@@ -1,11 +1,31 @@
 :root {
   font-family: sans-serif;
   line-height: 1.5;
+
+  /* Основные цвета */
+  --color-white: #fff;
+  --color-black: #000;
+  --color-purple: #9810fa;
+  --color-purple-dark: #8712db;
+  --color-gray-200: oklch(.92 .004 286.32);
+  --color-gray-300: oklch(.871 .006 286.286);
+  --color-gray-400: oklch(.705 .015 286.067);
+  --color-gray-500: oklch(.552 .016 285.938);
+  --color-gray-600: oklch(.442 .017 285.786);
+  --color-gray-600: oklch(.442 .017 285.786);
+  --color-gray-700: oklch(.37 .013 285.805);
+  --color-gray-800: oklch(.274 .006 286.033);
+  --color-gray-900: oklch(.21 .006 285.885);
+  --color-gray-950: oklch(.141 .005 285.823);
+  --color-green: oklch(.792 .209 151.711);
+  --color-green-dark: oklch(.627 .194 149.214);
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
 }
 
 a {

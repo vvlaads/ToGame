@@ -1,50 +1,96 @@
-.navbar {
-    width: 200px;
-    background: #f0f0f0;
-    padding: 20px;
-    border-right: 1px solid #ddd;
+.nav-bar__navbar {
+    background: var(--color-gray-950);
+    padding: 10px;
     height: 100vh;
     position: fixed;
     left: 0;
-    top: 0
+    top: 0;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    z-index: 1000;
 }
 
-.nav-header {
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ccc
+.nav-bar__navbar--hidden {
+    width: 80px;
 }
 
-.title {
-    margin: 0;
-    font-size: 18px
+.nav-bar__logo {
+    padding: 5px;
+    background-color: var(--color-purple);
+    border-radius: 10px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: center;
 }
 
-.menu {
+.nav-bar__logo_icon {
+    width: 30px;
+    height: 30px;
+    display: block;
+    filter: invert();
+    object-fit: contain;
+}
+
+.nav-bar__menu {
     list-style: none;
     padding: 0;
-    margin: 0
+    margin: 0;
 }
 
-.item {
-    margin-bottom: 10px
+.nav-bar__item {
+    margin-bottom: 10px;
 }
 
-.link {
-    display: block;
-    padding: 8px 12px;
+.nav-bar__link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px;
     text-decoration: none;
-    color: #333;
-    border-radius: 4px;
+    color: var(--color-gray-300);
+    border-radius: 10px;
+    background-color: var(--color-gray-800);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 44px;
+    box-sizing: border-box;
 }
 
-.link:hover {
-    background: #e0e0e0
+.nav-bar__link--active {
+    background-color: var(--color-purple);
+    color: white;
 }
 
-.icon {
+.nav-bar__link:hover {
+    background-color: var(--color-gray-700);
+    color: white;
+    cursor: pointer;
+}
+
+.nav-bar__link--active:hover {
+    background-color: var(--color-purple);
+}
+
+.nav-bar__icon {
     width: 20px;
     height: 20px;
     margin-right: 12px;
-    opacity: 0.7
+    flex-shrink: 0;
+    filter: invert();
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-bar__navbar--hidden .nav-bar__link {
+    justify-content: flex-start;
+    padding: 12px 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-bar__navbar--hidden .nav-bar__icon {
+    margin-right: 0;
 }

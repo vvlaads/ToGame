@@ -13,17 +13,7 @@ function HomePage() {
     return (
         <LayoutWithNav>
             <div className='container'>
-                <h1>Добро пожаловать, {user?.username}!</h1>
-
-                <div className='info-card'>
-                    <h3>Информация о пользователе:</h3>
-                    <p><strong>Логин:</strong> {user?.username}</p>
-                    <p><strong>Пароль:</strong> {user?.password}</p>
-                </div>
-
-                <button onClick={handleLogout} className='logout-button'>
-                    Выйти
-                </button>
+                <h1>С возвращением, {user?.username}!</h1>
             </div>
         </LayoutWithNav>
     );

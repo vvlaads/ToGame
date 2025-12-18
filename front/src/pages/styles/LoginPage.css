@@ -1,0 +1,104 @@
+.login-page__login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-page__logo {
+    padding: 20px;
+    background-color: var(--color-purple);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.login-page__icon {
+    width: 40px;
+    height: 40px;
+    display: block;
+    filter: invert();
+}
+
+.login-page__title {
+    font-size: 32px;
+}
+
+.login-page__description {
+    color: var(--color-gray-400);
+    margin-bottom: 30px;
+}
+
+.login-page__login-form {
+    width: 500px;
+    padding: 30px;
+    background: var(--color-gray-800);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.login-page__1);
+    border: 1px solid var(--color-gray-700);
+    border-radius: 10px;
+}
+
+.login-page__change-button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.login-page__change-button {
+    background-color: var(--color-gray-700);
+    color: var(--color-gray-400);
+    width: 45%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-page__change-button--active {
+    background-color: var(--color-purple);
+    color: var(--color-white);
+}
+
+.login-page__form-group {
+    margin-bottom: 20px;
+}
+
+.login-page__label {
+    color: var(--color-gray-400);
+}
+
+.login-page__form-group input {
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-gray-700);
+    border-radius: 6px;
+    background: var(--color-gray-900);
+    border-radius: 10px;
+}
+
+.login-page__form-group input:focus {
+    outline: none;
+    border-color: var(--color-purple);
+}
+
+
+.login-page__login-button {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-purple);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.login-page__login-button:hover {
+    background: var(--color-purple-dark);
+}

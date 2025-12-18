@@ -7,40 +7,50 @@ import ChatPage from './pages/ChatPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from "./pages/ProfilePage";
 import './App.css';
+import { NavProvider } from './context/NavContext';
+import SearchPlayersPage from './pages/SearchPlayersPage';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          } />
+      <NavProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } />
 
-          <Route path="/" element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          } />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/chats" element={
-            <ProtectedRoute>
-              <ChatPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/search" element={
+              <ProtectedRoute>
+                <SearchPlayersPage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } />
+            <Route path="/chats" element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            } />
 
-          {/* Редирект с несуществующих путей */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+
+            {/* Редирект с несуществующих путей */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </NavProvider>
     </AuthProvider>
   );
 }

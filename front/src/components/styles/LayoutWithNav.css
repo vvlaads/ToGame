@@ -6,6 +6,5 @@
 .main {
     flex: 1;
     padding: 20px;
-    margin-left: 200px;
-    width: calc(100% - 200px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
 }
