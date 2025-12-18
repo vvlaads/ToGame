@@ -19,6 +19,8 @@
   --color-gray-950: oklch(.141 .005 285.823);
   --color-green: oklch(.792 .209 151.711);
   --color-green-dark: oklch(.627 .194 149.214);
+  --color-red: oklch(.637 .237 25.331);
+  --color-red-dark: oklch(.577 .245 27.325);
 }
 
 body {

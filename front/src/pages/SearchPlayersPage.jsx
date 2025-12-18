@@ -32,16 +32,20 @@ function SearchPlayersPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentUser = users[currentIndex];
 
+    function prevUser() {
+        setCurrentIndex((prevIndex) =>
+            prevIndex === 0 ? users.length - 1 : prevIndex - 1
+        );
+    }
+
     function nextUser() {
         setCurrentIndex((prevIndex) =>
             prevIndex === users.length - 1 ? 0 : prevIndex + 1
         );
     }
 
-    function prevUser() {
-        setCurrentIndex((prevIndex) =>
-            prevIndex === 0 ? users.length - 1 : prevIndex - 1
-        );
+    function chatToPerson() {
+        console.log(currentUser);
     }
 
     return (
@@ -86,7 +90,7 @@ function SearchPlayersPage() {
 
                         <button
                             className='search-players-page__success-button'
-                            onClick={nextUser}>
+                            onClick={chatToPerson}>
                             Написать
                         </button>
                     </div>
