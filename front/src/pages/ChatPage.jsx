@@ -1,16 +1,23 @@
 import './styles/ChatPage.css'
 import LayoutWithNav from '../components/LayoutWithNav';
-import ChatIcon from '../../public/vite.svg';
+import SendIcon from "../assets/icons/send.svg"
 import { useState } from 'react';
+import ChatCard from '../components/ChatCard';
 
 function ChatPage() {
     const [currentChat, setCurrentChat] = useState(null);
+    const [currentRoom, setCurrentRoom] = useState(null);
+    const [isMute, setMute] = useState(false)
+    const [messageData, setMessageData] = useState({
+        message: '',
+        time: ''
+    });
+
     const chats = [
         {
             id: 1,
             name: 'Чат 1',
-            lastUsername: 'vvlaads',
-            lastMessage: 'Всем привет!',
+            avatar: "../../public/vite.svg",
             rooms: [],
             messages: [
                 {
@@ -36,14 +43,47 @@ function ChatPage() {
         {
             id: 2,
             name: 'Чат 2',
-            lastUsername: 'GamerPro',
-            lastMessage: 'Го кс?',
+            avatar: "../../public/vite.svg",
             rooms: [
                 {
                     id: 1,
                     name: "Болталка",
                     limit: 15,
-                    players: 1
+                    players: [
+                        {
+                            name: "vvlaads",
+                            avatar: "../../public/vite.svg"
+                        },
+                        {
+                            name: "vvlaads",
+                            avatar: "../../public/vite.svg"
+                        },
+                        {
+                            name: "vvlaads",
+                            avatar: "../../public/vite.svg"
+                        },
+                        {
+                            name: "vvlaads",
+                            avatar: "../../public/vite.svg"
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "CS:GO",
+                    limit: 15,
+                    players: [
+                        {
+                            id: 1,
+                            name: "GamerPro",
+                            avatar: "../../public/vite.svg"
+                        },
+                        {
+                            id: 2,
+                            name: "Capa",
+                            avatar: "../../public/vite.svg"
+                        }
+                    ]
                 }
             ],
             messages: [
@@ -71,20 +111,65 @@ function ChatPage() {
     ];
 
     function updateCurrentChat(chatId) {
-        // Используем поиск по id, а не индексу массива
+        console.log("update cur chat")
         const chat = chats.find(chat => chat.id === chatId);
         setCurrentChat(chat);
     }
 
-    const [currentRoom, setCurrentRoom] = useState(null);
 
     function joinToRoom(roomId) {
         const room = currentChat.rooms.find(room => room.id === roomId);
-        setCurrentRoom(room);
+
+        setCurrentRoom(
+            {
+                ...room,
+                chatId: currentChat.id
+            });
     }
 
     function leaveRoom() {
         setCurrentRoom(null);
+    }
+
+
+    function handleMuteButton() {
+        setMute(!isMute);
+        //TODO: muting and unmuting of micro
+    }
+
+    function handleChange(e) {
+        const { name, value } = e.target;
+        setMessageData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Автоматическое изменение высоты textarea
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+    }
+
+    function sendMessage(e) {
+        e.preventDefault(); // Не перезагружать страницу
+        try {
+            //TODO: sending message
+
+            setMessageData({
+                message: '',
+                time: ''
+            });
+        } catch (error) {
+            console.error('Ошибка входа:', error);
+        }
+    }
+
+    function handleKeyDown(e) {
+        // Проверяем, что нажата клавиша Enter
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Предотвращаем перенос строки
+            sendMessage(e); // Отправляем сообщение
+        }
+        // Если Shift + Enter - оставляем перенос строки
     }
 
     return (
@@ -92,22 +177,17 @@ function ChatPage() {
             <div className='chat-page__container'>
                 <div className='chat-page__chats'>
                     {chats.map((chat) => (
-                        <div
-                            key={chat.id} // Добавляем key
-                            className='chat-page__chat'
-                            onClick={() => updateCurrentChat(chat.id)} // Передаем id, а не индекс
-                        >
-                            <img className='chat-page__chat-avatar' src={ChatIcon} alt="Аватар чата" />
-                            <div className='chat-page__chat-info'>
-                                <div className='chat-page__chat-name'>{chat.name}</div>
-                                <div className='chat-page__chat-last-message'>{chat.lastUsername}: {chat.lastMessage}</div>
-                            </div>
-                        </div>
+                        <ChatCard
+                            key={chat.id}
+                            chat={chat}
+                            onClick={() => updateCurrentChat(chat.id)}
+                            className={currentChat?.id === chat.id ? 'chat-page__chat--active' : ''}
+                        />
                     ))}
                 </div>
                 <div className='chat-page__main'>
                     {currentChat ? (
-                        <>
+                        <div className='chat-page__current-chat-container'>
                             <div className='chat-page__messages'>
                                 {currentChat.messages.map((message, index) => (
                                     <div key={index} className='chat-page__chat-message'>
@@ -118,10 +198,21 @@ function ChatPage() {
                                     </div>
                                 ))}
                             </div>
-                            <div className='chat-page__input-message'>
-                                <input className='chat-page__input' type='text' placeholder='Сообщение...' />
-                            </div>
-                        </>
+                            <form className='chat-page__input-message' onSubmit={sendMessage}>
+                                <textarea
+                                    className='chat-page__input'
+                                    placeholder='Сообщение...'
+                                    name="message"
+                                    value={messageData.message}
+                                    onChange={handleChange}
+                                    onKeyDown={handleKeyDown}
+                                    rows={1}
+                                />
+                                <button type="submit">
+                                    <img src={SendIcon} />
+                                </button>
+                            </form>
+                        </div>
                     ) : (
                         <div className='chat-page__no-chat-selected'>
                             Выберите чат для начала общения
@@ -130,18 +221,33 @@ function ChatPage() {
                 </div>
                 <div className='chat-page__rooms-container'>
                     {currentRoom ? (
-                        <div>
-                            <div className='chat-page__room--active'>
+                        <div className='chat-page__active-room-info'>
+                            <div className='chat-page__room chat-page__room--active'>
                                 <div>
                                     {currentRoom.name}
                                 </div>
                                 <div>
-                                    {currentRoom.players} / {currentRoom.limit}
+                                    ({chats.find(chat => chat.id === currentRoom.chatId).name})
                                 </div>
                             </div>
-                            <div className='chat-page__room'>
-                                <button>Заглушить</button>
-                                <button onClick={leaveRoom()}>Выйти</button>
+
+                            <div className='chat-page__room-players-list-header'>
+                                УЧАСТНИКИ – {currentRoom.players.length}:
+                            </div>
+                            <div className='chat-page__room-players-list'>
+                                {currentRoom.players.map((player) => (
+                                    <div key={player.id} className='chat-page__room-player'>
+                                        <img className='chat-page__room-player-avatar' src={player.avatar} />
+                                        <span className='chat-page__room-player-name'>
+                                            {player.name}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className='chat-page__room-buttons'>
+                                <button className='chat-page__room-button' onClick={handleMuteButton}>{isMute ? 'Включить' : 'Заглушить'}</button>
+                                <button className='chat-page__room-button chat-page__room-leave-button' onClick={leaveRoom}>Выйти</button>
                             </div>
                         </div>) : (
                         <>
@@ -153,7 +259,7 @@ function ChatPage() {
                                                 {room.name}
                                             </div>
                                             <div>
-                                                {room.players} / {room.limit}
+                                                {room.players.length} / {room.limit}
                                             </div>
                                         </div>
                                     ))}
@@ -166,7 +272,7 @@ function ChatPage() {
 
                 </div>
             </div>
-        </LayoutWithNav>
+        </LayoutWithNav >
     );
 }
 

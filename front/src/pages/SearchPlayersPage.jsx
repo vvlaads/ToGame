@@ -10,21 +10,21 @@ function SearchPlayersPage() {
             id: 1,
             name: 'Capa',
             descr: 'Люблю играть в игры!',
-            genres: ['Шутер', 'Батл-рояль', 'Стратегия'],
+            tags: ['Шутер', 'Батл-рояль', 'Стратегия'],
             games: ['Overwatch', 'Apex Legends']
         },
         {
             id: 2,
             name: 'Next',
             descr: 'Новый игрок в команде!',
-            genres: ['РПГ', 'Экшен', 'Приключения'],
+            tags: ['РПГ', 'Экшен', 'Приключения'],
             games: ['The Witcher 3', 'Cyberpunk 2077']
         },
         {
             id: 3,
             name: 'GamerPro',
             descr: 'Профессиональный киберспортсмен',
-            genres: ['МОБА', 'Спортивные', 'Гонки'],
+            tags: ['МОБА', 'Спортивные', 'Гонки'],
             games: ['Dota 2', 'CS:GO', 'Rocket League']
         }
     ]);
@@ -67,11 +67,11 @@ function SearchPlayersPage() {
                         <div className='search-players-page__descr'>{currentUser.descr}</div>
 
                         <div className='search-players-page__section'>
-                            <div className='search-players-page__label'>ЖАНРЫ:</div>
-                            <div className='search-players-page__genres'>
-                                {currentUser.genres.map((genre, index) => (
-                                    <div key={index} className='search-players-page__genre'>
-                                        {genre}
+                            <div className='search-players-page__label'>ТЕГИ:</div>
+                            <div className='search-players-page__tags'>
+                                {currentUser.tags.map((tag, index) => (
+                                    <div key={index} className='search-players-page__tag'>
+                                        {tag}
                                     </div>
                                 ))}
                             </div>

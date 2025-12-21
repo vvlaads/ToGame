@@ -49,13 +49,13 @@
     width: 100%;
 }
 
-.search-players-page__genres {
+.search-players-page__tags {
     display: flex;
     flex-direction: row;
     gap: 20px;
 }
 
-.search-players-page__genre {
+.search-players-page__tag {
     padding: 8px 20px;
     border-radius: 5px;
     width: auto;
