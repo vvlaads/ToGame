@@ -3,10 +3,13 @@ import './styles/HomePage.css'
 import { useAuth } from '../context/AuthContext';
 import LayoutWithNav from '../components/LayoutWithNav';
 import ChatCard from '../components/ChatCard';
+import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
 
     const { user } = useAuth();
+
+    const navigate = useNavigate();
 
     const friends = [{
         id: 1,
@@ -115,6 +118,11 @@ function HomePage() {
         // ... остальные чаты
     ];
 
+    function redirectToChat(chatId) {
+        console.log('navigate to chats')
+        navigate(`/chats?chatId=${chatId}`);
+    }
+
     return (
         <LayoutWithNav>
             <div className='home-page__container'>
@@ -124,7 +132,7 @@ function HomePage() {
                         <h2>Активные чаты:</h2>
                         <div className='home-page__active-chats-list'>
                             {chats.map((chat) => (
-                                <ChatCard key={chat.id} chat={chat} />
+                                <ChatCard key={chat.id} chat={chat} onClick={() => redirectToChat(chat.id)} />
                             ))}
                         </div>
                     </div>

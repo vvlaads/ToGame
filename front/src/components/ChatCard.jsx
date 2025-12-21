@@ -36,14 +36,16 @@ function ChatCard({ chat, onClick, className }) {
             />
             <div className='chat-card__chat-info'>
                 <div className='chat-card__chat-name'>{chat.name}</div>
-                <div className='chat-card__chat-last-message'>
-                    {lastMessage ? `${lastMessage.name}: ${lastMessage.message}` : 'Нет сообщений'}
+                <div className='chat-card__chat-last-message-container'>
+                    <span className='chat-card__chat-last-message'>
+                        {lastMessage ? `${lastMessage.name}: ${lastMessage.message}` : 'Нет сообщений'}
+                    </span>
+                    {lastMessage && (
+                        <span className='chat-card__chat-time'>
+                            {lastMessage.time}
+                        </span>
+                    )}
                 </div>
-                {lastMessage && (
-                    <div className='chat-card__chat-time'>
-                        {lastMessage.time}
-                    </div>
-                )}
             </div>
         </div>
     );

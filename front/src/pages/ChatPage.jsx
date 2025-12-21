@@ -1,8 +1,9 @@
 import './styles/ChatPage.css'
 import LayoutWithNav from '../components/LayoutWithNav';
 import SendIcon from "../assets/icons/send.svg"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatCard from '../components/ChatCard';
+import { useSearchParams } from 'react-router-dom';
 
 function ChatPage() {
     const [currentChat, setCurrentChat] = useState(null);
@@ -12,6 +13,9 @@ function ChatPage() {
         message: '',
         time: ''
     });
+
+    const [searchParams] = useSearchParams(); // Получаем параметры из URL
+    const chatIdFromUrl = searchParams.get('chatId'); // Получаем chatId из параметра
 
     const chats = [
         {
@@ -110,10 +114,23 @@ function ChatPage() {
         // ... остальные чаты
     ];
 
+    // Эффект для автоматического выбора чата при загрузке страницы
+    useEffect(() => {
+        if (chatIdFromUrl) {
+            const chatId = parseInt(chatIdFromUrl);
+            const chat = chats.find(chat => chat.id === chatId);
+            if (chat) {
+                setCurrentChat(chat);
+            }
+        }
+    }, [chatIdFromUrl]); // Зависимость от chatIdFromUrl
+
     function updateCurrentChat(chatId) {
-        console.log("update cur chat")
         const chat = chats.find(chat => chat.id === chatId);
         setCurrentChat(chat);
+
+        // Обновляем URL без перезагрузки страницы
+        window.history.pushState({}, '', `/chats?chatId=${chatId}`);
     }
 
 
