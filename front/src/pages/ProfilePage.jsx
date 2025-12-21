@@ -27,6 +27,31 @@ function ProfilePage() {
                             </div>
                         </div>
                     </div>
+
+                    <div className='profile-page__game-list'>
+                        <h3>Любимые игры:</h3>
+
+                        {user?.games && user.games.length > 0 ? (
+                            <div className='profile-page__games-grid'>
+                                {user.games.map((game) => (
+                                    <div key={game.id} className='profile-page__game'>
+                                        <img
+                                            className='profile-page__game-avatar'
+                                            src={game.avatar}
+                                            alt={game.name}
+                                        />
+                                        <div className='profile-page__game-name'>
+                                            {game.name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className='profile-page__no-games'>
+                                Игры не добавлены
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className='profile-page__exit-button-container'>
