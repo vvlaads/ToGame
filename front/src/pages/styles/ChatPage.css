@@ -59,6 +59,10 @@
     flex-direction: column;
 }
 
+.chat-page__message-date {
+    color: var(--color-gray-400);
+}
+
 .chat-page__input-message {
     position: absolute;
     bottom: 0;

@@ -1,31 +1,16 @@
 import { useState, useEffect } from 'react';
 import './styles/ChatCard.css';
+import { getChatLastMessageInfo } from '../utils/chatUtils';
 
 function ChatCard({ chat, onClick, className }) {
-    const [lastMessage, setLastMessage] = useState(null);
-
-    // Преобразуем дату и время в timestamp для сравнения
-    function getTimestamp(msg) {
-        const [day, month, year] = msg.date.split('.').map(Number);
-        const [hours, minutes] = msg.time.split(':').map(Number);
-        return new Date(year, month - 1, day, hours, minutes).getTime();
-    }
+    const [lastMessageInfo, setLastMessageInfo] = useState(() =>
+        getChatLastMessageInfo(chat)
+    );
 
     useEffect(() => {
-        function getLastMessage() {
-            if (!chat.messages || chat.messages.length === 0) {
-                setLastMessage(null);
-                return;
-            }
-
-            const sortedMessages = [...chat.messages].sort((a, b) => {
-                return getTimestamp(b) - getTimestamp(a);
-            });
-            setLastMessage(sortedMessages[0]);
-        }
-
-        getLastMessage();
-    }, [chat.messages]);
+        const info = getChatLastMessageInfo(chat);
+        setLastMessageInfo(info);
+    }, [chat]);
 
     return (
         <div className={`chat-card__chat ${className}`} onClick={onClick}>
@@ -38,11 +23,11 @@ function ChatCard({ chat, onClick, className }) {
                 <div className='chat-card__chat-name'>{chat.name}</div>
                 <div className='chat-card__chat-last-message-container'>
                     <span className='chat-card__chat-last-message'>
-                        {lastMessage ? `${lastMessage.name}: ${lastMessage.message}` : 'Нет сообщений'}
+                        {lastMessageInfo.text}
                     </span>
-                    {lastMessage && (
+                    {lastMessageInfo.datetime && (
                         <span className='chat-card__chat-time'>
-                            {lastMessage.time}
+                            {lastMessageInfo.datetime}
                         </span>
                     )}
                 </div>

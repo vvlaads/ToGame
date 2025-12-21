@@ -9,48 +9,51 @@ import ProfilePage from "./pages/ProfilePage";
 import './App.css';
 import { NavProvider } from './context/NavContext';
 import SearchPlayersPage from './pages/SearchPlayersPage';
+import { ChatsProvider } from './context/ChatsContext';
 
 function App() {
   return (
     <AuthProvider>
-      <NavProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            } />
+      <ChatsProvider>
+        <NavProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              } />
 
-            <Route path="/" element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            } />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/search" element={
-              <ProtectedRoute>
-                <SearchPlayersPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/search" element={
+                <ProtectedRoute>
+                  <SearchPlayersPage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/chats" element={
-              <ProtectedRoute>
-                <ChatPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/chats" element={
+                <ProtectedRoute>
+                  <ChatPage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
 
-            {/* Редирект с несуществующих путей */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </NavProvider>
+              {/* Редирект с несуществующих путей */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </NavProvider>
+      </ChatsProvider>
     </AuthProvider>
   );
 }

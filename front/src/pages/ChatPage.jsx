@@ -1,153 +1,103 @@
 import './styles/ChatPage.css'
 import LayoutWithNav from '../components/LayoutWithNav';
 import SendIcon from "../assets/icons/send.svg"
-import { useEffect, useState } from 'react';
 import ChatCard from '../components/ChatCard';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useChats } from '../context/ChatsContext';
+import { useAuth } from '../context/AuthContext';
+import { formatMessageDateTime } from '../utils/chatUtils';
+import { loadCurrentChat, loadCurrentRoom, saveCurrentChat, saveCurrentRoom } from '../utils/sessionStorage';
 
 function ChatPage() {
+    const { user } = useAuth();
     const [currentChat, setCurrentChat] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(null);
-    const [isMute, setMute] = useState(false)
+    const [isMute, setMute] = useState(false);
+    const [searchParams] = useSearchParams();
+    const chatIdFromUrl = searchParams.get('chatId');
+    const { chats, addMessage } = useChats();
     const [messageData, setMessageData] = useState({
         message: '',
         time: ''
     });
 
-    const [searchParams] = useSearchParams(); // Получаем параметры из URL
-    const chatIdFromUrl = searchParams.get('chatId'); // Получаем chatId из параметра
-
-    const chats = [
-        {
-            id: 1,
-            name: 'Чат 1',
-            avatar: "../../public/vite.svg",
-            rooms: [],
-            messages: [
-                {
-                    name: "vvlaads",
-                    date: "20.12.2025",
-                    time: "12:12",
-                    message: "Привет!"
-                },
-                {
-                    name: "vvlaads",
-                    date: "20.12.2025",
-                    time: "12:12",
-                    message: "Привет!"
-                },
-                {
-                    name: "vvlaads",
-                    date: "20.12.2025",
-                    time: "12:12",
-                    message: "Всем привет!"
+    // Вспомогательная функция для поиска комнаты по ID
+    function findRoomById(roomId) {
+        for (const chat of chats) {
+            if (chat.rooms && chat.rooms.length > 0) {
+                const room = chat.rooms.find(r => r.id === roomId);
+                if (room) {
+                    return { room, chat };
                 }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Чат 2',
-            avatar: "../../public/vite.svg",
-            rooms: [
-                {
-                    id: 1,
-                    name: "Болталка",
-                    limit: 15,
-                    players: [
-                        {
-                            name: "vvlaads",
-                            avatar: "../../public/vite.svg"
-                        },
-                        {
-                            name: "vvlaads",
-                            avatar: "../../public/vite.svg"
-                        },
-                        {
-                            name: "vvlaads",
-                            avatar: "../../public/vite.svg"
-                        },
-                        {
-                            name: "vvlaads",
-                            avatar: "../../public/vite.svg"
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    name: "CS:GO",
-                    limit: 15,
-                    players: [
-                        {
-                            id: 1,
-                            name: "GamerPro",
-                            avatar: "../../public/vite.svg"
-                        },
-                        {
-                            id: 2,
-                            name: "Capa",
-                            avatar: "../../public/vite.svg"
-                        }
-                    ]
-                }
-            ],
-            messages: [
-                {
-                    name: "GamerPro",
-                    date: "20.12.2025",
-                    time: "12:10",
-                    message: "Привет!"
-                },
-                {
-                    name: "vvlaads",
-                    date: "20.12.2025",
-                    time: "12:12",
-                    message: "Привет!"
-                },
-                {
-                    name: "GamerPro",
-                    date: "20.12.2025",
-                    time: "12:15",
-                    message: "Го кс?"
-                }
-            ]
-        },
-        // ... остальные чаты
-    ];
-
-    // Эффект для автоматического выбора чата при загрузке страницы
-    useEffect(() => {
-        if (chatIdFromUrl) {
-            const chatId = parseInt(chatIdFromUrl);
-            const chat = chats.find(chat => chat.id === chatId);
-            if (chat) {
-                setCurrentChat(chat);
             }
         }
-    }, [chatIdFromUrl]); // Зависимость от chatIdFromUrl
+        return { room: null, chat: null };
+    }
 
+    useEffect(() => {
+        const savedRoomId = loadCurrentRoom();
+        if (savedRoomId) {
+            const { room, chat } = findRoomById(savedRoomId);
+
+            if (room && chat) {
+                setCurrentRoom({
+                    ...room,
+                    chatId: chat.id
+                });
+            }
+        }
+
+        if (chatIdFromUrl) {
+            const chatId = parseInt(chatIdFromUrl);
+            const chat = chats.find(c => c.id === chatId);
+            if (chat) {
+                setCurrentChat(chat);
+                saveCurrentChat(chatId);
+            }
+        } else {
+            const savedChatId = loadCurrentChat();
+            if (savedChatId) {
+                const chat = chats.find(c => c.id === savedChatId);
+                if (chat) setCurrentChat(chat);
+            }
+        }
+    }, [chatIdFromUrl, chats]);
+
+    // Обновить текущий чат
     function updateCurrentChat(chatId) {
         const chat = chats.find(chat => chat.id === chatId);
         setCurrentChat(chat);
-
-        // Обновляем URL без перезагрузки страницы
+        saveCurrentChat(chatId);
         window.history.pushState({}, '', `/chats?chatId=${chatId}`);
     }
 
-
     function joinToRoom(roomId) {
-        const room = currentChat.rooms.find(room => room.id === roomId);
+        // Используем вспомогательную функцию для поиска
+        const { room, chat } = findRoomById(roomId);
 
-        setCurrentRoom(
-            {
-                ...room,
-                chatId: currentChat.id
-            });
+        if (!room || !chat) return;
+
+        setCurrentRoom({
+            ...room,
+            chatId: chat.id
+        });
+
+        // Автоматически переключаемся на чат комнаты
+        setCurrentChat(chat);
+
+        // Сохраняем оба состояния
+        saveCurrentRoom(roomId);
+        saveCurrentChat(chat.id);
+
+        // Обновляем URL
+        window.history.pushState({}, '', `/chats?chatId=${chat.id}`);
     }
 
     function leaveRoom() {
         setCurrentRoom(null);
+        saveCurrentRoom(null);
     }
-
 
     function handleMuteButton() {
         setMute(!isMute);
@@ -166,32 +116,57 @@ function ChatPage() {
         e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
     }
 
+    /**
+     * Отправка сообщения в чат
+     */
     function sendMessage(e) {
-        e.preventDefault(); // Не перезагружать страницу
-        try {
-            //TODO: sending message
+        e.preventDefault();
 
+        if (messageData.message.trim() === '') return;
+
+        try {
+            // Создаем новое сообщение
+            const newMessage = {
+                name: user?.username,
+                message: messageData.message,
+                date: new Date().toLocaleDateString('ru-RU'),
+                time: new Date().toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }),
+            };
+
+            // Добавляем сообщение в глобальный список чатов
+            if (currentChat) {
+                addMessage(currentChat.id, newMessage);
+            }
+
+            // Очищаем поле ввода
             setMessageData({
                 message: '',
                 time: ''
             });
+
         } catch (error) {
-            console.error('Ошибка входа:', error);
+            console.error('Ошибка отправки:', error);
         }
     }
 
+    /**
+     * Отправка сообщения при нажатии Enter
+     */
     function handleKeyDown(e) {
-        // Проверяем, что нажата клавиша Enter
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // Предотвращаем перенос строки
-            sendMessage(e); // Отправляем сообщение
+            e.preventDefault();
+            sendMessage(e);
         }
-        // Если Shift + Enter - оставляем перенос строки
     }
 
     return (
         <LayoutWithNav>
             <div className='chat-page__container'>
+                {/*Вкладка чатов*/}
                 <div className='chat-page__chats'>
                     {chats.map((chat) => (
                         <ChatCard
@@ -202,6 +177,10 @@ function ChatPage() {
                         />
                     ))}
                 </div>
+
+
+
+                {/*Вкладка текущего чата*/}
                 <div className='chat-page__main'>
                     {currentChat ? (
                         <div className='chat-page__current-chat-container'>
@@ -211,7 +190,7 @@ function ChatPage() {
                                         <div className='chat-page__message-content'>
                                             <strong>{message.name}</strong>: {message.message}
                                         </div>
-                                        <div className='chat-page__message-date'>{message.time}</div>
+                                        <div className='chat-page__message-date'>{formatMessageDateTime(message)}</div>
                                     </div>
                                 ))}
                             </div>
@@ -236,6 +215,10 @@ function ChatPage() {
                         </div>
                     )}
                 </div>
+
+
+
+                {/*Вкладка комнат*/}
                 <div className='chat-page__rooms-container'>
                     {currentRoom ? (
                         <div className='chat-page__active-room-info'>
