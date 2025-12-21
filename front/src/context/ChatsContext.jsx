@@ -106,12 +106,14 @@ export function ChatsProvider({ children }) {
 
     // Функция для добавления нового чата
     const addChat = (newChat) => {
+        const id = Date.now();
         setChats(prevChats => [...prevChats, {
             ...newChat,
-            id: Date.now(), // Генерируем уникальный ID если не указан
+            id: id, // Генерируем уникальный ID если не указан
             messages: newChat.messages || [],
             rooms: newChat.rooms || []
         }]);
+        return id;
     };
 
     // Функция для обновления чата

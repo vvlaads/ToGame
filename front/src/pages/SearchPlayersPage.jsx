@@ -3,6 +3,8 @@ import LayoutWithNav from '../components/LayoutWithNav';
 import { useState } from 'react';
 import LeftArrow from '../assets/icons/left arrow.svg';
 import RightArrow from '../assets/icons/right arrow.svg';
+import { useChats } from '../context/ChatsContext';
+import { useNavigate } from 'react-router-dom';
 
 function SearchPlayersPage() {
     const [users, setUsers] = useState([
@@ -28,7 +30,8 @@ function SearchPlayersPage() {
             games: ['Dota 2', 'CS:GO', 'Rocket League']
         }
     ]);
-
+    const navigate = useNavigate();
+    const { chats, addChat } = useChats();
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentUser = users[currentIndex];
 
@@ -45,7 +48,20 @@ function SearchPlayersPage() {
     }
 
     function chatToPerson() {
-        console.log(currentUser);
+        const existingChat = chats.find(chat => chat.name === currentUser.name);
+
+        if (existingChat) {
+            navigate(`/chats?chatId=${existingChat.id}`);
+            return;
+        }
+
+        const newChatId = addChat({
+            name: currentUser.name,
+            avatar: "../../public/vite.svg",
+            rooms: []
+        });
+
+        navigate(`/chats?chatId=${newChatId}`);
     }
 
     return (
