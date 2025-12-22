@@ -25,9 +25,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.hibernate.orm</groupId>
+      <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>6.0.2.Final</version>
+      <version>6.6.13.Final</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
@@ -56,6 +57,11 @@
       <artifactId>lombok</artifactId>
       <version>1.18.30</version>
     </dependency>
+    <dependency>
+      <groupId>jakarta.data</groupId>
+      <artifactId>jakarta.data-api</artifactId>
+      <version>1.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -64,6 +70,20 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.hibernate.orm</groupId>
+              <artifactId>hibernate-jpamodelgen</artifactId>
+              <version>${hibernate.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
       </plugin>
     </plugins>
   </build>

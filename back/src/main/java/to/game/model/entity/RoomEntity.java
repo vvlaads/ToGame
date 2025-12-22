@@ -20,7 +20,7 @@ import lombok.Setter;
 public class RoomEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(max = 30)
     private String name;

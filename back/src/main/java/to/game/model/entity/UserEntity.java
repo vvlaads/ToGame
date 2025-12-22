@@ -25,7 +25,7 @@ import lombok.Setter;
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(max = 30)
     private String name;
@@ -34,6 +34,14 @@ public class UserEntity {
     @JoinColumn(name = "avatar_id", nullable = true)
     private AvatarEntity avatar;
 
+    public void addAvatar(AvatarEntity avatar) {
+        this.avatar = avatar;
+    }
+
+    public void deleteAvatar() {
+        this.avatar = null;
+    }
+
     @Length(max = 100)
     private String descr;
 
@@ -41,13 +49,41 @@ public class UserEntity {
     @JoinColumn(name = "room_id", nullable = true)
     private RoomEntity room;
 
+    public void setRoom(RoomEntity room) {
+        this.room = room;
+    }
+
+    public void deleteRoom() {
+        this.room = null;
+    }
+
     @ManyToMany
     @JoinTable(name = "user_to_game", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "game_id"))
     private Set<GameEntity> games = new HashSet<>();
 
+    public void addGame(GameEntity game) {
+        games.add(game);
+        game.getUsers().add(this);
+    }
+
+    public void deleteGame(GameEntity game) {
+        games.remove(game);
+        game.getUsers().remove(this);
+    }
+
     @ManyToMany
     @JoinTable(name = "user_to_chat", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private Set<ChatEntity> chats = new HashSet<>();
+
+    public void addChat(ChatEntity chat) {
+        chats.add(chat);
+        chat.getUsers().add(this);
+    }
+
+    public void deleteChat(ChatEntity chat) {
+        chats.remove(chat);
+        chat.getUsers().remove(this);
+    }
 
     @ManyToMany
     @JoinTable(name = "user_to_friend", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "friend_id"))

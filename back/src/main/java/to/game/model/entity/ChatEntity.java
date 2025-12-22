@@ -26,7 +26,7 @@ import lombok.Setter;
 public class ChatEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(max = 30)
     private String name;
@@ -38,12 +38,18 @@ public class ChatEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
 
-   @OneToMany(
-        mappedBy = "chat",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RoomEntity> rooms = new HashSet<>();
+
+    public void addRoom(RoomEntity room) {
+        rooms.add(room);
+        room.setChat(this);
+    }
+
+    public void deleteRoom(RoomEntity room) {
+        rooms.remove(room);
+        room.setChat(null);
+    }
 
     @ManyToMany(mappedBy = "chats")
     private Set<UserEntity> users = new HashSet<>();
