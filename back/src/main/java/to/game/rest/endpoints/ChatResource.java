@@ -1,43 +1,79 @@
 package to.game.rest.endpoints;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import to.game.model.dto.ChatDTO;
+import to.game.model.dto.UserDTO;
 import to.game.service.ChatManagmentService;
+import to.game.service.UserService;
 
 @Path("/chat")
 public class ChatResource {
     @Inject
     ChatManagmentService chatManagmentService;
 
+    @Inject
+    UserService userService;
+
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response create() {
-        return Response.ok().build();
+    public Response create(@Context ContainerRequestContext ctx, ChatDTO chat) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        chatManagmentService.createChat(user.getId(), chat.getName(), chat.getDescr());
+        return Response.status(Response.Status.CREATED).build();
     }
 
-    @Path("/update/{id}")
+    @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @PATCH
-    public Response update(@PathParam("id") Long id) {
+    @Transactional
+    public Response update(@Context ContainerRequestContext ctx, ChatDTO chat) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        chatManagmentService.renameChat(chat.getId(), user.getId(), chat.getName());
+        chatManagmentService.changeDescr(chat.getId(), user.getId(), chat.getDescr());
         return Response.ok().build();
     }
 
-    @Path("/delete/{id}")
+    @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response delete(@PathParam("id") Long id) {
+    public Response delete(@Context ContainerRequestContext ctx, ChatDTO chat) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        chatManagmentService.deleteChat(chat.getId(), user.getId());
+        return Response.ok().build();
+    }
+
+    @Path("/join-chat")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response joinChat(@Context ContainerRequestContext ctx, Long chatId) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        userService.joinChat(user.getId(), chatId);
+        return Response.ok().build();
+    }
+
+    @Path("/leave-chat")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @DELETE
+    public Response leaveChat(@Context ContainerRequestContext ctx, Long chatId) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        userService.leaveChat(user.getId(), chatId);
         return Response.ok().build();
     }
 

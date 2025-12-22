@@ -1,10 +1,17 @@
 package to.game.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import to.game.model.dto.AccessTokenDTO;
+import to.game.model.dto.GameDTO;
 import to.game.model.entity.AvatarEntity;
 import to.game.model.entity.ChatEntity;
 import to.game.model.entity.GameEntity;
@@ -14,6 +21,7 @@ import to.game.model.repos.ChatRepository;
 import to.game.model.repos.GameRepopsitory;
 import to.game.model.repos.LikeRepository;
 import to.game.model.repos.UserRepository;
+import to.game.util.Hex;
 
 @ApplicationScoped
 public class UserService {
@@ -30,8 +38,55 @@ public class UserService {
     LikeRepository likeRepo;
 
     @Transactional
-    public void createUser(UserEntity user) {
+    public AccessTokenDTO createUser(String name, String password, Set<GameDTO> games) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+
+        if (userRepo.findByNameAndPassword(name,
+                Hex.bytesToHex(digest.digest(password.getBytes(StandardCharsets.UTF_8)))).isPresent()) {
+            throw new RuntimeException("User with this name already exists");
+        }
+
+        UserEntity user = new UserEntity();
+        user.setName(name);
+        user.setPassword(Hex.bytesToHex(digest.digest(password.getBytes(StandardCharsets.UTF_8))));
+
+        for (GameDTO gameDTO : games) {
+            GameEntity game = gameRepo.findByName(gameDTO.getName())
+                    .orElseThrow(() -> new RuntimeException("Game not found"));
+            user.addGame(game);
+        }
+
+        user.setAccessToken(UUID.randomUUID());
         userRepo.save(user);
+
+        AccessTokenDTO token = new AccessTokenDTO();
+        token.setAccessToken(user.getAccessToken());
+        return token;
+    }
+
+    public AccessTokenDTO signIn(String name, String password) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Unknown hashing algorithm");
+        }
+
+        Optional<UserEntity> user = userRepo.findByNameAndPassword(name,
+                Hex.bytesToHex(digest.digest(password.getBytes(StandardCharsets.UTF_8))));
+
+        if (user.isEmpty()) {
+            throw new RuntimeException("Invalid name or password");
+        } else {
+            AccessTokenDTO tokenDTO = new AccessTokenDTO();
+            tokenDTO.setAccessToken(user.get().getAccessToken());
+            return tokenDTO;
+        }
     }
 
     @Transactional
@@ -55,16 +110,16 @@ public class UserService {
     }
 
     @Transactional
-    public void addGame(Long userId, Long gameId) {
+    public void addGame(Long userId, String gameName) {
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        GameEntity game = gameRepo.findById(gameId).orElseThrow(() -> new RuntimeException("Game not found"));
+        GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new RuntimeException("Game not found"));
         user.addGame(game);
     }
 
     @Transactional
-    public void deleteGame(Long userId, Long gameId) {
+    public void deleteGame(Long userId, String gameName) {
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        GameEntity game = gameRepo.findById(gameId).orElseThrow(() -> new RuntimeException("Game not found"));
+        GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new RuntimeException("Game not found"));
         user.deleteGame(game);
     }
 

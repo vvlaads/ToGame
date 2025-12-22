@@ -2,6 +2,7 @@ package to.game.model.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -15,6 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +30,14 @@ public class UserEntity {
     private Long id;
 
     @Length(max = 30)
+    @NotBlank
     private String name;
+
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    private UUID accessToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "avatar_id", nullable = true)
