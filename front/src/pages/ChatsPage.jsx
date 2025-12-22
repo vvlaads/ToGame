@@ -1,51 +1,69 @@
-import './styles/ChatPage.css'
+import './styles/ChatsPage.css'
 import LayoutWithNav from '../components/LayoutWithNav';
 import SendIcon from "../assets/icons/send.svg"
 import ChatCard from '../components/ChatCard';
+import TrashIcon from '../assets/icons/trash.svg';
+import Modal from '../components/Modal';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
 import { formatMessageDateTime } from '../utils/chatUtils';
 import { loadCurrentChat, loadCurrentRoom, saveCurrentChat, saveCurrentRoom } from '../utils/sessionStorage';
-import TrashIcon from '../assets/icons/trash.svg';
-import Modal from '../components/Modal';
 
-function ChatPage() {
+function ChatsPage() {
     const { user } = useAuth();
-    const [currentChat, setCurrentChat] = useState(null);
-    const [currentRoom, setCurrentRoom] = useState(null);
-    const [isMute, setMute] = useState(false);
-    const [searchParams] = useSearchParams();
-    const chatIdFromUrl = searchParams.get('chatId');
-    const { chats, addMessage, addRoom, removeRoom, addPlayerToRoom, removePlayerFromRoom } = useChats();
+    const {
+        chats,
+        loading,
+        getChatList,
+        addMessage,
+        createRoom,
+        deleteRoom,
+        getChatById,
+        addPlayerToRoom,
+        removePlayerFromRoom
+    } = useChats();
+
     const [messageData, setMessageData] = useState({
-        message: '',
-        time: ''
+        username: '',
+        date: '',
+        time: '',
+        text: ''
     });
-    const [newRoom, setNewRoom] = useState({
+
+    const [roomData, setRoomData] = useState({
         id: 0,
         name: '',
-        limit: null,
+        limit: 0,
         players: []
     });
-    const [modalIsOpen, setModalIsOpen] = useState(false);
 
-    const openModal = () => {
+    const [currentChat, setCurrentChat] = useState(null);
+    const [currentRoom, setCurrentRoom] = useState(null);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isMute, setMute] = useState(false);
+
+    const [searchParams] = useSearchParams();
+    const chatIdFromUrl = searchParams.get('chatId');
+
+    // Открыть модальное окно
+    function openModal() {
         setModalIsOpen(true);
     };
 
-    const closeModal = () => {
+    // Закрыть модальное окно
+    function closeModal() {
         setModalIsOpen(false);
-        setNewRoom({
+        setRoomData({
             id: 0,
             name: '',
-            limit: null,
+            limit: 0,
             players: []
         });
     };
 
-    // Вспомогательная функция для поиска комнаты по ID
+    // Поиск комнаты по ID
     function findRoomById(roomId) {
         for (const chat of chats) {
             if (chat.rooms && chat.rooms.length > 0) {
@@ -58,62 +76,43 @@ function ChatPage() {
         return { room: null, chat: null };
     }
 
-    useEffect(() => {
-        const savedRoomId = loadCurrentRoom();
-        if (savedRoomId) {
-            const { room, chat } = findRoomById(savedRoomId);
-
-            if (room && chat) {
-                setCurrentRoom({
-                    ...room,
-                    chatId: chat.id
-                });
-            }
-        }
-
-        if (chatIdFromUrl) {
-            const chatId = parseInt(chatIdFromUrl);
-            const chat = chats.find(c => c.id === chatId);
-            if (chat) {
-                setCurrentChat(chat);
-                saveCurrentChat(chatId);
-            }
-        } else {
-            const savedChatId = loadCurrentChat();
-            if (savedChatId) {
-                const chat = chats.find(c => c.id === savedChatId);
-                if (chat) setCurrentChat(chat);
-            }
-        }
-    }, [chatIdFromUrl, chats]);
-
     // Обновить текущий чат
     function updateCurrentChat(chatId) {
-        const chat = chats.find(chat => chat.id === chatId);
-        setCurrentChat(chat);
+        setCurrentChat(getChatById(chatId));
         saveCurrentChat(chatId);
         window.history.pushState({}, '', `/chats?chatId=${chatId}`);
     }
 
-    function addNewRoom(e) {
+    // Создать новую комнату
+    async function addRoom(e) {
         e.preventDefault(); // Не перезагружать страницу
         try {
-            addRoom(currentChat.id, newRoom);
+            await createRoom(currentChat.id, { ...roomData, id: Math.round(Math.random() * 1000) });
             closeModal();
         } catch (error) {
-            console.error('Ошибка входа:', error);
+            console.error('Ошибка создания комнаты:', error);
+        }
+    }
+    // Удалить комнату
+    async function removeRoom(e, room) {
+        e.stopPropagation();
+        try {
+            await deleteRoom(currentChat.id, room.id);
+        } catch (error) {
+            console.error('Ошибка удаления комнаты:', error);
         }
     }
 
     // Обновляем сохраненные данные
     function changeRoomForm(e) {
         const { name, value } = e.target;
-        setNewRoom(prev => ({
+        setRoomData(prev => ({
             ...prev,
             [name]: value
         }));
     }
 
+    // Присоединиться к комнате
     function joinToRoom(roomId) {
         const { room, chat } = findRoomById(roomId);
 
@@ -133,29 +132,23 @@ function ChatPage() {
             ...room,
             chatId: chat.id
         });
-
-        // Автоматически переключаемся на чат комнаты
-        setCurrentChat(chat);
-
-        // Сохраняем оба состояния
         saveCurrentRoom(roomId);
-        saveCurrentChat(chat.id);
-
-        // Обновляем URL
-        window.history.pushState({}, '', `/chats?chatId=${chat.id}`);
     }
 
+    // Выйти из комнаты
     function leaveRoom() {
         removePlayerFromRoom(currentRoom.chatId, currentRoom.id, user.username);
         setCurrentRoom(null);
         saveCurrentRoom(null);
     }
 
+    // Нажатие на кнопку Mute
     function handleMuteButton() {
         setMute(!isMute);
         //TODO: muting and unmuting of micro
     }
 
+    // Обработка изменения формы
     function handleChange(e) {
         const { name, value } = e.target;
         setMessageData(prev => ({
@@ -168,19 +161,17 @@ function ChatPage() {
         e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
     }
 
-    /**
-     * Отправка сообщения в чат
-     */
-    function sendMessage(e) {
+    // Отправка сообщения в чат
+    async function sendMessage(e) {
         e.preventDefault();
 
-        if (messageData.message.trim() === '') return;
+        if (messageData.text.trim() === '') return;
 
         try {
             // Создаем новое сообщение
             const newMessage = {
-                name: user?.username,
-                message: messageData.message,
+                username: user?.username,
+                text: messageData.text,
                 date: new Date().toLocaleDateString('ru-RU'),
                 time: new Date().toLocaleTimeString('ru-RU', {
                     hour: '2-digit',
@@ -189,15 +180,18 @@ function ChatPage() {
                 }),
             };
 
-            // Добавляем сообщение в глобальный список чатов
-            if (currentChat) {
-                addMessage(currentChat.id, newMessage);
+            const result = await addMessage(currentChat.id, newMessage);
+
+            if (!result.success) {
+                console.error('Ошибка отправки:', result.error);
             }
 
             // Очищаем поле ввода
             setMessageData({
-                message: '',
-                time: ''
+                username: '',
+                date: '',
+                time: '',
+                text: ''
             });
 
         } catch (error) {
@@ -205,9 +199,7 @@ function ChatPage() {
         }
     }
 
-    /**
-     * Отправка сообщения при нажатии Enter
-     */
+    // Отправка сообщения при нажатии Enter
     function handleKeyDown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -215,19 +207,73 @@ function ChatPage() {
         }
     }
 
+    // Получаем чаты при загрузке компонента
+    useEffect(() => {
+        const fetchChats = async () => {
+            if (user) {
+                await getChatList();
+            }
+        };
+
+        fetchChats();
+    }, [user, getChatList]);
+
+    // Восстановление последней комнаты и чата
+    useEffect(() => {
+        const savedRoomId = loadCurrentRoom();
+        if (savedRoomId) {
+            const { room, chat } = findRoomById(savedRoomId);
+
+            if (room && chat) {
+                setCurrentRoom({
+                    ...room,
+                    chatId: chat.id
+                });
+            }
+        }
+
+        if (chatIdFromUrl) {
+            const chatId = parseInt(chatIdFromUrl);
+            setCurrentChat(getChatById(chatId));
+            saveCurrentChat(chatId);
+        } else {
+            const savedChatId = loadCurrentChat();
+            if (savedChatId) {
+                setCurrentChat(getChatById(savedChatId));
+            }
+        }
+    }, [chatIdFromUrl]);
+
+    // Заглушка на время загрузки
+    if (loading) {
+        return (
+            <LayoutWithNav>
+                <div className="chat-page__loading">
+                    Загрузка чатов...
+                </div>
+            </LayoutWithNav>
+        );
+    }
+
     return (
         <LayoutWithNav>
             <div className='chat-page__container'>
                 {/*Вкладка чатов*/}
                 <div className='chat-page__chats'>
-                    {chats.map((chat) => (
-                        <ChatCard
-                            key={chat.id}
-                            chat={chat}
-                            onClick={() => updateCurrentChat(chat.id)}
-                            className={currentChat?.id === chat.id ? 'chat-page__chat--active' : ''}
-                        />
-                    ))}
+                    {Array.isArray(chats) && chats.length > 0 ? (
+                        chats.map((chat) => (
+                            <ChatCard
+                                key={chat.id}
+                                chat={chat}
+                                onClick={() => updateCurrentChat(chat.id)}
+                                className={currentChat?.id === chat.id ? 'chat-page__chat--active' : ''}
+                            />
+                        ))
+                    ) : (
+                        <div className='chat-page__no-chats-message'>
+                            Нет доступных чатов
+                        </div>
+                    )}
                 </div>
 
 
@@ -237,21 +283,23 @@ function ChatPage() {
                     {currentChat ? (
                         <div className='chat-page__current-chat-container'>
                             <div className='chat-page__messages'>
-                                {currentChat.messages.map((message, index) => (
-                                    <div key={index} className='chat-page__chat-message'>
-                                        <div className='chat-page__message-content'>
-                                            <strong>{message.name}</strong>: {message.message}
+                                {currentChat.messages && currentChat.messages.length > 0 ? (
+                                    currentChat.messages.map((message, index) => (
+                                        <div key={index} className='chat-page__chat-message'>
+                                            <div className='chat-page__message-content'>
+                                                <strong>{message.username}</strong>: {message.text}
+                                            </div>
+                                            <div className='chat-page__message-date'>{formatMessageDateTime(message)}</div>
                                         </div>
-                                        <div className='chat-page__message-date'>{formatMessageDateTime(message)}</div>
-                                    </div>
-                                ))}
+                                    ))
+                                ) : (<div className='chat-page__no-messages'>Сообщений пока нет</div>)}
                             </div>
                             <form className='chat-page__input-message' onSubmit={sendMessage}>
                                 <textarea
                                     className='chat-page__input'
                                     placeholder='Сообщение...'
-                                    name="message"
-                                    value={messageData.message}
+                                    name="text"
+                                    value={messageData.text}
                                     onChange={handleChange}
                                     onKeyDown={handleKeyDown}
                                     rows={1}
@@ -279,7 +327,7 @@ function ChatPage() {
                                     {currentRoom.name}
                                 </div>
                                 <div>
-                                    ({chats.find(chat => chat.id === currentRoom.chatId).name})
+                                    ({getChatById(currentRoom.chatId).name})
                                 </div>
                             </div>
 
@@ -287,8 +335,8 @@ function ChatPage() {
                                 УЧАСТНИКИ – {currentRoom.players.length}:
                             </div>
                             <div className='chat-page__room-players-list'>
-                                {currentRoom.players.length > 0 ? (
-                                    currentRoom.players.map((player) => (
+                                {currentRoom.players && currentRoom.players.length > 0 ? (
+                                    currentRoom.players.map(player => (
                                         <div key={player.id} className='chat-page__room-player'>
                                             <img className='chat-page__room-player-avatar' src={player.avatar} />
                                             <span className='chat-page__room-player-name'>
@@ -308,8 +356,8 @@ function ChatPage() {
                         (
                             <div className='chat-page__rooms'>
                                 {currentChat && currentChat.rooms.length > 0 ? (
-                                    currentChat.rooms.map((room, index) => (
-                                        <div key={index} className='chat-page__room'>
+                                    currentChat.rooms.map(room => (
+                                        <div key={room.id} className='chat-page__room'>
                                             <div
                                                 className='chat-page__room-info'
                                                 onClick={() => joinToRoom(room.id)}
@@ -322,10 +370,7 @@ function ChatPage() {
 
                                             <button
                                                 className='chat-page__delete-room'
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeRoom(currentChat.id, room.id);
-                                                }}
+                                                onClick={(e) => removeRoom(e, room)}
                                                 title="Удалить комнату"
                                             >
                                                 <img className='chat-page__delete-room-icon' src={TrashIcon} alt="Удалить" />
@@ -339,13 +384,13 @@ function ChatPage() {
                                 <Modal isOpen={modalIsOpen} onClose={closeModal}>
                                     <div className='chat-page__add-room-window'>
                                         <h1 className='chat-page__add-room-window-header'>Добавить комнату</h1>
-                                        <form className='chat-page__add-room-window-form' onSubmit={addNewRoom}>
+                                        <form className='chat-page__add-room-window-form' onSubmit={addRoom}>
                                             <input
                                                 type='text'
                                                 name='name'
                                                 placeholder='Введите название комнаты'
                                                 className='chat-page__add-room-window-input'
-                                                value={newRoom.name}
+                                                value={roomData.name}
                                                 onChange={changeRoomForm}
                                             />
                                             <input
@@ -353,7 +398,7 @@ function ChatPage() {
                                                 name='limit'
                                                 placeholder='Введите лимит комнаты'
                                                 className='chat-page__add-room-window-input'
-                                                value={newRoom.limit}
+                                                value={roomData.limit}
                                                 onChange={changeRoomForm}
                                             />
                                             <div className='chat-page__add-room-window-buttons'>
@@ -383,4 +428,4 @@ function ChatPage() {
     );
 }
 
-export default ChatPage;
+export default ChatsPage;

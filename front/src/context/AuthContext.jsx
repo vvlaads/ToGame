@@ -17,6 +17,7 @@ function AuthProvider({ children }) {
         // Для дебага имитируем обращение к серверу
         if (config.debug) {
             const user = {
+                id: 100,
                 username: userData.login,
                 password: userData.password,
                 games: GAME_LIST
@@ -61,6 +62,7 @@ function AuthProvider({ children }) {
             const data = await response.json();
 
             const user = {
+                id: data?.id,
                 username: data?.login,
                 password: data?.password,
                 games: data?.games

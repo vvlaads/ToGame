@@ -110,7 +110,7 @@ export function getChatLastMessageInfo(chat) {
     }
 
     return {
-        text: `${lastMessage.name}: ${lastMessage.message || lastMessage.text}`,
+        text: `${lastMessage.username}: ${lastMessage.text}`,
         datetime: formatMessageDateTime(lastMessage),
         fullInfo: lastMessage
     };

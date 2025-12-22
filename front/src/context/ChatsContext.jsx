@@ -1,283 +1,296 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
-
-// Начальные данные чатов
-const initialChats = [
-    {
-        id: 1,
-        name: 'Чат 1',
-        avatar: "../../public/vite.svg",
-        rooms: [],
-        messages: [
-            {
-                name: "vvlaads",
-                date: "20.12.2025",
-                time: "12:12:15",
-                message: "Привет!"
-            },
-            {
-                name: "vvlaads",
-                date: "21.12.2025",
-                time: "12:12:30",
-                message: "Привет!"
-            }
-        ]
-    },
-    {
-        id: 2,
-        name: 'Чат 2',
-        avatar: "../../public/vite.svg",
-        rooms: [
-            {
-                id: 1,
-                name: "Болталка",
-                limit: 15,
-                players: [
-                    {
-                        name: "vvlaads",
-                        avatar: "../../public/vite.svg"
-                    },
-                    {
-                        name: "vvlaads",
-                        avatar: "../../public/vite.svg"
-                    },
-                    {
-                        name: "vvlaads",
-                        avatar: "../../public/vite.svg"
-                    },
-                    {
-                        name: "vvlaads",
-                        avatar: "../../public/vite.svg"
-                    }
-                ]
-            },
-            {
-                id: 2,
-                name: "CS:GO",
-                limit: 15,
-                players: [
-                    {
-                        name: "GamerPro",
-                        avatar: "../../public/vite.svg"
-                    },
-                    {
-                        name: "Capa",
-                        avatar: "../../public/vite.svg"
-                    }
-                ]
-            }
-        ],
-        messages: [
-            {
-                name: "GamerPro",
-                date: "19.11.2025",
-                time: "12:10:00",
-                message: "Привет!"
-            }
-        ]
-    }
-];
+import config from '../config/index.js'
+import { createContext, useState, useContext } from 'react';
+import { CHAT_LIST } from '../constants/testValues';
+import { API_ENDPOINTS } from '../constants/api.js';
+import { useAuth } from './AuthContext.jsx';
 
 const ChatsContext = createContext();
 
+const API_BASE_URL = config.apiUrl;
+const API_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.CHAT}`;
+const API_CREATE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.CREATE_CHAT}`;
+const API_UPDATE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.UPDATE_CHAT}`;
+const API_DELETE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_CHAT}`;
+
 export function ChatsProvider({ children }) {
-    const [chats, setChats] = useState(initialChats);
+    const { user } = useAuth();
+    const [chats, setChats] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Функция для добавления нового сообщения в чат
-    function addMessage(chatId, message) {
-        setChats(prevChats =>
-            prevChats.map(chat => {
-                if (chat.id === chatId) {
-                    const newMessage = {
-                        name: message.name || 'Аноним',
-                        message: message.message || '',
-                        date: message.date || new Date().toLocaleDateString('ru-RU'),
-                        time: message.time || new Date().toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                        })
-                    };
-
-                    return {
-                        ...chat,
-                        messages: [...chat.messages, newMessage]
-                    };
-                }
-                return chat;
-            })
-        );
-    }
-
-    // Функция для добавления нового чата
-    function addChat(newChat) {
-        const newChatWithDefaults = {
-            ...newChat,
-            id: newChat.id || Date.now(),
-            messages: newChat.messages || [],
-            rooms: newChat.rooms || []
-        };
-
-        setChats(prevChats => [...prevChats, newChatWithDefaults]);
-        return newChatWithDefaults.id;
-    }
-
-    // Функция для обновления чата
-    function updateChat(chatId, updatedData) {
-        setChats(prevChats =>
-            prevChats.map(chat =>
-                chat.id === chatId ? { ...chat, ...updatedData } : chat
-            )
-        );
-    }
-
-    // Функция для получения чата по ID
+    // Получение чата по ID
     function getChatById(chatId) {
         return chats.find(chat => chat.id === chatId);
     }
 
-    // Функция для удаления чата
-    function removeChat(chatId) {
-        setChats(prevChats => prevChats.filter(chat => chat.id !== chatId));
+    // Получение комнаты по ID
+    function getRoomById(chatId, roomId) {
+        const chat = getChatById(chatId);
+        return chat.rooms.find(room => room.id === roomId);
     }
 
-    // Функция для очистки сообщений в чате
-    function clearChatMessages(chatId) {
-        setChats(prevChats =>
-            prevChats.map(chat =>
-                chat.id === chatId ? { ...chat, messages: [] } : chat
-            )
-        );
+    // Получить список чатов для пользователя
+    async function getChatList() {
+        setLoading(true);
+
+        // Для дебага имитируем обращение к серверу
+        if (config.debug) {
+            const chatsData = CHAT_LIST;
+            setChats(chatsData);
+            setLoading(false);
+            return { success: true, data: chatsData };
+        }
+
+        // Основное тело метода
+        try {
+            const response = await fetch(API_CHAT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user: user })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка получения чатов');
+            }
+
+            const chatsData = await response.json();
+            setChats(chatsData);
+            setLoading(false);
+            return { success: true, data: chatsData };
+
+        } catch (error) {
+            console.error('Ошибка получения чатов', error);
+            setLoading(false);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Создание нового чата
+    async function createChat(chatData) {
+        // Для дебага имитируем обращение к серверу
+        if (config.debug) {
+            setChats(prevChats =>
+                [...prevChats, { id: Date.now(), ...chatData }]
+            );
+            return { success: true, data: chats };
+        }
+
+        // Основное тело метода
+        try {
+            const response = await fetch(API_CREATE_CHAT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ chatData })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка создания чата');
+            }
+
+            const chatsData = await response.json();
+            setChats(chatsData);
+            return { success: true, data: chatsData };
+
+        } catch (error) {
+            console.error('Ошибка создания чата', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Обновление чата
+    async function updateChat(chatId, updatedData) {
+        // Для дебага имитируем обращение к серверу
+        if (config.debug) {
+            let updatedChats;
+
+            setChats(prevChats => {
+                updatedChats = prevChats.map(chat => {
+                    if (chat.id === chatId) {
+                        return {
+                            ...chat,
+                            ...updatedData
+                        };
+                    }
+                    return chat;
+                });
+                return updatedChats;
+            });
+
+            return { success: true, data: updatedChats };
+        }
+
+
+        // Основное тело метода
+        try {
+            const response = await fetch(`${API_UPDATE_CHAT_URL}/${chatId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ updatedData })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка ообновления чата');
+            }
+
+            const chatsData = await response.json();
+            setChats(chatsData);
+            return { success: true, data: chatsData };
+
+        } catch (error) {
+            console.error('Ошибка ообновления чата', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Удаление чата
+    async function deleteChat(chatId) {
+        // Для дебага имитируем обращение к серверу
+        if (config.debug) {
+            setChats(prevChats =>
+                prevChats.filter(chat => chat.id !== chatId)
+            );
+            return { success: true, data: chats };
+        }
+
+        // Основное тело метода
+        try {
+            const response = await fetch(`${API_DELETE_CHAT_URL}/${chatId}`, {
+                method: 'GET',
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка удаления чата');
+            }
+
+            const chatsData = await response.json();
+            setChats(chatsData);
+            return { success: true, data: chatsData };
+
+        } catch (error) {
+            console.error('Ошибка удаления чата', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Добавить новое сообщения в чат
+    async function addMessage(chatId, message) {
+        const chat = getChatById(chatId);
+        if (!chat) {
+            console.error('Чат не найден');
+            return { success: false, error: 'Чат не найден' };
+        }
+
+        chat.messages.push(message);
+        const updatedData = {
+            messages: chat.messages
+        };
+        return await updateChat(chatId, updatedData);
     }
 
     // Функция для добавления комнаты в чат
-    function addRoom(chatId, roomData) {
-        setChats(prevChats =>
-            prevChats.map(chat => {
-                if (chat.id === chatId) {
-                    // Проверяем лимит комнат
-                    if (chat.rooms.length >= 5) {
-                        console.warn('Достигнут лимит комнат (максимум 5)');
-                        return chat;
-                    }
-
-                    const newRoom = {
-                        id: Date.now(), // Уникальный ID
-                        name: roomData.name || 'Новая комната',
-                        limit: roomData.limit || 15,
-                        players: roomData.players || []
-                    };
-
-                    return {
-                        ...chat,
-                        rooms: [...chat.rooms, newRoom]
-                    };
-                }
-                return chat;
-            })
-        );
+    async function createRoom(chatId, roomData) {
+        const chat = getChatById(chatId);
+        if (!chat) {
+            console.error('Чат не найден');
+            return { success: false, error: 'Чат не найден' };
+        }
+        chat.rooms.push(roomData);
+        const updatedData = {
+            rooms: chat.rooms
+        };
+        return await updateChat(chatId, updatedData);
     }
 
     // Функция для добавления игрока в комнату
-    function addPlayerToRoom(chatId, roomId, player) {
-        setChats(prevChats =>
-            prevChats.map(chat => {
-                if (chat.id === chatId) {
-                    const roomIndex = chat.rooms.findIndex(room => room.id === roomId);
+    async function addPlayerToRoom(chatId, roomId, player) {
+        const chat = getChatById(chatId);
+        if (!chat) {
+            console.error('Чат не найден');
+            return { success: false, error: 'Чат не найден' };
+        }
 
-                    if (roomIndex === -1) {
-                        return chat;
-                    }
+        const newRooms = []
+        chat.rooms.map(room => {
+            if (room.id === roomId) {
+                newRooms.push(getRoomById(chatId, roomId).players.push(player));
+            }
+            newRooms.push(room)
+        })
 
-                    const room = chat.rooms[roomIndex];
-
-                    // Проверяем лимит игроков
-                    if (room.players.length >= room.limit) {
-                        console.warn('Комната заполнена');
-                        return chat;
-                    }
-
-                    // Проверяем, есть ли уже такой игрок
-                    const playerExists = room.players.some(p => p.name === player.name);
-                    if (playerExists) {
-                        console.warn('Игрок уже в комнате');
-                        return chat;
-                    }
-
-                    const updatedRooms = [...chat.rooms];
-                    updatedRooms[roomIndex] = {
-                        ...room,
-                        players: [...room.players, {
-                            name: player.name || 'Игрок',
-                            avatar: player.avatar || "../../public/vite.svg"
-                        }]
-                    };
-
-                    return {
-                        ...chat,
-                        rooms: updatedRooms
-                    };
-                }
-                return chat;
-            })
-        );
+        const updatedData = {
+            rooms: newRooms
+        };
+        return await updateChat(chatId, updatedData);
     }
 
     // Функция для удаления игрока из комнаты
-    function removePlayerFromRoom(chatId, roomId, playerName) {
-        setChats(prevChats =>
-            prevChats.map(chat => {
-                if (chat.id === chatId) {
-                    const roomIndex = chat.rooms.findIndex(room => room.id === roomId);
-
-                    if (roomIndex === -1) {
-                        return chat;
+    async function removePlayerFromRoom(chatId, roomId, playerName) {
+        const chat = getChatById(chatId);
+        if (!chat) {
+            console.error('Чат не найден');
+            return { success: false, error: 'Чат не найден' };
+        }
+        const newRooms = []
+        chat.rooms.map(room => {
+            if (room.id === roomId) {
+                const players = getRoomById(chatId, roomId).players;
+                const playerList = [];
+                players.map(player => {
+                    if (player.name !== playerName) {
+                        playerList.push(player);
                     }
+                })
+                const currentRoom = getRoomById(chatId, roomId);
+                currentRoom.players = playerList;
+                newRooms.push(currentRoom);
+            }
+            newRooms.push(room)
+        })
 
-                    const room = chat.rooms[roomIndex];
-                    const updatedRooms = [...chat.rooms];
-
-                    updatedRooms[roomIndex] = {
-                        ...room,
-                        players: room.players.filter(player => player.name !== playerName)
-                    };
-
-                    return {
-                        ...chat,
-                        rooms: updatedRooms
-                    };
-                }
-                return chat;
-            })
-        );
+        const updatedData = {
+            rooms: newRooms
+        };
+        return await updateChat(chatId, updatedData);
     }
 
     // Функция для удаления комнаты
-    function removeRoom(chatId, roomId) {
-        setChats(prevChats =>
-            prevChats.map(chat => {
-                if (chat.id === chatId) {
-                    return {
-                        ...chat,
-                        rooms: chat.rooms.filter(room => room.id !== roomId)
-                    };
-                }
-                return chat;
-            })
-        );
+    async function deleteRoom(chatId, roomId) {
+        const chat = getChatById(chatId);
+        if (!chat) {
+            console.error('Чат не найден');
+            return { success: false, error: 'Чат не найден' };
+        }
+
+        const rooms = [];
+        chat.rooms.map(room => {
+            if (room.id !== roomId) {
+                rooms.push(room);
+            }
+        })
+        const updatedData = {
+            rooms: rooms
+        };
+        return await updateChat(chatId, updatedData);
     }
 
     const value = {
         chats,
+        loading,
+        getChatList,
         addMessage,
-        addChat,
+        createChat,
         updateChat,
         getChatById,
-        removeChat,
-        clearChatMessages,
-        addRoom,
+        deleteChat,
+        createRoom,
         addPlayerToRoom,
         removePlayerFromRoom,
-        removeRoom
+        deleteRoom
     };
 
     return (
