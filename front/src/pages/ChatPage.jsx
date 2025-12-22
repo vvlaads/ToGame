@@ -8,6 +8,8 @@ import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
 import { formatMessageDateTime } from '../utils/chatUtils';
 import { loadCurrentChat, loadCurrentRoom, saveCurrentChat, saveCurrentRoom } from '../utils/sessionStorage';
+import TrashIcon from '../assets/icons/trash.svg';
+import Modal from '../components/Modal';
 
 function ChatPage() {
     const { user } = useAuth();
@@ -16,11 +18,32 @@ function ChatPage() {
     const [isMute, setMute] = useState(false);
     const [searchParams] = useSearchParams();
     const chatIdFromUrl = searchParams.get('chatId');
-    const { chats, addMessage } = useChats();
+    const { chats, addMessage, addRoom, removeRoom, addPlayerToRoom, removePlayerFromRoom } = useChats();
     const [messageData, setMessageData] = useState({
         message: '',
         time: ''
     });
+    const [newRoom, setNewRoom] = useState({
+        id: 0,
+        name: '',
+        limit: null,
+        players: []
+    });
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setNewRoom({
+            id: 0,
+            name: '',
+            limit: null,
+            players: []
+        });
+    };
 
     // Вспомогательная функция для поиска комнаты по ID
     function findRoomById(roomId) {
@@ -72,11 +95,39 @@ function ChatPage() {
         window.history.pushState({}, '', `/chats?chatId=${chatId}`);
     }
 
+    function addNewRoom(e) {
+        e.preventDefault(); // Не перезагружать страницу
+        try {
+            addRoom(currentChat.id, newRoom);
+            closeModal();
+        } catch (error) {
+            console.error('Ошибка входа:', error);
+        }
+    }
+
+    // Обновляем сохраненные данные
+    function changeRoomForm(e) {
+        const { name, value } = e.target;
+        setNewRoom(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    }
+
     function joinToRoom(roomId) {
-        // Используем вспомогательную функцию для поиска
         const { room, chat } = findRoomById(roomId);
 
         if (!room || !chat) return;
+
+        addPlayerToRoom(
+            currentChat.id,
+            roomId,
+            {
+                id: user.id,
+                name: user.username,
+                avatar: "../../public/vite.svg"
+            }
+        );
 
         setCurrentRoom({
             ...room,
@@ -95,6 +146,7 @@ function ChatPage() {
     }
 
     function leaveRoom() {
+        removePlayerFromRoom(currentRoom.chatId, currentRoom.id, user.username);
         setCurrentRoom(null);
         saveCurrentRoom(null);
     }
@@ -235,39 +287,94 @@ function ChatPage() {
                                 УЧАСТНИКИ – {currentRoom.players.length}:
                             </div>
                             <div className='chat-page__room-players-list'>
-                                {currentRoom.players.map((player) => (
-                                    <div key={player.id} className='chat-page__room-player'>
-                                        <img className='chat-page__room-player-avatar' src={player.avatar} />
-                                        <span className='chat-page__room-player-name'>
-                                            {player.name}
-                                        </span>
-                                    </div>
-                                ))}
+                                {currentRoom.players.length > 0 ? (
+                                    currentRoom.players.map((player) => (
+                                        <div key={player.id} className='chat-page__room-player'>
+                                            <img className='chat-page__room-player-avatar' src={player.avatar} />
+                                            <span className='chat-page__room-player-name'>
+                                                {player.name}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (<>Тут никого нет</>)}
+
                             </div>
 
                             <div className='chat-page__room-buttons'>
                                 <button className='chat-page__room-button' onClick={handleMuteButton}>{isMute ? 'Включить' : 'Заглушить'}</button>
                                 <button className='chat-page__room-button chat-page__room-leave-button' onClick={leaveRoom}>Выйти</button>
                             </div>
-                        </div>) : (
-                        <>
-                            {currentChat && currentChat.rooms.length > 0 ? (
-                                <div className='chat-page__rooms'>
-                                    {currentChat.rooms.map((room, index) => (
-                                        <div key={index} className='chat-page__room' onClick={() => joinToRoom(room.id)}>
-                                            <div>
-                                                {room.name}
+                        </div>) :
+                        (
+                            <div className='chat-page__rooms'>
+                                {currentChat && currentChat.rooms.length > 0 ? (
+                                    currentChat.rooms.map((room, index) => (
+                                        <div key={index} className='chat-page__room'>
+                                            <div
+                                                className='chat-page__room-info'
+                                                onClick={() => joinToRoom(room.id)}
+                                            >
+                                                <div>{room.name}</div>
+                                                <div>
+                                                    {room.players.length} / {room.limit}
+                                                </div>
                                             </div>
-                                            <div>
-                                                {room.players.length} / {room.limit}
-                                            </div>
+
+                                            <button
+                                                className='chat-page__delete-room'
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeRoom(currentChat.id, room.id);
+                                                }}
+                                                title="Удалить комнату"
+                                            >
+                                                <img className='chat-page__delete-room-icon' src={TrashIcon} alt="Удалить" />
+                                            </button>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className='chat-page__no_rooms'>Тут будут голосовые чаты</div>
-                            )}
-                        </>)}
+                                    ))
+                                ) : (<></>)}
+                                <button className='chat-page__add-room' onClick={openModal}>
+                                    Добавить комнату
+                                </button>
+                                <Modal isOpen={modalIsOpen} onClose={closeModal}>
+                                    <div className='chat-page__add-room-window'>
+                                        <h1 className='chat-page__add-room-window-header'>Добавить комнату</h1>
+                                        <form className='chat-page__add-room-window-form' onSubmit={addNewRoom}>
+                                            <input
+                                                type='text'
+                                                name='name'
+                                                placeholder='Введите название комнаты'
+                                                className='chat-page__add-room-window-input'
+                                                value={newRoom.name}
+                                                onChange={changeRoomForm}
+                                            />
+                                            <input
+                                                type='number'
+                                                name='limit'
+                                                placeholder='Введите лимит комнаты'
+                                                className='chat-page__add-room-window-input'
+                                                value={newRoom.limit}
+                                                onChange={changeRoomForm}
+                                            />
+                                            <div className='chat-page__add-room-window-buttons'>
+                                                <button
+                                                    type='submit'
+                                                    id='chat-page__add-room-window-submit-button'
+                                                    className='chat-page__add-room-window-button'>
+                                                    Добавить
+                                                </button>
+                                                <button
+                                                    id='chat-page__add-room-window-cancel-button'
+                                                    className='chat-page__add-room-window-button'
+                                                    onClick={closeModal}>
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </Modal>
+                            </div>
+                        )}
 
 
                 </div>

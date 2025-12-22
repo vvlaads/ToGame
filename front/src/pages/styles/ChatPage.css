@@ -138,6 +138,43 @@
     background-color: var(--color-gray-700);
     padding: 15px;
     border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-page__room-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.chat-page__delete-room {
+    border-radius: 100%;
+    height: 40px;
+    width: 40px;
+    min-width: 40px;
+    border: 0;
+    background-color: var(--color-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.chat-page__delete-room:hover {
+    background-color: var(--color-red-dark);
+}
+
+.chat-page__delete-room-icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
 }
 
 .chat-page__room:hover {
@@ -215,5 +252,81 @@
 }
 
 .chat-page__room-leave-button:hover {
+    background-color: var(--color-red-dark);
+}
+
+.chat-page__add-room {
+    width: 100%;
+    height: 80px;
+    color: inherit;
+    background-color: var(--color-gray-700);
+    border: 0;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.chat-page__add-room:hover {
+    background-color: var(--color-gray-500);
+}
+
+.chat-page__add-room-window {
+    padding: 20px;
+    border-radius: 20px;
+    width: 800px;
+    background-color: var(--color-gray-800);
+}
+
+.chat-page__add-room-window-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.chat-page__add-room-window-input {
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-gray-700);
+    border-radius: 6px;
+    background: var(--color-gray-900);
+    border-radius: 10px;
+}
+
+.chat-page__add-room-window-input:focus {
+    outline: none;
+    border-color: var(--color-purple);
+}
+
+.chat-page__add-room-window-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.chat-page__add-room-window-button {
+    height: 50px;
+    color: inherit;
+    border: 0;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+#chat-page__add-room-window-submit-button {
+    width: 50%;
+    background-color: var(--color-purple);
+}
+
+#chat-page__add-room-window-submit-button:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#chat-page__add-room-window-cancel-button {
+    width: 40%;
+    background-color: var(--color-red);
+}
+
+#chat-page__add-room-window-cancel-button:hover {
     background-color: var(--color-red-dark);
 }
