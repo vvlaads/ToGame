@@ -4,19 +4,19 @@ import { useAuth } from '../context/AuthContext'
 import GamePad from '../assets/icons/gamepad.svg';
 
 function LoginPage() {
-    const [loginData, setLoginData] = useState({
+    const [userData, setUserData] = useState({
         login: '',
         password: ''
     });
 
     const [isAuth, setAuth] = useState(true);
 
-    const { login, register } = useAuth();
+    const { signUp, register } = useAuth();
 
     // Обновляем сохраненные данные
     function handleChange(e) {
         const { name, value } = e.target;
-        setLoginData(prev => ({
+        setUserData(prev => ({
             ...prev,
             [name]: value
         }));
@@ -26,10 +26,16 @@ function LoginPage() {
     async function handleSubmit(e) {
         e.preventDefault(); // Не перезагружать страницу
         try {
+            var response = null;
             if (isAuth) {
-                await login(loginData);
+                response = await signUp(userData);
+            } else {
+                response = await register(userData);
             }
-            await register(loginData);
+
+            if (!response.success) {
+                throw new Error(response.error);
+            }
         } catch (error) {
             console.error('Ошибка входа:', error);
         }
@@ -67,7 +73,7 @@ function LoginPage() {
                         type='text'
                         name='login'
                         placeholder='Введите логин'
-                        value={loginData.login}
+                        value={userData.login}
                         onChange={handleChange}
                         required
                     />
@@ -79,7 +85,7 @@ function LoginPage() {
                         type='password'
                         name='password'
                         placeholder='Введите пароль'
-                        value={loginData.password}
+                        value={userData.password}
                         onChange={handleChange}
                         required
                     />
