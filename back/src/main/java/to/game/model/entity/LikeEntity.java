@@ -17,7 +17,7 @@ public class LikeEntity {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     
     @ManyToOne
     @JoinColumn(name = "sender_id")

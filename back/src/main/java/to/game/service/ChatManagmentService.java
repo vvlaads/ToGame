@@ -1,0 +1,78 @@
+package to.game.service;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import to.game.model.entity.ChatEntity;
+import to.game.model.entity.RoomEntity;
+import to.game.model.repos.ChatRepository;
+
+@ApplicationScoped
+public class ChatManagmentService {
+    @Inject
+    ChatRepository chatRepo;
+
+    @Inject
+    UserService userRepo;
+
+    @Transactional
+    public void createChat(Long userId, String chatName, String chatDescr) {
+        ChatEntity chat = new ChatEntity();
+        chat.setName(chatName);
+        chat.setDescr(chatDescr);
+        chat.setOwner(userRepo.userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
+
+        chatRepo.save(chat);
+    }
+
+    @Transactional
+    public void deleteChat(Long chatId, Long userId) {
+        checkIfOwner(chatId, userId);
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        chatRepo.delete(chat);
+    }
+
+    @Transactional
+    public void addRoomToChat(Long chatId, Long userId, String roomName) {
+        checkIfOwner(chatId, userId);
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+
+        RoomEntity room = new RoomEntity();
+        room.setName(roomName);
+
+        chat.addRoom(room);
+    }
+
+    @Transactional
+    public void deleteRoomFromChat(Long chatId, Long userId, Long roomId) {
+        checkIfOwner(chatId, userId);
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+
+        RoomEntity room = chat.getRooms().stream().filter(r -> r.getId() == roomId).findFirst()
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        chat.deleteRoom(room);
+    }
+
+    @Transactional
+    public void renameChat(Long chatId, Long userId, String newName) {
+        checkIfOwner(chatId, userId);
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        chat.setName(newName);
+    }
+
+    @Transactional
+    public void changeDescr(Long chatId, Long userId, String newDscription) {
+        checkIfOwner(chatId, userId);
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        chat.setDescr(newDscription);
+    }
+
+    @Transactional
+    public void checkIfOwner(Long chatId, Long userId) {
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        if (chat.getOwner().getId() != userId) {
+            throw new RuntimeException("User is not the owner of the chat");
+        }
+    }
+}

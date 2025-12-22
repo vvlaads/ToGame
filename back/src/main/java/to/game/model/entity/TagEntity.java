@@ -21,7 +21,7 @@ import lombok.Setter;
 public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(max = 20)
     private String name;

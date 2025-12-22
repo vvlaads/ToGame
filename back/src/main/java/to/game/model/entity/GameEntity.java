@@ -23,7 +23,7 @@ import lombok.Setter;
 public class GameEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Length(max = 100)
     private String name;
