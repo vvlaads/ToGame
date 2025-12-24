@@ -1,6 +1,6 @@
 export const API_ENDPOINTS = {
-    REGISTER: '/user/register',
     SIGN_UP: '/user/sign-up',
+    SIGN_IN: '/user/sign-in',
     CHAT: '/chat',
     CREATE_CHAT: '/chat/create',
     UPDATE_CHAT: '/chat/update',

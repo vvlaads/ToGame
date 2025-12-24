@@ -1,10 +1,10 @@
 const config = {
     development: {
-        apiUrl: 'http://localhost:5173/to-game-api',
+        apiUrl: 'http://localhost:8080/to-game-api',
         debug: true
     },
     production: {
-        apiUrl: 'http://localhost:5173/to-game-api',
+        apiUrl: 'http://localhost:8080/to-game-api',
         debug: false
     }
 };

@@ -7,7 +7,7 @@ import { USER_LIST } from '../constants/testValues.jsx';
 const AuthContext = createContext();
 
 const API_BASE_URL = config.apiUrl;
-const API_REGISTER_URL = `${API_BASE_URL}${API_ENDPOINTS.REGISTER}`
+const API_SIGN_IN_URL = `${API_BASE_URL}${API_ENDPOINTS.SIGN_IN}`
 const API_SIGN_UP_URL = `${API_BASE_URL}${API_ENDPOINTS.SIGN_UP}`
 
 function AuthProvider({ children }) {
@@ -64,12 +64,12 @@ function AuthProvider({ children }) {
         var url = ''
         var errorMessage = ''
         switch (requestType) {
-            case AUTH_TYPE.REGISTER:
-                url = API_REGISTER_URL;
-                errorMessage = 'Ошибка регистрации';
-                break;
             case AUTH_TYPE.SIGN_UP:
                 url = API_SIGN_UP_URL;
+                errorMessage = 'Ошибка регистрации';
+                break;
+            case AUTH_TYPE.SIGN_IN:
+                url = API_SIGN_IN_URL;
                 errorMessage = 'Ошибка авторизации';
                 break;
             default:
@@ -117,12 +117,12 @@ function AuthProvider({ children }) {
 
     // Регистрация пользователя
     async function signUp(userData) {
-        return sendUserData(userData, AUTH_TYPE.REGISTER);
+        return sendUserData(userData, AUTH_TYPE.SIGN_UP);
     }
 
     // Авторизация пользователя
     async function signIn(userData) {
-        return sendUserData(userData, AUTH_TYPE.SIGN_UP);
+        return sendUserData(userData, AUTH_TYPE.SIGN_IN);
     };
 
     // Выход пользователя
@@ -135,7 +135,7 @@ function AuthProvider({ children }) {
         setUser({ ...user, roomId: roomId });
     }
 
-    const value = { user, signIn, signUp, logout, getUserInfo };
+    const value = { user, signIn, signUp, logout, getUserInfo, setRoomId };
 
     return (
         <AuthContext.Provider value={value}>
