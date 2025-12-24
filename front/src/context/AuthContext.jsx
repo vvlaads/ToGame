@@ -13,6 +13,43 @@ const API_SIGN_UP_URL = `${API_BASE_URL}${API_ENDPOINTS.SIGN_UP}`
 function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
 
+    // Получение информации о пользователе (кроме пароля)
+    async function getUserInfo(userId) {
+        // В дебаге используем тестовые значения
+        if (config.debug) {
+            const user = USER_LIST.find(u => u.id === userId);
+            if (user) {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    avatarId: user.avatarId,
+                    descr: user.descr,
+                    roomId: user.roomId,
+                    image: user.image,
+                    bannerImage: user.bannerImage
+                };
+            }
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'GET',
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка получения информации о пользователе');
+            }
+
+            const userData = await response.json();
+            return userData;
+        } catch (error) {
+            console.error('Ошибка получения информации о пользователе:', error);
+            return null;
+        }
+    }
+
+
     // Отправка запроса с данными пользователя
     async function sendUserData(userData, requestType) {
         // Для дебага имитируем обращение к серверу
@@ -94,7 +131,11 @@ function AuthProvider({ children }) {
         localStorage.removeItem('user');
     };
 
-    const value = { user, signIn, signUp, logout };
+    function setRoomId(roomId) {
+        setUser({ ...user, roomId: roomId });
+    }
+
+    const value = { user, signIn, signUp, logout, getUserInfo };
 
     return (
         <AuthContext.Provider value={value}>

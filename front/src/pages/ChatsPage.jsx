@@ -8,11 +8,12 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
-import { formatMessageDateTime } from '../utils/chatUtils';
 import { loadCurrentChatId, loadCurrentRoomId, saveCurrentChatId, saveCurrentRoomId } from '../utils/sessionStorage';
+import { getPathForImage } from '../utils/imageFormat';
+import { formatTimestamp } from '../utils/chatUtils';
 
 function ChatsPage() {
-    const { user } = useAuth();
+    const { user, getUserInfo, setRoomId } = useAuth();
     const {
         chats,
         loading,
@@ -22,29 +23,31 @@ function ChatsPage() {
         deleteRoom,
         getChatById,
         getRoomById,
-        addPlayerToRoom,
-        removePlayerFromRoom
+        getRoomPlayers,
+        getMessages,
+        getRooms
     } = useChats();
 
     const [messageData, setMessageData] = useState({
-        username: '',
-        date: '',
-        time: '',
-        text: ''
+        userId: 0,
+        text: '',
+        createdAt: 0,
+        chatId: 0
     });
 
     const [roomData, setRoomData] = useState({
-        id: 0,
         name: '',
-        limit: 0,
         chatId: 0,
-        players: []
     });
 
     const [currentChat, setCurrentChat] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isMute, setMute] = useState(false);
+    const [currentMessages, setCurrentMessages] = useState([]);
+    const [currentChatRooms, setCurrentChatRooms] = useState([]);
+    const [currentRoomPlayers, setCurrentRoomPlayers] = useState([]);
+    const [usernames, setUsernames] = useState({});
 
     const [searchParams] = useSearchParams();
     const chatIdFromUrl = searchParams.get('chatId');
@@ -58,32 +61,44 @@ function ChatsPage() {
     function closeModal() {
         setModalIsOpen(false);
         setRoomData({
-            id: 0,
             name: '',
-            limit: 0,
-            chatId: 0,
-            players: []
+            chatId: 0
         });
     };
 
     // Обновить текущий чат
-    function updateCurrentChat(chatId) {
+    async function updateCurrentChat(chatId) {
         setCurrentChat(getChatById(chatId));
         saveCurrentChatId(chatId);
+        const messagesResponse = await getMessages(chatId);
+        const roomsResponse = await getRooms(chatId);
+        if (messagesResponse.success) {
+            setCurrentMessages(messagesResponse.data);
+        }
+        if (roomsResponse.success) {
+            setCurrentChatRooms(roomsResponse.data);
+        }
         window.history.pushState({}, '', `/chats?chatId=${chatId}`);
     }
 
     // Обновить текущую комнату
-    function updateCurrentRoom(roomId) {
+    async function updateCurrentRoom(roomId) {
         setCurrentRoom(getRoomById(roomId));
         saveCurrentRoomId(roomId);
+        const playersResponse = await getRoomPlayers(roomId);
+        if (playersResponse.success) {
+            setCurrentRoomPlayers(playersResponse.data);
+        }
     }
 
     // Создать новую комнату
     async function addRoom(e) {
         e.preventDefault(); // Не перезагружать страницу
         try {
-            await createRoom(currentChat.id, { ...roomData, id: Math.round(Math.random() * 1000), chatId: currentChat.id });
+            const response = await createRoom(roomData);
+            if (response.success) {
+                setCurrentChatRooms(response.data);
+            }
             closeModal();
         } catch (error) {
             console.error('Ошибка создания комнаты:', error);
@@ -114,21 +129,13 @@ function ChatsPage() {
 
         if (!room) return;
 
-        addPlayerToRoom(
-            roomId,
-            {
-                id: user.id,
-                name: user.username,
-                avatar: "../../public/vite.svg"
-            }
-        );
-
+        setRoomId(roomId);
         updateCurrentRoom(roomId);
     }
 
     // Выйти из комнаты
     function leaveRoom() {
-        removePlayerFromRoom(currentRoom.chatId, currentRoom.id, user.username);
+        setRoomId(null);
         updateCurrentRoom(null);
     }
 
@@ -160,28 +167,26 @@ function ChatsPage() {
         try {
             // Создаем новое сообщение
             const newMessage = {
-                username: user?.username,
+                userId: user?.id,
                 text: messageData.text,
-                date: new Date().toLocaleDateString('ru-RU'),
-                time: new Date().toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                }),
+                createdAt: Date.now(),
+                chatId: currentChat.id
             };
 
-            const result = await addMessage(currentChat.id, newMessage);
+            const result = await addMessage(newMessage);
 
             if (!result.success) {
                 console.error('Ошибка отправки:', result.error);
             }
 
+            setCurrentMessages(result.data);
+
             // Очищаем поле ввода
             setMessageData({
-                username: '',
-                date: '',
-                time: '',
-                text: ''
+                userId: 0,
+                text: '',
+                createdAt: 0,
+                chatId: 0
             });
 
         } catch (error) {
@@ -234,6 +239,28 @@ function ChatsPage() {
         }
     }, [chatIdFromUrl]);
 
+    // Обновление текущих сообщений
+    useEffect(() => {
+        const loadUsernames = async () => {
+            if (currentMessages.length === 0) return;
+
+            const usernameMap = {};
+            const uniqueUserIds = [...new Set(currentMessages.map(msg => msg.userId))];
+            for (const userId of uniqueUserIds) {
+                const response = await getUserInfo(userId);
+                if (response) {
+                    usernameMap[userId] = response.name;
+                } else {
+                    usernameMap[userId] = 'Неизвестно';
+                }
+            }
+
+            setUsernames(usernameMap);
+        };
+
+        loadUsernames();
+    }, [currentMessages]);
+
     // Заглушка на время загрузки
     if (loading) {
         return (
@@ -273,13 +300,13 @@ function ChatsPage() {
                     {currentChat ? (
                         <div className='chat-page__current-chat-container'>
                             <div className='chat-page__messages'>
-                                {currentChat.messages && currentChat.messages.length > 0 ? (
-                                    currentChat.messages.map((message, index) => (
-                                        <div key={index} className='chat-page__chat-message'>
+                                {currentMessages && currentMessages.length > 0 ? (
+                                    currentMessages.map(message => (
+                                        <div key={message.uuid} className='chat-page__chat-message'>
                                             <div className='chat-page__message-content'>
-                                                <strong>{message.username}</strong>: {message.text}
+                                                <strong>{usernames[message.userId] || 'Загрузка...'}</strong>: {message.text}
                                             </div>
-                                            <div className='chat-page__message-date'>{formatMessageDateTime(message)}</div>
+                                            <div className='chat-page__message-date'>{formatTimestamp(message.createdAt)}</div>
                                         </div>
                                     ))
                                 ) : (<div className='chat-page__no-messages'>Сообщений пока нет</div>)}
@@ -325,10 +352,10 @@ function ChatsPage() {
                                 УЧАСТНИКИ – {currentRoom.players.length}:
                             </div>
                             <div className='chat-page__room-players-list'>
-                                {currentRoom.players && currentRoom.players.length > 0 ? (
-                                    currentRoom.players.map(player => (
+                                {currentRoomPlayers && currentRoomPlayers.length > 0 ? (
+                                    currentRoomPlayers.map(player => (
                                         <div key={player.id} className='chat-page__room-player'>
-                                            <img className='chat-page__room-player-avatar' src={player.avatar} />
+                                            <img className='chat-page__room-player-avatar' src={getPathForImage(player.image)} />
                                             <span className='chat-page__room-player-name'>
                                                 {player.name}
                                             </span>
@@ -345,16 +372,16 @@ function ChatsPage() {
                         </div>) :
                         (
                             <div className='chat-page__rooms'>
-                                {currentChat && currentChat.rooms.length > 0 ? (
-                                    currentChat.rooms.map(room => (
-                                        <div key={room.id} className='chat-page__room'>
+                                {currentChat && currentChatRooms.length > 0 ? (
+                                    currentChatRooms.map(room => (
+                                        <div key={room.uuid} className='chat-page__room'>
                                             <div
                                                 className='chat-page__room-info'
                                                 onClick={() => joinToRoom(room.id)}
                                             >
                                                 <div>{room.name}</div>
                                                 <div>
-                                                    {room.players.length} / {room.limit}
+                                                    {currentRoomPlayers.length} / 15
                                                 </div>
                                             </div>
 
@@ -381,14 +408,6 @@ function ChatsPage() {
                                                 placeholder='Введите название комнаты'
                                                 className='chat-page__add-room-window-input'
                                                 value={roomData.name}
-                                                onChange={changeRoomForm}
-                                            />
-                                            <input
-                                                type='number'
-                                                name='limit'
-                                                placeholder='Введите лимит комнаты'
-                                                className='chat-page__add-room-window-input'
-                                                value={roomData.limit}
                                                 onChange={changeRoomForm}
                                             />
                                             <div className='chat-page__add-room-window-buttons'>

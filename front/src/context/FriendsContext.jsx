@@ -10,44 +10,9 @@ const API_BASE_URL = config.apiUrl;
 const API_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.FRIENDS}`;
 
 function FriendsProvider({ children }) {
-    const { user } = useAuth();
+    const { user, getUserInfo } = useAuth();
     const [friends, setFriends] = useState([]);
 
-    // Получение информации о пользователе (кроме пароля)
-    async function getUserInfo(userId) {
-        // В дебаге используем тестовые значения
-        if (config.debug) {
-            const user = USER_LIST.find(u => u.id === userId);
-            if (user) {
-                return {
-                    id: user.id,
-                    name: user.name,
-                    avatarId: user.avatarId,
-                    descr: user.descr,
-                    roomId: user.roomId,
-                    image: user.image,
-                    bannerImage: user.bannerImage
-                };
-            }
-            return null;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-                method: 'GET',
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка получения информации о пользователе');
-            }
-
-            const userData = await response.json();
-            return userData;
-        } catch (error) {
-            console.error('Ошибка получения информации о пользователе:', error);
-            return null;
-        }
-    }
 
     // Получение списка друзей текущего пользователя
     async function getFriendList() {
@@ -98,7 +63,7 @@ function FriendsProvider({ children }) {
         }
     }
 
-    const value = { friends, getFriendList, getUserInfo };
+    const value = { friends, getFriendList };
 
     return (
         <FriendsContext.Provider value={value}>

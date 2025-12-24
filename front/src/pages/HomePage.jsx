@@ -4,8 +4,7 @@ import LayoutWithNav from '../components/LayoutWithNav';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
-import { sortChatsByLastMessage, getRecentChats } from '../utils/chatUtils';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFriends } from '../context/FriendsContext';
 import { getPathForImage } from '../utils/imageFormat';
 
@@ -16,16 +15,12 @@ function HomePage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
+    const activeChats = chats;
+
     // Переход к выбранному чату
     function redirectToChat(chatId) {
         navigate(`/chats?chatId=${chatId}`);
     }
-
-    // Получаем активные чаты
-    const activeChats = useMemo(() => {
-        const recentChats = getRecentChats(chats, 1);
-        return sortChatsByLastMessage(recentChats);
-    }, [chats]);
 
 
     // Получаем друзей при загрузке компонента

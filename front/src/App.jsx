@@ -16,10 +16,10 @@ import { GameProvider } from './context/GameContext';
 function App() {
   return (
     <AuthProvider>
-      <FriendsProvider>
-        <SearchPlayersProvider>
-          <GameProvider>
-            <ChatsProvider>
+      <ChatsProvider>
+        <FriendsProvider>
+          <SearchPlayersProvider>
+            <GameProvider>
               <NavProvider>
                 <Router>
                   <Routes>
@@ -58,10 +58,10 @@ function App() {
                   </Routes>
                 </Router>
               </NavProvider>
-            </ChatsProvider>
-          </GameProvider>
-        </SearchPlayersProvider>
-      </FriendsProvider>
+            </GameProvider>
+          </SearchPlayersProvider>
+        </FriendsProvider>
+      </ChatsProvider>
     </AuthProvider>
   );
 }

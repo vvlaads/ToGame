@@ -1,6 +1,6 @@
 import config from '../config/index.jsx'
 import { createContext, useState, useContext } from 'react';
-import { CHAT_LIST } from '../constants/testValues';
+import { CHAT_LIST, MESSAGE_LIST, ROOM_LIST, USER_LIST } from '../constants/testValues';
 import { API_ENDPOINTS } from '../constants/api.jsx';
 import { useAuth } from './AuthContext.jsx';
 
@@ -13,7 +13,7 @@ const API_UPDATE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.UPDATE_CHAT}`;
 const API_DELETE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_CHAT}`;
 
 export function ChatsProvider({ children }) {
-    const { user } = useAuth();
+    const { user, getUserInfo } = useAuth();
     const [chats, setChats] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -185,84 +185,45 @@ export function ChatsProvider({ children }) {
     }
 
     // Добавить новое сообщения в чат
-    async function addMessage(chatId, message) {
-        const chat = getChatById(chatId);
-        if (!chat) {
-            console.error('Чат не найден');
-            return { success: false, error: 'Чат не найден' };
+    async function addMessage(messageData) {
+        // Тестовые данные для дебага
+        if (config.debug) {
+            let messages = MESSAGE_LIST.filter(message => message.chatId === messageData.chatId);
+            messages.push({ ...messageData, uuid: Date.now() });
+            return { success: true, data: messages };
         }
 
-        chat.messages.push(message);
-        const updatedData = {
-            messages: chat.messages
-        };
-        return await updateChat(chatId, updatedData);
+        //TODO: обращение к серверу
+        return { success: false, error: 'Не удалось добавить сообщение' };
     }
 
     // Функция для добавления комнаты в чат
-    async function createRoom(chatId, roomData) {
-        const chat = getChatById(chatId);
-        if (!chat) {
-            console.error('Чат не найден');
-            return { success: false, error: 'Чат не найден' };
+    async function createRoom(roomData) {
+        // Тестовые данные для дебага
+        if (config.debug) {
+            let rooms = ROOM_LIST.filter(room => room.chatId === roomData.chatId);
+            rooms.push({ ...roomData, uuid: Date.now() });
+            return { success: true, data: rooms };
         }
-        chat.rooms.push(roomData);
-        const updatedData = {
-            rooms: chat.rooms
-        };
-        return await updateChat(chatId, updatedData);
+
+        //TODO: обращение к серверу
+        return { success: false, error: 'Не удалось добавить комнату' };
     }
 
-    // Функция для добавления игрока в комнату
-    async function addPlayerToRoom(chatId, roomId, player) {
-        const chat = getChatById(chatId);
-        if (!chat) {
-            console.error('Чат не найден');
-            return { success: false, error: 'Чат не найден' };
+    async function getRoomPlayers(roomId) {
+        //Тестовые данные для дебага
+        if (config.debug) {
+            const players = [];
+            USER_LIST.forEach(user => {
+                if (user.roomId === roomId) {
+                    players.push(user);
+                }
+            })
+            return { success: true, data: players };
         }
 
-        const newRooms = []
-        chat.rooms.map(room => {
-            if (room.id === roomId) {
-                newRooms.push(getRoomById(chatId, roomId).players.push(player));
-            }
-            newRooms.push(room)
-        })
-
-        const updatedData = {
-            rooms: newRooms
-        };
-        return await updateChat(chatId, updatedData);
-    }
-
-    // Функция для удаления игрока из комнаты
-    async function removePlayerFromRoom(chatId, roomId, playerName) {
-        const chat = getChatById(chatId);
-        if (!chat) {
-            console.error('Чат не найден');
-            return { success: false, error: 'Чат не найден' };
-        }
-        const newRooms = []
-        chat.rooms.map(room => {
-            if (room.id === roomId) {
-                const players = getRoomById(chatId, roomId).players;
-                const playerList = [];
-                players.map(player => {
-                    if (player.name !== playerName) {
-                        playerList.push(player);
-                    }
-                })
-                const currentRoom = getRoomById(chatId, roomId);
-                currentRoom.players = playerList;
-                newRooms.push(currentRoom);
-            }
-            newRooms.push(room)
-        })
-
-        const updatedData = {
-            rooms: newRooms
-        };
-        return await updateChat(chatId, updatedData);
+        //TODO: обращение к серверу
+        return { success: false, error: 'Ошибка получения игроков' };
     }
 
     // Функция для удаления комнаты
@@ -280,6 +241,56 @@ export function ChatsProvider({ children }) {
         }
     }
 
+    async function getRooms(chatId) {
+        //Тестовые данные для дебага
+        if (config.debug) {
+            const rooms = [];
+            ROOM_LIST.forEach(room => {
+                if (room.chatId === chatId) {
+                    rooms.push(room);
+                }
+            })
+            return { success: true, data: rooms };
+        }
+
+        //TODO: обращение к серверу
+        return { success: false, error: 'Ошибка получения комнат' };
+    }
+
+    async function getMessages(chatId) {
+        //Тестовые данные для дебага
+        if (config.debug) {
+            const messages = [];
+            MESSAGE_LIST.forEach(message => {
+                if (message.chatId === chatId) {
+                    messages.push(message);
+                }
+            })
+            return { success: true, data: messages };
+        }
+
+        //TODO: обращение к серверу
+        return { success: false, error: 'Ошибка получения сообщений' };
+    }
+
+    // Получаем последнее сообщение из массива сообщений
+    async function getLastMessage(chatId) {
+        const messagesResponse = await getMessages(chatId);
+        if (!messagesResponse.success) {
+            return null;
+        }
+        const messages = messagesResponse.data;
+
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return null;
+        }
+
+        return messages.reduce((latest, current) => {
+            if (!latest) return current;
+            return current.createdAt > latest.createdAt ? current : latest;
+        }, null);
+    }
+
     const value = {
         chats,
         loading,
@@ -291,9 +302,11 @@ export function ChatsProvider({ children }) {
         getRoomById,
         deleteChat,
         createRoom,
-        addPlayerToRoom,
-        removePlayerFromRoom,
-        deleteRoom
+        deleteRoom,
+        getMessages,
+        getLastMessage,
+        getRooms,
+        getRoomPlayers
     };
 
     return (
