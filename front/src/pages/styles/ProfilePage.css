@@ -12,6 +12,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 20px;
 }
 
 .profile-page__image {
@@ -29,7 +30,7 @@
     margin-top: 20px;
 }
 
-.profile-page__avatar {
+.profile-page__user-image {
     width: 100px;
     height: 100px;
     background-color: var(--color-purple);
@@ -59,8 +60,13 @@
     font-size: 16px;
 }
 
+.profile-page__user-descr {
+    color: var(--color-gray-400);
+    font-size: 20px;
+}
+
 .profile-page__game-list {
-    margin-top: 30px;
+    margin-top: 10px;
     flex: 1;
 }
 
@@ -96,7 +102,7 @@
     background-color: var(--color-gray-600);
 }
 
-.profile-page__game-avatar {
+.profile-page__game-image {
     width: 144px;
     height: 192px;
     border-radius: 15px;

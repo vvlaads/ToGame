@@ -29,7 +29,7 @@ export const CHAT_LIST = [
         name: 'Киберспорт',
         ownerId: 1,
         descr: 'Играем турики каждый понедельник в 17:00',
-        avatar: 'vite.svg',
+        image: 'vite.svg',
 
     }
 ];
@@ -61,7 +61,7 @@ export const USER_LIST = [
         descr: 'Я новичок',
         roomId: null,
         image: 'Avatar.jpg',
-        bannerImage: 'Apex.jpg'
+        bannerImage: 'Banner.jpg'
     },
     {
         id: 2,
@@ -71,7 +71,7 @@ export const USER_LIST = [
         descr: 'Люблю играть в игры',
         roomId: null,
         image: 'Avatar1.jpg',
-        bannerImage: 'Apex.jpg'
+        bannerImage: 'Banner.jpg'
     },
     {
         id: 3,
