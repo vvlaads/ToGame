@@ -7,7 +7,7 @@ function ProtectedRoute({ children }) {
 
     if (!user) {
         // Если не авторизован, перенаправляем на логин
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/auth" replace />;
     }
 
     return children;

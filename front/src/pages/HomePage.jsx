@@ -1,52 +1,65 @@
 import './styles/HomePage.css'
-import { useAuth } from '../context/AuthContext';
-import LayoutWithNav from '../components/LayoutWithNav';
 import ChatCard from '../components/ChatCard';
+import LayoutWithNav from '../components/LayoutWithNav';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
-import {
-    sortChatsByLastMessage,
-    getRecentChats
-} from '../utils/chatUtils';
-import { useMemo } from 'react';
+import { sortChatsByLastMessage, getRecentChats } from '../utils/chatUtils';
+import { useEffect, useMemo, useState } from 'react';
+import { useFriends } from '../context/FriendsContext';
+import { getPathForImage } from '../utils/imageFormat';
 
 function HomePage() {
     const { user } = useAuth();
     const { chats } = useChats();
+    const { friends, getFriendList } = useFriends();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
-    // Получаем и сортируем активные чаты (последнее сообщение в течение часа)
+    // Переход к выбранному чату
+    function redirectToChat(chatId) {
+        navigate(`/chats?chatId=${chatId}`);
+    }
+
+    // Получаем активные чаты
     const activeChats = useMemo(() => {
-        // Фильтруем чаты с последним сообщением в течение часа
         const recentChats = getRecentChats(chats, 1);
-
-        // Сортируем по времени последнего сообщения (новые первыми)
         return sortChatsByLastMessage(recentChats);
     }, [chats]);
 
-    // Можно также получить все чаты для отладки
-    const allSortedChats = useMemo(() => sortChatsByLastMessage(chats), [chats]);
 
-    const friends = [{
-        id: 1,
-        name: "vvlaads",
-        avatar: "../../public/vite.svg"
-    },
-    {
-        id: 2,
-        name: "GamerPro",
-        avatar: "../../public/vite.svg"
-    }];
+    // Получаем друзей при загрузке компонента
+    useEffect(() => {
+        const fetchFriends = async () => {
+            setLoading(true);
+            try {
+                await getFriendList();
+            } catch (error) {
+                console.error('Ошибка загрузки друзей:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    function redirectToChat(chatId) {
-        console.log('navigate to chats')
-        navigate(`/chats?chatId=${chatId}`);
+        if (user) {
+            fetchFriends();
+        }
+    }, [user]);
+
+    if (loading) {
+        return (
+            <LayoutWithNav>
+                <div className='home-page__container'>
+                    <div className="loading">Загрузка...</div>
+                </div>
+            </LayoutWithNav>
+        );
     }
 
     return (
         <LayoutWithNav>
             <div className='home-page__container'>
-                <h1>С возвращением, {user?.username}!</h1>
+                <h1>С возвращением, {user?.name}!</h1>
                 <div className='home-page__info'>
                     <div className='home-page__active-chats-container'>
                         <h2>Активные чаты:</h2>
@@ -74,7 +87,7 @@ function HomePage() {
                                 <div key={friend.id} className='home-page__friend-info'>
                                     <img
                                         className='home-page__friend-avatar'
-                                        src={friend.avatar}
+                                        src={getPathForImage(friend.image)}
                                         alt={friend.name}
                                     />
                                     <span className='home-page__friend-name'>

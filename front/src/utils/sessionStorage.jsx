@@ -1,40 +1,40 @@
 const SESSION_KEYS = {
-    CURRENT_CHAT: 'current_chat_id',
-    CURRENT_ROOM: 'current_room_id'
+    CURRENT_CHAT_ID: 'CURRENT_CHAT_ID',
+    CURRENT_ROOM_ID: 'CURRENT_ROOM_ID'
 };
 
-// Сохраняем текущий чат
-export function saveCurrentChat(chatId) {
+// Сохраняем ID текущего чата
+export function saveCurrentChatId(chatId) {
     if (chatId) {
-        sessionStorage.setItem(SESSION_KEYS.CURRENT_CHAT, chatId.toString());
+        sessionStorage.setItem(SESSION_KEYS.CURRENT_CHAT_ID, chatId.toString());
     } else {
-        sessionStorage.removeItem(SESSION_KEYS.CURRENT_CHAT);
+        sessionStorage.removeItem(SESSION_KEYS.CURRENT_CHAT_ID);
     }
 }
 
-// Сохраняем текущую комнату
-export function saveCurrentRoom(roomId) {
+// Сохраняем ID текущей комнаты
+export function saveCurrentRoomId(roomId) {
     if (roomId) {
-        sessionStorage.setItem(SESSION_KEYS.CURRENT_ROOM, roomId.toString());
+        sessionStorage.setItem(SESSION_KEYS.CURRENT_ROOM_ID, roomId.toString());
     } else {
-        sessionStorage.removeItem(SESSION_KEYS.CURRENT_ROOM);
+        sessionStorage.removeItem(SESSION_KEYS.CURRENT_ROOM_ID);
     }
 }
 
-// Загружаем сохраненный чат
-export function loadCurrentChat() {
-    const saved = sessionStorage.getItem(SESSION_KEYS.CURRENT_CHAT);
+// Загружаем ID текущего чата
+export function loadCurrentChatId() {
+    const saved = sessionStorage.getItem(SESSION_KEYS.CURRENT_CHAT_ID);
     return saved ? parseInt(saved) : null;
 }
 
-// Загружаем сохраненную комнату
-export function loadCurrentRoom() {
-    const saved = sessionStorage.getItem(SESSION_KEYS.CURRENT_ROOM);
+// Загружаем ID текущей комнаты
+export function loadCurrentRoomId() {
+    const saved = sessionStorage.getItem(SESSION_KEYS.CURRENT_ROOM_ID);
     return saved ? parseInt(saved) : null;
 }
 
 // Очищаем все сохраненные данные
 export function clearSessionData() {
-    sessionStorage.removeItem(SESSION_KEYS.CURRENT_CHAT);
-    sessionStorage.removeItem(SESSION_KEYS.CURRENT_ROOM);
+    sessionStorage.removeItem(SESSION_KEYS.CURRENT_CHAT_ID);
+    sessionStorage.removeItem(SESSION_KEYS.CURRENT_ROOM_ID);
 }

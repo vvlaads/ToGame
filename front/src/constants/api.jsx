@@ -5,9 +5,6 @@ export const API_ENDPOINTS = {
     CREATE_CHAT: '/chat/create',
     UPDATE_CHAT: '/chat/update',
     DELETE_CHAT: '/chat/delete',
+    FRIENDS: '/friends',
 };
 
-export const UserRequestType = {
-    SIGN_UP: 1,
-    REGISTER: 2
-}

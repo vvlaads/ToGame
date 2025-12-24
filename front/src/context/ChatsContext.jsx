@@ -1,7 +1,7 @@
-import config from '../config/index.js'
+import config from '../config/index.jsx'
 import { createContext, useState, useContext } from 'react';
 import { CHAT_LIST } from '../constants/testValues';
-import { API_ENDPOINTS } from '../constants/api.js';
+import { API_ENDPOINTS } from '../constants/api.jsx';
 import { useAuth } from './AuthContext.jsx';
 
 const ChatsContext = createContext();
@@ -23,9 +23,16 @@ export function ChatsProvider({ children }) {
     }
 
     // Получение комнаты по ID
-    function getRoomById(chatId, roomId) {
-        const chat = getChatById(chatId);
-        return chat.rooms.find(room => room.id === roomId);
+    function getRoomById(roomId) {
+        for (const chat in chats) {
+            if (chat.rooms && chat.rooms.length > 0) {
+                const room = chat.rooms.find(room => room.id === roomId);
+                if (room) {
+                    return room;
+                }
+            }
+        }
+        return null;
     }
 
     // Получить список чатов для пользователя
@@ -259,23 +266,18 @@ export function ChatsProvider({ children }) {
     }
 
     // Функция для удаления комнаты
-    async function deleteRoom(chatId, roomId) {
-        const chat = getChatById(chatId);
-        if (!chat) {
-            console.error('Чат не найден');
-            return { success: false, error: 'Чат не найден' };
-        }
-
-        const rooms = [];
-        chat.rooms.map(room => {
-            if (room.id !== roomId) {
-                rooms.push(room);
+    async function deleteRoom(roomId) {
+        for (const chat in chats) {
+            if (chat.rooms && chat.rooms.length > 0) {
+                const room = chat.rooms.find(room => room.id === roomId);
+                if (room) {
+                    const updatedData = {
+                        rooms: chat.rooms.filter(room => room.id === roomId)
+                    };
+                    return await updateChat(chat.id, updatedData);
+                }
             }
-        })
-        const updatedData = {
-            rooms: rooms
-        };
-        return await updateChat(chatId, updatedData);
+        }
     }
 
     const value = {
@@ -286,6 +288,7 @@ export function ChatsProvider({ children }) {
         createChat,
         updateChat,
         getChatById,
+        getRoomById,
         deleteChat,
         createRoom,
         addPlayerToRoom,
