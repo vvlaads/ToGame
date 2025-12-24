@@ -1,10 +1,14 @@
 package to.game.service;
 
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import to.game.model.entity.ChatEntity;
+import to.game.model.entity.MessageEntity;
 import to.game.model.entity.RoomEntity;
+import to.game.model.entity.UserEntity;
 import to.game.model.repos.ChatRepository;
 
 @ApplicationScoped
@@ -74,5 +78,23 @@ public class ChatManagmentService {
         if (chat.getOwner().getId() != userId) {
             throw new RuntimeException("User is not the owner of the chat");
         }
+    }
+
+    @Transactional
+    public void sendMessage(Long senderId, Long chatId, String content) {
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        UserEntity sender = userRepo.userRepo.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        MessageEntity message = new MessageEntity();
+        message.setChatId(chat);
+        message.setSenderId(sender);
+        message.setContent(content);
+        chat.addMessage(message);
+    }
+
+    @Transactional
+    public List<MessageEntity> getMessages(Long chatId) {
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+        return chat.getMessages();
     }
 }
