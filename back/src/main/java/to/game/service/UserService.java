@@ -3,6 +3,7 @@ package to.game.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -73,6 +74,7 @@ public class UserService {
         return token;
     }
 
+    @Transactional
     public AccessTokenDTO signIn(String name, String password) {
         MessageDigest digest;
         try {
@@ -177,6 +179,12 @@ public class UserService {
     }
 
     @Transactional
+    public List<UserEntity> getFriends(Long userId) {
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getFriends().stream().toList();
+    }
+
+    @Transactional
     public void sendLike(Long senderId, Long receiverId) {
         if (senderId.equals(receiverId)) {
             throw new RuntimeException("Users cannot like themselves");
@@ -201,6 +209,18 @@ public class UserService {
         like.setReceiverId(receiver);
 
         likeRepo.save(like);
+    }
+
+    @Transactional
+    public List<LikeEntity> getRecievedLikes(Long userId) {
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getReceivedLikes().stream().toList();
+    }
+
+    @Transactional
+    public List<LikeEntity> getSentLikes(Long userId) {
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getSentLikes().stream().toList();
     }
 
     @Transactional
