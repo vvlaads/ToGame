@@ -7,6 +7,8 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.ext.Provider;
+import to.game.exceptions.AuthorizationException;
+import to.game.exceptions.EntityNotFoundException;
 import to.game.model.dto.UserDTO;
 import to.game.model.entity.UserEntity;
 import to.game.model.repos.UserRepository;
@@ -26,11 +28,11 @@ public class AuthFilter implements ContainerRequestFilter {
         Cookie cookie = requestContext.getCookies().get("AccessToken");
 
         if (cookie == null) {
-            throw new RuntimeException("AccessToken cookie is missing");
+            throw new AuthorizationException("AccessToken cookie is missing");
         }
 
         UserEntity user = userRepo.findByAccessToken(UUID.fromString(cookie.getValue()))
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new EntityNotFoundException("User"));
 
         UserDTO userDTO = new UserDTO(user);
         requestContext.setProperty("user", userDTO);

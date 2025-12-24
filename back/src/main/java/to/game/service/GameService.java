@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import to.game.exceptions.EntityNotFoundException;
 import to.game.model.entity.GameEntity;
 import to.game.model.entity.UserEntity;
 import to.game.model.repos.GameRepopsitory;
@@ -25,7 +26,7 @@ public class GameService {
 
     @Transactional
     public List<GameEntity> getAllGamesByUser(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
         return user.getGames().stream().toList();
     }
 }
