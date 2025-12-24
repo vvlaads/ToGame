@@ -54,6 +54,14 @@ public class UserResource {
         return Response.ok().entity(userService.userInfo(user.getId())).build();
     }
 
+    @Path("/info-by-id")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response infoById(UserDTO user) {
+        return Response.ok().entity(userService.userInfo(user.getId())).build();
+    }
+
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -94,5 +102,62 @@ public class UserResource {
         UserDTO user = (UserDTO) ctx.getProperty("user");
         userService.removeAvatar(user.getId());
         return Response.ok().build();
+    }
+
+    @Path("/send-like")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response sendLike(@Context ContainerRequestContext ctx, UserDTO reciver) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        userService.sendLike(user.getId(), reciver.getId());
+        return Response.ok().build();
+    }
+
+    @Path("/add-friend")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response addFriend(@Context ContainerRequestContext ctx, UserDTO reciver) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        userService.addFriend(user.getId(), reciver.getId());
+        return Response.ok().build();
+    }
+
+    @Path("/delete-friend")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @DELETE
+    public Response deleteFriend(@Context ContainerRequestContext ctx, UserDTO reciver) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        userService.removeFriend(user.getId(), reciver.getId());
+        return Response.ok().build();
+    }
+
+    @Path("/get-friends")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getFriends(@Context ContainerRequestContext ctx) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        return Response.ok().entity(userService.getFriends(user.getId())).build();
+    }
+
+    @Path("/get-recieved-likes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getRecivedLikes(@Context ContainerRequestContext ctx) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        return Response.ok().entity(userService.getRecievedLikes(user.getId())).build();
+    }
+
+    @Path("/get-sent-likes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getSentLikes(@Context ContainerRequestContext ctx) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        return Response.ok().entity(userService.getRecievedLikes(user.getId())).build();
     }
 }
