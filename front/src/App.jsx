@@ -9,50 +9,53 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import { NavProvider } from './context/NavContext';
 import { ChatsProvider } from './context/ChatsContext';
+import { FriendsProvider } from './context/FriendsContext';
 
 function App() {
   return (
     <AuthProvider>
-      <ChatsProvider>
-        <NavProvider>
-          <Router>
-            <Routes>
-              <Route path="/auth" element={
-                <PublicRoute>
-                  <AuthPage />
-                </PublicRoute>
-              } />
+      <FriendsProvider>
+        <ChatsProvider>
+          <NavProvider>
+            <Router>
+              <Routes>
+                <Route path="/auth" element={
+                  <PublicRoute>
+                    <AuthPage />
+                  </PublicRoute>
+                } />
 
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
-              } />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/search" element={
-                <ProtectedRoute>
-                  <SearchPlayersPage />
-                </ProtectedRoute>
-              } />
+                <Route path="/search" element={
+                  <ProtectedRoute>
+                    <SearchPlayersPage />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/chats" element={
-                <ProtectedRoute>
-                  <ChatsPage />
-                </ProtectedRoute>
-              } />
+                <Route path="/chats" element={
+                  <ProtectedRoute>
+                    <ChatsPage />
+                  </ProtectedRoute>
+                } />
 
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
 
-              {/* Редирект с несуществующих путей */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Router>
-        </NavProvider>
-      </ChatsProvider>
+                {/* Редирект с несуществующих путей */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Router>
+          </NavProvider>
+        </ChatsProvider>
+      </FriendsProvider>
     </AuthProvider>
   );
 }

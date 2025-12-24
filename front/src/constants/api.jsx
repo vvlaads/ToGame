@@ -5,5 +5,6 @@ export const API_ENDPOINTS = {
     CREATE_CHAT: '/chat/create',
     UPDATE_CHAT: '/chat/update',
     DELETE_CHAT: '/chat/delete',
+    FRIENDS: '/friends',
 };
 
