@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import to.game.model.dto.ChatDTO;
+import to.game.model.dto.MessageDTO;
 import to.game.model.dto.RoomDTO;
 import to.game.model.dto.UserDTO;
 import to.game.service.ChatManagmentService;
@@ -115,6 +116,16 @@ public class ChatResource {
     public Response deleteRoom(@Context ContainerRequestContext ctx, RoomDTO room) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
         chatManagmentService.deleteRoomFromChat(room.getChatId(), user.getId(), room.getId());
+        return Response.ok().build();
+    }
+
+    @Path("/send-message")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response sendMessage(@Context ContainerRequestContext ctx, MessageDTO message) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        chatManagmentService.sendMessage(user.getId(), message.getChatId(), message.getContent());
         return Response.ok().build();
     }
 }

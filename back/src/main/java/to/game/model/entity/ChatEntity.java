@@ -1,6 +1,8 @@
 package to.game.model.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.Length;
@@ -53,4 +55,12 @@ public class ChatEntity {
 
     @ManyToMany(mappedBy = "chats")
     private Set<UserEntity> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "chatId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageEntity> messages = new ArrayList<>();
+
+    public void addMessage(MessageEntity message) {
+        messages.add(message);
+        message.setChatId(this);
+    }
 }
