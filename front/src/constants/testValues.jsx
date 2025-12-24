@@ -58,9 +58,9 @@ export const USER_LIST = [
         name: 'vvlaads',
         password: 'vvlaads',
         avatarId: 1,
-        descr: '',
+        descr: 'Я новичок',
         roomId: null,
-        image: 'vite.svg',
+        image: 'Avatar.jpg',
         bannerImage: 'Apex.jpg'
     },
     {
@@ -68,8 +68,9 @@ export const USER_LIST = [
         name: 'GamerPro',
         password: '123',
         avatarId: 2,
+        descr: 'Люблю играть в игры',
         roomId: null,
-        image: 'vite.svg',
+        image: 'Avatar1.jpg',
         bannerImage: 'Apex.jpg'
     },
     {
@@ -77,9 +78,10 @@ export const USER_LIST = [
         name: 'Capa',
         password: '123',
         avatarId: 3,
+        descr: 'Люблю CS:GO',
         roomId: null,
-        image: 'vite.svg',
-        bannerImage: 'Apex.jpg'
+        image: 'Avatar2.jpg',
+        bannerImage: 'CS.png'
     }
 ];
 
@@ -94,7 +96,7 @@ export const TAG_LIST = [
     },
     {
         id: 3,
-        name: 'RPG'
+        name: 'Battle Royale'
     },
     {
         id: 4,
@@ -112,13 +114,13 @@ export const GAME_LIST = [
     {
         id: 2,
         name: 'CS:GO',
-        image: 'Apex.jpg',
+        image: 'CS.png',
         descr: 'CS'
     },
     {
         id: 3,
         name: 'Dota 2',
-        image: 'Apex.jpg',
+        image: 'Dota.png',
         descr: 'Dota'
     }
 ];
@@ -151,3 +153,21 @@ export const MESSAGE_LIST = [
         chatId: 2,
     }
 ];
+
+export const GAME_TO_USER = [
+    { userId: 1, gameId: 1 },
+    { userId: 1, gameId: 2 },
+    { userId: 2, gameId: 3 },
+    { userId: 2, gameId: 1 },
+    { userId: 3, gameId: 2 }
+]
+
+export const TAG_TO_GAME = [
+    { tagId: 1, gameId: 1 },
+    { tagId: 3, gameId: 1 },
+    { tagId: 4, gameId: 1 },
+    { tagId: 1, gameId: 2 },
+    { tagId: 4, gameId: 2 },
+    { tagId: 2, gameId: 3 },
+    { tagId: 4, gameId: 3 }
+]
