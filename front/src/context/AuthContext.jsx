@@ -1,7 +1,8 @@
-import config from '../config/index.js'
+import config from '../config/index.jsx'
 import { createContext, useState, useContext } from 'react';
-import { API_ENDPOINTS, UserRequestType } from '../constants/api.js';
-import { GAME_LIST } from '../constants/testValues.js';
+import { API_ENDPOINTS } from '../constants/api.jsx';
+import { AUTH_TYPE } from '../constants/enums.jsx';
+import { USER_LIST } from '../constants/testValues.jsx';
 
 const AuthContext = createContext();
 
@@ -16,12 +17,7 @@ function AuthProvider({ children }) {
     async function sendUserData(userData, requestType) {
         // Для дебага имитируем обращение к серверу
         if (config.debug) {
-            const user = {
-                id: 100,
-                username: userData.login,
-                password: userData.password,
-                games: GAME_LIST
-            };
+            const user = USER_LIST[0];
             setUser(user);
             localStorage.setItem('user', JSON.stringify(user));
             return { success: true, data: user };
@@ -31,11 +27,11 @@ function AuthProvider({ children }) {
         var url = ''
         var errorMessage = ''
         switch (requestType) {
-            case UserRequestType.REGISTER:
+            case AUTH_TYPE.REGISTER:
                 url = API_REGISTER_URL;
                 errorMessage = 'Ошибка регистрации';
                 break;
-            case UserRequestType.SIGN_UP:
+            case AUTH_TYPE.SIGN_UP:
                 url = API_SIGN_UP_URL;
                 errorMessage = 'Ошибка авторизации';
                 break;
@@ -50,7 +46,7 @@ function AuthProvider({ children }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: userData.login,
+                    name: userData.name,
                     password: userData.password
                 })
             });
@@ -63,9 +59,13 @@ function AuthProvider({ children }) {
 
             const user = {
                 id: data?.id,
-                username: data?.login,
+                name: data?.name,
                 password: data?.password,
-                games: data?.games
+                avatarId: data?.avatarId,
+                descr: data?.descr,
+                roomId: data?.roomId,
+                image: data?.image,
+                bannerImage: data?.bannerImage
             };
 
             setUser(user);
@@ -79,13 +79,13 @@ function AuthProvider({ children }) {
     }
 
     // Регистрация пользователя
-    async function register(userData) {
-        return sendUserData(userData, UserRequestType.REGISTER);
+    async function signUp(userData) {
+        return sendUserData(userData, AUTH_TYPE.REGISTER);
     }
 
     // Авторизация пользователя
-    async function signUp(userData) {
-        return sendUserData(userData, UserRequestType.SIGN_UP);
+    async function signIn(userData) {
+        return sendUserData(userData, AUTH_TYPE.SIGN_UP);
     };
 
     // Выход пользователя
@@ -94,7 +94,7 @@ function AuthProvider({ children }) {
         localStorage.removeItem('user');
     };
 
-    const value = { user, register, signUp, logout };
+    const value = { user, signIn, signUp, logout };
 
     return (
         <AuthContext.Provider value={value}>

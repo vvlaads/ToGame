@@ -7,7 +7,3 @@ export const API_ENDPOINTS = {
     DELETE_CHAT: '/chat/delete',
 };
 
-export const UserRequestType = {
-    SIGN_UP: 1,
-    REGISTER: 2
-}

@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
 import { formatMessageDateTime } from '../utils/chatUtils';
-import { loadCurrentChat, loadCurrentRoom, saveCurrentChat, saveCurrentRoom } from '../utils/sessionStorage';
+import { loadCurrentChatId, loadCurrentRoomId, saveCurrentChatId, saveCurrentRoomId } from '../utils/sessionStorage';
 
 function ChatsPage() {
     const { user } = useAuth();
@@ -21,6 +21,7 @@ function ChatsPage() {
         createRoom,
         deleteRoom,
         getChatById,
+        getRoomById,
         addPlayerToRoom,
         removePlayerFromRoom
     } = useChats();
@@ -36,6 +37,7 @@ function ChatsPage() {
         id: 0,
         name: '',
         limit: 0,
+        chatId: 0,
         players: []
     });
 
@@ -59,35 +61,29 @@ function ChatsPage() {
             id: 0,
             name: '',
             limit: 0,
+            chatId: 0,
             players: []
         });
     };
 
-    // Поиск комнаты по ID
-    function findRoomById(roomId) {
-        for (const chat of chats) {
-            if (chat.rooms && chat.rooms.length > 0) {
-                const room = chat.rooms.find(r => r.id === roomId);
-                if (room) {
-                    return { room, chat };
-                }
-            }
-        }
-        return { room: null, chat: null };
-    }
-
     // Обновить текущий чат
     function updateCurrentChat(chatId) {
         setCurrentChat(getChatById(chatId));
-        saveCurrentChat(chatId);
+        saveCurrentChatId(chatId);
         window.history.pushState({}, '', `/chats?chatId=${chatId}`);
+    }
+
+    // Обновить текущую комнату
+    function updateCurrentRoom(roomId) {
+        setCurrentRoom(getRoomById(roomId));
+        saveCurrentRoomId(roomId);
     }
 
     // Создать новую комнату
     async function addRoom(e) {
         e.preventDefault(); // Не перезагружать страницу
         try {
-            await createRoom(currentChat.id, { ...roomData, id: Math.round(Math.random() * 1000) });
+            await createRoom(currentChat.id, { ...roomData, id: Math.round(Math.random() * 1000), chatId: currentChat.id });
             closeModal();
         } catch (error) {
             console.error('Ошибка создания комнаты:', error);
@@ -97,13 +93,13 @@ function ChatsPage() {
     async function removeRoom(e, room) {
         e.stopPropagation();
         try {
-            await deleteRoom(currentChat.id, room.id);
+            await deleteRoom(room.id);
         } catch (error) {
             console.error('Ошибка удаления комнаты:', error);
         }
     }
 
-    // Обновляем сохраненные данные
+    // Обновляем данные о новой комнате
     function changeRoomForm(e) {
         const { name, value } = e.target;
         setRoomData(prev => ({
@@ -114,12 +110,11 @@ function ChatsPage() {
 
     // Присоединиться к комнате
     function joinToRoom(roomId) {
-        const { room, chat } = findRoomById(roomId);
+        const room = getRoomById(roomId);
 
-        if (!room || !chat) return;
+        if (!room) return;
 
         addPlayerToRoom(
-            currentChat.id,
             roomId,
             {
                 id: user.id,
@@ -128,18 +123,13 @@ function ChatsPage() {
             }
         );
 
-        setCurrentRoom({
-            ...room,
-            chatId: chat.id
-        });
-        saveCurrentRoom(roomId);
+        updateCurrentRoom(roomId);
     }
 
     // Выйти из комнаты
     function leaveRoom() {
         removePlayerFromRoom(currentRoom.chatId, currentRoom.id, user.username);
-        setCurrentRoom(null);
-        saveCurrentRoom(null);
+        updateCurrentRoom(null);
     }
 
     // Нажатие на кнопку Mute
@@ -148,8 +138,8 @@ function ChatsPage() {
         //TODO: muting and unmuting of micro
     }
 
-    // Обработка изменения формы
-    function handleChange(e) {
+    // Обновляем данные о новом сообщении
+    function changeMessageForm(e) {
         const { name, value } = e.target;
         setMessageData(prev => ({
             ...prev,
@@ -220,9 +210,9 @@ function ChatsPage() {
 
     // Восстановление последней комнаты и чата
     useEffect(() => {
-        const savedRoomId = loadCurrentRoom();
+        const savedRoomId = loadCurrentRoomId();
         if (savedRoomId) {
-            const { room, chat } = findRoomById(savedRoomId);
+            const { room, chat } = getRoomById(savedRoomId);
 
             if (room && chat) {
                 setCurrentRoom({
@@ -235,9 +225,9 @@ function ChatsPage() {
         if (chatIdFromUrl) {
             const chatId = parseInt(chatIdFromUrl);
             setCurrentChat(getChatById(chatId));
-            saveCurrentChat(chatId);
+            saveCurrentChatId(chatId);
         } else {
-            const savedChatId = loadCurrentChat();
+            const savedChatId = loadCurrentChatId();
             if (savedChatId) {
                 setCurrentChat(getChatById(savedChatId));
             }
@@ -300,7 +290,7 @@ function ChatsPage() {
                                     placeholder='Сообщение...'
                                     name="text"
                                     value={messageData.text}
-                                    onChange={handleChange}
+                                    onChange={changeMessageForm}
                                     onKeyDown={handleKeyDown}
                                     rows={1}
                                 />

@@ -1,7 +1,7 @@
 import './App.css';
 import HomePage from './pages/HomePage';
 import ChatsPage from './pages/ChatsPage';
-import LoginPage from './pages/LoginPage';
+import AuthPage from './pages/AuthPage';
 import ProfilePage from "./pages/ProfilePage";
 import SearchPlayersPage from './pages/SearchPlayersPage';
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
@@ -17,9 +17,9 @@ function App() {
         <NavProvider>
           <Router>
             <Routes>
-              <Route path="/login" element={
+              <Route path="/auth" element={
                 <PublicRoute>
-                  <LoginPage />
+                  <AuthPage />
                 </PublicRoute>
               } />
 
