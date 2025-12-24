@@ -98,9 +98,9 @@ public class UserEntity {
     @JoinTable(name = "user_to_friend", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private Set<UserEntity> friends = new HashSet<>();
 
-    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "senderId", fetch = FetchType.LAZY)
     private Set<LikeEntity> sentLikes = new HashSet<>();
 
-    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "receiverId", fetch = FetchType.LAZY)
     private Set<LikeEntity> receivedLikes = new HashSet<>();
 }

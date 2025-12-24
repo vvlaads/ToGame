@@ -21,9 +21,9 @@ public class LikeEntity {
     
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private UserEntity sender;
+    private UserEntity senderId;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
-    private UserEntity receiver;
+    private UserEntity receiverId;
 }

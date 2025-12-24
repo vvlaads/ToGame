@@ -29,7 +29,8 @@ public class UserResource {
     @POST
     public Response register(UserDTO user) {
         AccessTokenDTO token = userService.createUser(user.getName(), user.getPassword(), user.getGames());
-        NewCookie cookie = new NewCookie("AccessToken", token.getAccessToken().toString());
+        NewCookie cookie = new NewCookie.Builder("accessToken").value(token.getAccessToken().toString())
+                .maxAge(24 * 60 * 60).build();
         return Response.ok().cookie(cookie).build();
     }
 
@@ -39,7 +40,8 @@ public class UserResource {
     @POST
     public Response signIn(UserDTO user) {
         AccessTokenDTO token = userService.signIn(user.getName(), user.getPassword());
-        NewCookie cookie = new NewCookie("AccessToken", token.getAccessToken().toString());
+        NewCookie cookie = new NewCookie.Builder("accessToken").value(token.getAccessToken().toString())
+                .maxAge(24 * 60 * 60).build();
         return Response.ok().cookie(cookie).build();
     }
 

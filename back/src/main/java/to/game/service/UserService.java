@@ -197,8 +197,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
         LikeEntity like = new LikeEntity();
-        like.setSender(sender);
-        like.setReceiver(receiver);
+        like.setSenderId(sender);
+        like.setReceiverId(receiver);
 
         likeRepo.save(like);
     }
