@@ -20,5 +20,6 @@ public class UserDTO {
     Long id;
     String name;
     String password;
+    String descr;
     Set<GameDTO> games;
 }

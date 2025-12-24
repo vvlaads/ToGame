@@ -27,8 +27,17 @@ public class GameResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getAllByUser(UserDTO user) {
+    public Response getAll() {
         return Response.ok().entity(gameService.getAllGames()).build();
+    }
+
+    @Path("/all-by-user")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getAllByUser(@Context ContainerRequestContext ctx) {
+        UserDTO user = (UserDTO) ctx.getProperty("user");
+        return Response.ok().entity(gameService.getAllGamesByUser(user.getId())).build();
     }
 
     @Path("/add-game")

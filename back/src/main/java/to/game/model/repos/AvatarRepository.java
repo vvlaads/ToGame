@@ -2,9 +2,9 @@ package to.game.model.repos;
 
 import jakarta.data.repository.CrudRepository;
 import jakarta.data.repository.Repository;
-import to.game.model.entity.ChatEntity;
+import to.game.model.entity.AvatarEntity;
 
 @Repository
-public interface ChatRepository extends CrudRepository<ChatEntity, Long> {
+public interface AvatarRepository extends CrudRepository<AvatarEntity, Long> {
 
 }

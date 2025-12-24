@@ -17,6 +17,7 @@ import to.game.model.entity.ChatEntity;
 import to.game.model.entity.GameEntity;
 import to.game.model.entity.LikeEntity;
 import to.game.model.entity.UserEntity;
+import to.game.model.repos.AvatarRepository;
 import to.game.model.repos.ChatRepository;
 import to.game.model.repos.GameRepopsitory;
 import to.game.model.repos.LikeRepository;
@@ -36,6 +37,9 @@ public class UserService {
 
     @Inject
     LikeRepository likeRepo;
+
+    @Inject
+    AvatarRepository avatarRepo;
 
     @Transactional
     public AccessTokenDTO createUser(String name, String password, Set<GameDTO> games) {
@@ -96,6 +100,12 @@ public class UserService {
     }
 
     @Transactional
+    public UserEntity userInfo(Long userId) {
+        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user;
+    }
+
+    @Transactional
     public void joinChat(Long userId, Long chatId) {
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
@@ -124,8 +134,9 @@ public class UserService {
     }
 
     @Transactional
-    public void setAvatar(Long userId, AvatarEntity avatar) {
+    public void setAvatar(Long userId, Long avatarId) {
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        AvatarEntity avatar = avatarRepo.findById(avatarId).orElseThrow(() -> new RuntimeException("Avatar not found"));
         user.addAvatar(avatar);
     }
 
