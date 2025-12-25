@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import to.game.model.dto.ChatDTO;
 import to.game.model.dto.MessageDTO;
+import to.game.model.dto.ResponseDTO;
 import to.game.model.dto.RoomDTO;
 import to.game.model.dto.UserDTO;
 import to.game.service.ChatManagmentService;
@@ -33,8 +34,8 @@ public class ChatResource {
     @POST
     public Response create(@Context ContainerRequestContext ctx, ChatDTO chat) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        chatManagmentService.createChat(user.getId(), chat.getName(), chat.getDescr());
-        return Response.status(Response.Status.CREATED).build();
+        ResponseDTO<Object> resp = chatManagmentService.createChat(user.getId(), chat.getName(), chat.getDescr());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/update")
@@ -45,8 +46,8 @@ public class ChatResource {
     public Response update(@Context ContainerRequestContext ctx, ChatDTO chat) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
         chatManagmentService.renameChat(chat.getId(), user.getId(), chat.getName());
-        chatManagmentService.changeDescr(chat.getId(), user.getId(), chat.getDescr());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = chatManagmentService.changeDescr(chat.getId(), user.getId(), chat.getDescr());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/delete")
@@ -55,8 +56,8 @@ public class ChatResource {
     @DELETE
     public Response delete(@Context ContainerRequestContext ctx, ChatDTO chat) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        chatManagmentService.deleteChat(chat.getId(), user.getId());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = chatManagmentService.deleteChat(chat.getId(), user.getId());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/join-chat")
@@ -65,8 +66,8 @@ public class ChatResource {
     @POST
     public Response joinChat(@Context ContainerRequestContext ctx, Long chatId) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.joinChat(user.getId(), chatId);
-        return Response.ok().build();
+        ResponseDTO<Object> resp = userService.joinChat(user.getId(), chatId);
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/leave-chat")
@@ -75,8 +76,8 @@ public class ChatResource {
     @DELETE
     public Response leaveChat(@Context ContainerRequestContext ctx, Long chatId) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.leaveChat(user.getId(), chatId);
-        return Response.ok().build();
+        ResponseDTO<Object> resp = userService.leaveChat(user.getId(), chatId);
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/join-room")
@@ -85,8 +86,8 @@ public class ChatResource {
     @POST
     public Response joinRoom(@Context ContainerRequestContext ctx, RoomDTO room) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.joinRoom(user.getId(), room.getChatId(), room.getId());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = userService.joinRoom(user.getId(), room.getChatId(), room.getId());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/leave-room")
@@ -95,8 +96,8 @@ public class ChatResource {
     @DELETE
     public Response leaveRoom(@Context ContainerRequestContext ctx) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.leaveRoom(user.getId());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = userService.leaveRoom(user.getId());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/create-room")
@@ -105,8 +106,8 @@ public class ChatResource {
     @POST
     public Response createRoom(@Context ContainerRequestContext ctx, RoomDTO room) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        chatManagmentService.addRoomToChat(room.getChatId(), user.getId(), room.getName());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = chatManagmentService.addRoomToChat(room.getChatId(), user.getId(), room.getName());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/delete-room")
@@ -115,8 +116,9 @@ public class ChatResource {
     @DELETE
     public Response deleteRoom(@Context ContainerRequestContext ctx, RoomDTO room) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        chatManagmentService.deleteRoomFromChat(room.getChatId(), user.getId(), room.getId());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = chatManagmentService.deleteRoomFromChat(room.getChatId(), user.getId(),
+                room.getId());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/send-message")
@@ -125,7 +127,8 @@ public class ChatResource {
     @POST
     public Response sendMessage(@Context ContainerRequestContext ctx, MessageDTO message) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        chatManagmentService.sendMessage(user.getId(), message.getChatId(), message.getContent());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = chatManagmentService.sendMessage(user.getId(), message.getChatId(),
+                message.getContent());
+        return Response.status(resp.getStatus()).build();
     }
 }

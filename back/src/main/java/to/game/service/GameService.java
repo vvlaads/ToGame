@@ -1,11 +1,10 @@
 package to.game.service;
 
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import to.game.exceptions.EntityNotFoundException;
+import to.game.model.dto.ResponseDTO;
 import to.game.model.entity.GameEntity;
 import to.game.model.entity.UserEntity;
 import to.game.model.repos.GameRepopsitory;
@@ -20,13 +19,13 @@ public class GameService {
     UserRepository userRepo;
 
     @Transactional
-    public List<GameEntity> getAllGames() {
-        return gameRepo.findAll().toList();
+    public ResponseDTO<GameEntity> getAllGames() {
+        return new ResponseDTO<>(200, "", gameRepo.findAll().toList());
     }
 
     @Transactional
-    public List<GameEntity> getAllGamesByUser(Long userId) {
+    public ResponseDTO<GameEntity> getAllGamesByUser(Long userId) {
         UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        return user.getGames().stream().toList();
+        return new ResponseDTO<>(200, "", user.getGames().stream().toList());
     }
 }

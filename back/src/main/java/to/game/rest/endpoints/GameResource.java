@@ -11,7 +11,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import to.game.model.dto.GameDTO;
+import to.game.model.dto.ResponseDTO;
 import to.game.model.dto.UserDTO;
+import to.game.model.entity.GameEntity;
 import to.game.service.GameService;
 import to.game.service.UserService;
 
@@ -28,7 +30,8 @@ public class GameResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getAll() {
-        return Response.ok().entity(gameService.getAllGames()).build();
+        ResponseDTO<GameEntity> resp = gameService.getAllGames();
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
     @Path("/all-by-user")
@@ -37,7 +40,8 @@ public class GameResource {
     @POST
     public Response getAllByUser(@Context ContainerRequestContext ctx) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        return Response.ok().entity(gameService.getAllGamesByUser(user.getId())).build();
+        ResponseDTO<GameEntity> resp = gameService.getAllGamesByUser(user.getId());
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
     @Path("/add-game")
@@ -46,8 +50,8 @@ public class GameResource {
     @POST
     public Response addGame(@Context ContainerRequestContext ctx, GameDTO game) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.addGame(user.getId(), game.getName());
-        return Response.status(Response.Status.CREATED).build();
+        ResponseDTO<Object> resp = userService.addGame(user.getId(), game.getName());
+        return Response.status(resp.getStatus()).build();
     }
 
     @Path("/remove-game")
@@ -56,7 +60,7 @@ public class GameResource {
     @DELETE
     public Response removeGame(@Context ContainerRequestContext ctx, GameDTO game) {
         UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.deleteGame(user.getId(), game.getName());
-        return Response.ok().build();
+        ResponseDTO<Object> resp = userService.deleteGame(user.getId(), game.getName());
+        return Response.status(resp.getStatus()).build();
     }
 }
