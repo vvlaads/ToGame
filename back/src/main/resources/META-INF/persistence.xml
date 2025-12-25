@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
-             version="3.0">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+  version="3.0">
   <persistence-unit name="default">
+    <jta-data-source>java:jboss/togameDS</jta-data-source>
+    <class>to.game.model.entity.AvatarEntity</class>
+    <class>to.game.model.entity.ChatEntity</class>
+    <class>to.game.model.entity.GameEntity</class>
+    <class>to.game.model.entity.LikeEntity</class>
+    <class>to.game.model.entity.MessageEntity</class>
+    <class>to.game.model.entity.RoomEntity</class>
+    <class>to.game.model.entity.RoomEntity</class>
+    <class>to.game.model.entity.TagEntity</class>
+    <class>to.game.model.entity.UserEntity</class>
+    <properties>
+      <property name="jakarta.persistence.provider"
+        value="org.hibernate.jpa.HibernatePersistenceProvider" />
+      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+      <property name="hibernate.hbm2ddl.auto" value="update" />
+      <property name="hibernate.show_sql" value="true" />
+      <property name="hibernate.format_sql" value="true" />
+      <property name="jakarta.data.repository.bootstrap"
+        value="org.hibernate.data.persistence.HibernateRepositoryBootstrap" />
 
+    </properties>
   </persistence-unit>
 </persistence>

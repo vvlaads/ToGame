@@ -1,5 +1,7 @@
 package to.game.service;
 
+import java.util.UUID;
+
 import jakarta.data.exceptions.DataConnectionException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,6 +14,7 @@ import to.game.model.entity.MessageEntity;
 import to.game.model.entity.RoomEntity;
 import to.game.model.entity.UserEntity;
 import to.game.model.repos.ChatRepository;
+import to.game.model.repos.UserRepository;
 
 @ApplicationScoped
 public class ChatManagmentService {
@@ -19,21 +22,22 @@ public class ChatManagmentService {
     ChatRepository chatRepo;
 
     @Inject
-    UserService userRepo;
+    UserRepository userRepo;
 
     @Transactional
-    public ResponseDTO<Object> createChat(Long userId, String chatName, String chatDescr) {
+    public ResponseDTO<Object> createChat(UUID accessToken, String chatName, String chatDescr) {
         ChatEntity chat = new ChatEntity();
         chat.setName(chatName);
         chat.setDescr(chatDescr);
-        chat.setOwner(userRepo.userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User")));
+        chat.setOwner(userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User")));
         chatRepo.save(chat);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteChat(Long chatId, Long userId) {
-        if (checkIfOwner(chatId, userId)) {
+    public ResponseDTO<Object> deleteChat(Long chatId, UUID accessToken) {
+        if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
             chatRepo.delete(chat);
             return new ResponseDTO<>(200);
@@ -42,8 +46,8 @@ public class ChatManagmentService {
     }
 
     @Transactional
-    public ResponseDTO<Object> addRoomToChat(Long chatId, Long userId, String roomName) {
-        if (checkIfOwner(chatId, userId)) {
+    public ResponseDTO<Object> addRoomToChat(Long chatId, UUID accessToken, String roomName) {
+        if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
 
             RoomEntity room = new RoomEntity();
@@ -57,8 +61,8 @@ public class ChatManagmentService {
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteRoomFromChat(Long chatId, Long userId, Long roomId) {
-        if (checkIfOwner(chatId, userId)) {
+    public ResponseDTO<Object> deleteRoomFromChat(Long chatId, UUID accessToken, Long roomId) {
+        if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
 
             RoomEntity room = chat.getRooms().stream().filter(r -> r.getId() == roomId).findFirst()
@@ -72,8 +76,8 @@ public class ChatManagmentService {
     }
 
     @Transactional
-    public ResponseDTO<Object> renameChat(Long chatId, Long userId, String newName) {
-        if (checkIfOwner(chatId, userId)) {
+    public ResponseDTO<Object> renameChat(Long chatId, UUID accessToken, String newName) {
+        if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
             chat.setName(newName);
             return new ResponseDTO<>(200);
@@ -83,8 +87,8 @@ public class ChatManagmentService {
     }
 
     @Transactional
-    public ResponseDTO<Object> changeDescr(Long chatId, Long userId, String newDscription) {
-        if (checkIfOwner(chatId, userId)) {
+    public ResponseDTO<Object> changeDescr(Long chatId, UUID accessToken, String newDscription) {
+        if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
             chat.setDescr(newDscription);
             return new ResponseDTO<>(200);
@@ -94,18 +98,20 @@ public class ChatManagmentService {
     }
 
     @Transactional
-    public boolean checkIfOwner(Long chatId, Long userId) {
+    public boolean checkIfOwner(Long chatId, UUID accessToken) {
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        if (chat.getOwner().getId() != userId) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        if (chat.getOwner().getId() != user.getId()) {
             throw new DataConnectionException("User is not the owner of the chat");
         }
         return true;
     }
 
     @Transactional
-    public ResponseDTO<Object> sendMessage(Long senderId, Long chatId, String content) {
+    public ResponseDTO<Object> sendMessage(UUID accessToken, Long chatId, String content) {
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        UserEntity sender = userRepo.userRepo.findById(senderId)
+        UserEntity sender = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         MessageEntity message = new MessageEntity();
         message.setChatId(chat);

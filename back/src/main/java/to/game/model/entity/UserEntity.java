@@ -17,13 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "user")
+@Table(name = "user_table")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -36,7 +37,7 @@ public class UserEntity {
     @NotBlank
     private String password;
 
-    @NotBlank
+    @NotNull
     private UUID accessToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)

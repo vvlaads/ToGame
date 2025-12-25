@@ -9,6 +9,9 @@ import to.game.model.entity.UserEntity;
 @Getter
 @Setter
 public class UserDTO {
+    public UserDTO() {
+    }
+
     public UserDTO(UserEntity user) {
         this.id = user.getId();
         this.name = user.getName();

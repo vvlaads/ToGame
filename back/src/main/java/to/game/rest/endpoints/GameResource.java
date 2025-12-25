@@ -1,7 +1,10 @@
 package to.game.rest.endpoints;
 
+import java.util.UUID;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -38,9 +41,8 @@ public class GameResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getAllByUser(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<GameEntity> resp = gameService.getAllGamesByUser(user.getId());
+    public Response getAllByUser(@CookieParam("AccessToken") String token) {
+        ResponseDTO<GameEntity> resp = gameService.getAllGamesByUser(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 

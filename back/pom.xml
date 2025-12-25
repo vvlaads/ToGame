@@ -37,6 +37,7 @@
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${hibernate.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

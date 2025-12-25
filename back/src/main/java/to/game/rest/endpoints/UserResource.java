@@ -1,15 +1,16 @@
 package to.game.rest.endpoints;
 
+import java.util.UUID;
+
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
@@ -32,8 +33,8 @@ public class UserResource {
     @POST
     public Response register(UserDTO user) {
         AccessTokenDTO token = userService.createUser(user.getName(), user.getPassword(), user.getGames());
-        NewCookie cookie = new NewCookie.Builder("accessToken").value(token.getAccessToken().toString())
-                .maxAge(24 * 60 * 60).build();
+        NewCookie cookie = new NewCookie.Builder("AccessToken").value(token.getAccessToken().toString())
+                .maxAge(24 * 60 * 60).path("/").build();
         return Response.ok().cookie(cookie).build();
     }
 
@@ -43,8 +44,8 @@ public class UserResource {
     @POST
     public Response signIn(UserDTO user) {
         AccessTokenDTO token = userService.signIn(user.getName(), user.getPassword());
-        NewCookie cookie = new NewCookie.Builder("accessToken").value(token.getAccessToken().toString())
-                .maxAge(24 * 60 * 60).build();
+        NewCookie cookie = new NewCookie.Builder("AccessToken").value(token.getAccessToken().toString())
+                .maxAge(24 * 60 * 60).path("/").build();
         return Response.ok().cookie(cookie).build();
     }
 
@@ -52,9 +53,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response info(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<UserEntity> resp = userService.userInfo(user.getId());
+    public Response info(@CookieParam("AccessToken") String token) {
+        ResponseDTO<UserDTO> resp = userService.userInfo(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -63,7 +63,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response infoById(UserDTO user) {
-        ResponseDTO<UserEntity> resp = userService.userInfo(user.getId());
+        ResponseDTO<UserDTO> resp = userService.userInfoById(user.getId());
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -71,9 +71,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response delete(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.deleteUser(user.getId());
+    public Response delete(@CookieParam("AccessToken") String token) {
+        ResponseDTO<Object> resp = userService.deleteUser(UUID.fromString(token));
         return Response.status(resp.getStatus()).build();
     }
 
@@ -82,10 +81,9 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @PATCH
     @Transactional
-    public Response update(@Context ContainerRequestContext ctx, UserDTO newUser) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        userService.changeName(user.getId(), newUser.getName());
-        ResponseDTO<Object> resp = userService.changeDescr(user.getId(), newUser.getDescr());
+    public Response update(@CookieParam("AccessToken") String token, UserDTO newUser) {
+        userService.changeName(UUID.fromString(token), newUser.getName());
+        ResponseDTO<Object> resp = userService.changeDescr(UUID.fromString(token), newUser.getDescr());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -93,9 +91,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @PATCH
-    public Response updateAvatar(@Context ContainerRequestContext ctx, AvatarDTO avatar) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.setAvatar(user.getId(), avatar.getId());
+    public Response updateAvatar(@CookieParam("AccessToken") String token, AvatarDTO avatar) {
+        ResponseDTO<Object> resp = userService.setAvatar(UUID.fromString(token), avatar.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -103,9 +100,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response deleteAvatar(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.removeAvatar(user.getId());
+    public Response deleteAvatar(@CookieParam("AccessToken") String token) {
+        ResponseDTO<Object> resp = userService.removeAvatar(UUID.fromString(token));
         return Response.status(resp.getStatus()).build();
     }
 
@@ -113,9 +109,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response sendLike(@Context ContainerRequestContext ctx, UserDTO reciver) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.sendLike(user.getId(), reciver.getId());
+    public Response sendLike(@CookieParam("AccessToken") String token, UserDTO reciver) {
+        ResponseDTO<Object> resp = userService.sendLike(UUID.fromString(token), reciver.getId());
         return Response.status(resp.hashCode()).build();
     }
 
@@ -123,9 +118,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response addFriend(@Context ContainerRequestContext ctx, UserDTO reciver) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.addFriend(user.getId(), reciver.getId());
+    public Response addFriend(@CookieParam("AccessToken") String token, UserDTO reciver) {
+        ResponseDTO<Object> resp = userService.addFriend(UUID.fromString(token), reciver.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -133,9 +127,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response deleteFriend(@Context ContainerRequestContext ctx, UserDTO reciver) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.removeFriend(user.getId(), reciver.getId());
+    public Response deleteFriend(@CookieParam("AccessToken") String token, UserDTO reciver) {
+        ResponseDTO<Object> resp = userService.removeFriend(UUID.fromString(token), reciver.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -143,9 +136,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getFriends(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<UserEntity> resp = userService.getFriends(user.getId());
+    public Response getFriends(@CookieParam("AccessToken") String token) {
+        ResponseDTO<UserEntity> resp = userService.getFriends(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -153,9 +145,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getRecivedLikes(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(user.getId());
+    public Response getRecivedLikes(@CookieParam("AccessToken") String token) {
+        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -163,9 +154,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getSentLikes(@Context ContainerRequestContext ctx) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(user.getId());
+    public Response getSentLikes(@CookieParam("AccessToken") String token) {
+        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 }
