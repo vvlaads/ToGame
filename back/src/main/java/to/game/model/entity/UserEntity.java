@@ -99,9 +99,24 @@ public class UserEntity {
     @JoinTable(name = "user_to_friend", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private Set<UserEntity> friends = new HashSet<>();
 
-    @OneToMany(mappedBy = "senderId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
     private Set<LikeEntity> sentLikes = new HashSet<>();
 
-    @OneToMany(mappedBy = "receiverId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
     private Set<LikeEntity> receivedLikes = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof UserEntity))
+            return false;
+        UserEntity that = (UserEntity) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

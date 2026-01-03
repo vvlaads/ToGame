@@ -18,8 +18,6 @@ import to.game.model.dto.AccessTokenDTO;
 import to.game.model.dto.AvatarDTO;
 import to.game.model.dto.ResponseDTO;
 import to.game.model.dto.UserDTO;
-import to.game.model.entity.LikeEntity;
-import to.game.model.entity.UserEntity;
 import to.game.service.UserService;
 
 @Path("/user")
@@ -111,15 +109,6 @@ public class UserResource {
     @POST
     public Response sendLike(@CookieParam("AccessToken") String token, UserDTO reciver) {
         ResponseDTO<Object> resp = userService.sendLike(UUID.fromString(token), reciver.getId());
-        return Response.status(resp.hashCode()).build();
-    }
-
-    @Path("/add-friend")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @POST
-    public Response addFriend(@CookieParam("AccessToken") String token, UserDTO reciver) {
-        ResponseDTO<Object> resp = userService.addFriend(UUID.fromString(token), reciver.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -137,7 +126,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getFriends(@CookieParam("AccessToken") String token) {
-        ResponseDTO<UserEntity> resp = userService.getFriends(UUID.fromString(token));
+        ResponseDTO<UserDTO> resp = userService.getFriends(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -146,7 +135,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getRecivedLikes(@CookieParam("AccessToken") String token) {
-        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(UUID.fromString(token));
+        ResponseDTO<UserDTO> resp = userService.getRecievedLikes(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -155,7 +144,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getSentLikes(@CookieParam("AccessToken") String token) {
-        ResponseDTO<LikeEntity> resp = userService.getRecievedLikes(UUID.fromString(token));
+        ResponseDTO<UserDTO> resp = userService.getSentLikes(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 }

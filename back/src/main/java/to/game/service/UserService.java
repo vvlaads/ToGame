@@ -3,6 +3,7 @@ package to.game.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -163,6 +164,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         AvatarEntity avatar = avatarRepo.findById(avatarId).orElseThrow(() -> new EntityNotFoundException("Avatar"));
         user.addAvatar(avatar);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
@@ -171,6 +173,7 @@ public class UserService {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         user.deleteAvatar();
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
@@ -199,6 +202,8 @@ public class UserService {
         UserEntity friend = userRepo.findById(friendId).orElseThrow(() -> new EntityNotFoundException("Friend"));
         user.getFriends().add(friend);
         friend.getFriends().add(user);
+        userRepo.update(user);
+        userRepo.update(friend);
         return new ResponseDTO<>(200);
     }
 
@@ -209,14 +214,20 @@ public class UserService {
         UserEntity friend = userRepo.findById(friendId).orElseThrow(() -> new EntityNotFoundException("Friend"));
         user.getFriends().remove(friend);
         friend.getFriends().remove(user);
+        userRepo.update(user);
+        userRepo.update(friend);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<UserEntity> getFriends(UUID accessToken) {
+    public ResponseDTO<UserDTO> getFriends(UUID accessToken) {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getFriends().stream().toList());
+        List<UserDTO> friends = new ArrayList<>();
+        for (UserEntity friend  : user.getFriends()) {
+            friends.add(new UserDTO(friend.getId(), friend.getName(), friend.getDescr()));
+        }
+        return new ResponseDTO<>(200, "", friends);
     }
 
     @Transactional
@@ -239,25 +250,37 @@ public class UserService {
         }
 
         LikeEntity like = new LikeEntity();
-        like.setSenderId(sender);
-        like.setReceiverId(receiver);
+        like.setSender(sender);
+        like.setReceiver(receiver);
 
         likeRepo.save(like);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<LikeEntity> getRecievedLikes(UUID accessToken) {
+    public ResponseDTO<UserDTO> getRecievedLikes(UUID accessToken) {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getReceivedLikes().stream().toList());
+        List<LikeEntity> likes = likeRepo.findByReceiverId(user.getId());
+        List<UserDTO> senders = new ArrayList<>();
+        for (LikeEntity like : likes) {
+            senders.add(new UserDTO(like.getSender().getId(), like.getSender().getName(),
+                    like.getSender().getDescr()));
+        }
+        return new ResponseDTO<>(200, "", senders);
     }
 
     @Transactional
-    public ResponseDTO<LikeEntity> getSentLikes(UUID accessToken) {
+    public ResponseDTO<UserDTO> getSentLikes(UUID accessToken) {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getSentLikes().stream().toList());
+        List<LikeEntity> likes = likeRepo.findBySenderId(user.getId());
+        List<UserDTO> recievers = new ArrayList<>();
+        for (LikeEntity like : likes) {
+            recievers.add(new UserDTO(like.getReceiver().getId(), like.getReceiver().getName(),
+                    like.getReceiver().getDescr()));
+        }
+        return new ResponseDTO<>(200, "", recievers);
     }
 
     @Transactional
@@ -265,6 +288,7 @@ public class UserService {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         user.setName(newName);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
@@ -273,6 +297,7 @@ public class UserService {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         user.setDescr(newDescr);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 }

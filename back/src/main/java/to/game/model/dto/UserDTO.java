@@ -20,6 +20,12 @@ public class UserDTO {
                 .collect(java.util.stream.Collectors.toSet());
     }
 
+    public UserDTO(Long id, String name, String descr){
+        this.id = id;
+        this.name = name;
+        this.descr = descr;
+    }
+
     Long id;
     String name;
     String password;
