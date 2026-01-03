@@ -40,4 +40,19 @@ public class GameEntity {
 
     @ManyToMany(mappedBy = "games")
     private Set<UserEntity> users = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof GameEntity))
+            return false;
+        GameEntity that = (GameEntity) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

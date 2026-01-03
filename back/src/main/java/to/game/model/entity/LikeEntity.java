@@ -12,7 +12,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "like")
+@Table(name = "user_like")
 public class LikeEntity {
 
     @Id
@@ -21,9 +21,9 @@ public class LikeEntity {
     
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private UserEntity senderId;
+    private UserEntity sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
-    private UserEntity receiverId;
+    private UserEntity receiver;
 }

@@ -17,13 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "user")
+@Table(name = "user_table")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -36,7 +37,7 @@ public class UserEntity {
     @NotBlank
     private String password;
 
-    @NotBlank
+    @NotNull
     private UUID accessToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -98,9 +99,24 @@ public class UserEntity {
     @JoinTable(name = "user_to_friend", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private Set<UserEntity> friends = new HashSet<>();
 
-    @OneToMany(mappedBy = "senderId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
     private Set<LikeEntity> sentLikes = new HashSet<>();
 
-    @OneToMany(mappedBy = "receiverId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
     private Set<LikeEntity> receivedLikes = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof UserEntity))
+            return false;
+        UserEntity that = (UserEntity) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

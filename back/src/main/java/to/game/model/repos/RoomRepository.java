@@ -5,10 +5,10 @@ import java.io.Serializable;
 import jakarta.data.repository.CrudRepository;
 import jakarta.data.repository.Repository;
 import jakarta.enterprise.context.ApplicationScoped;
-import to.game.model.entity.AvatarEntity;
+import to.game.model.entity.RoomEntity;
 
 @Repository
 @ApplicationScoped
-public interface AvatarRepository extends CrudRepository<AvatarEntity, Long>, Serializable {
-
+public interface RoomRepository extends CrudRepository<RoomEntity, Long>, Serializable{
+    
 }

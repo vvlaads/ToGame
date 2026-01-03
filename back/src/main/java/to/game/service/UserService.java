@@ -3,10 +3,12 @@ package to.game.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,6 +19,7 @@ import to.game.exceptions.EntityNotFoundException;
 import to.game.model.dto.AccessTokenDTO;
 import to.game.model.dto.GameDTO;
 import to.game.model.dto.ResponseDTO;
+import to.game.model.dto.UserDTO;
 import to.game.model.entity.AvatarEntity;
 import to.game.model.entity.ChatEntity;
 import to.game.model.entity.GameEntity;
@@ -24,7 +27,7 @@ import to.game.model.entity.LikeEntity;
 import to.game.model.entity.UserEntity;
 import to.game.model.repos.AvatarRepository;
 import to.game.model.repos.ChatRepository;
-import to.game.model.repos.GameRepopsitory;
+import to.game.model.repos.GameRepository;
 import to.game.model.repos.LikeRepository;
 import to.game.model.repos.UserRepository;
 import to.game.util.Hex;
@@ -38,7 +41,7 @@ public class UserService {
     ChatRepository chatRepo;
 
     @Inject
-    GameRepopsitory gameRepo;
+    GameRepository gameRepo;
 
     @Inject
     LikeRepository likeRepo;
@@ -100,155 +103,212 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteUser(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> deleteUser(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         userRepo.delete(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<UserEntity> userInfo(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", List.of(user));
+    public ResponseDTO<UserDTO> userInfo(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessTokenWithGames(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
+        return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
     @Transactional
-    public ResponseDTO<Object> joinChat(Long userId, Long chatId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<UserDTO> userInfoById(Long userId) {
+        UserEntity user = userRepo.findByIdWithGames(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet())); 
+        return new ResponseDTO<>(200, "", List.of(userDTO));
+    }
+
+    @Transactional
+    public ResponseDTO<Object> joinChat(UUID accessToken, Long chatId) {
+        UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        user.addChat(chat);
+        user.getChats().add(chat);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> leaveChat(Long userId, Long chatId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> leaveChat(UUID accessToken, Long chatId) {
+        UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        user.deleteChat(chat);
+        user.getChats().remove(chat);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> addGame(Long userId, String gameName) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> addGame(UUID accessToken, String gameName) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new EntityNotFoundException("Game"));
         user.addGame(game);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteGame(Long userId, String gameName) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> deleteGame(UUID accessToken, String gameName) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new EntityNotFoundException("Game"));
         user.deleteGame(game);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> setAvatar(Long userId, Long avatarId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> setAvatar(UUID accessToken, Long avatarId) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         AvatarEntity avatar = avatarRepo.findById(avatarId).orElseThrow(() -> new EntityNotFoundException("Avatar"));
         user.addAvatar(avatar);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> removeAvatar(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> removeAvatar(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         user.deleteAvatar();
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> joinRoom(Long userId, Long chatId, Long roomId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
+    public ResponseDTO<Object> joinRoom(UUID accessToken, Long chatId, Long roomId) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        ChatEntity chat = chatRepo.findByIdWithRooms(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
         user.setRoom(chat.getRooms().stream().filter(r -> r.getId().equals(roomId)).findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Room")));
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> leaveRoom(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> leaveRoom(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         user.deleteRoom();
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> addFriend(Long userId, Long friendId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> addFriend(UUID accessToken, Long friendId) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         UserEntity friend = userRepo.findById(friendId).orElseThrow(() -> new EntityNotFoundException("Friend"));
         user.getFriends().add(friend);
         friend.getFriends().add(user);
+        userRepo.update(user);
+        userRepo.update(friend);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> removeFriend(Long userId, Long friendId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> removeFriend(UUID accessToken, Long friendId) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         UserEntity friend = userRepo.findById(friendId).orElseThrow(() -> new EntityNotFoundException("Friend"));
         user.getFriends().remove(friend);
         friend.getFriends().remove(user);
+        userRepo.update(user);
+        userRepo.update(friend);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<UserEntity> getFriends(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getFriends().stream().toList());
+    public ResponseDTO<UserDTO> getFriends(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        List<UserDTO> friends = new ArrayList<>();
+        for (UserEntity friend  : user.getFriends()) {
+            friends.add(new UserDTO(friend.getId(), friend.getName(), friend.getDescr()));
+        }
+        return new ResponseDTO<>(200, "", friends);
     }
 
     @Transactional
-    public ResponseDTO<Object> sendLike(Long senderId, Long receiverId) {
-        if (senderId.equals(receiverId)) {
-            throw new DataConsistencyException("Users cannot like themselves");
-        }
-
-        Optional<LikeEntity> reverseLike = likeRepo.findBySenderIdAndReceiverId(receiverId, senderId);
-
-        if (reverseLike.isPresent()) {
-            likeRepo.delete(reverseLike.get());
-            return addFriend(senderId, receiverId);
-        }
-
-        UserEntity sender = userRepo.findById(senderId)
+    public ResponseDTO<Object> sendLike(UUID accessToken, Long receiverId) {
+        UserEntity sender = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("Sender"));
 
         UserEntity receiver = userRepo.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException("Receiver"));
 
+        if (sender.getId().equals(receiverId)) {
+            throw new DataConsistencyException("Users cannot like themselves");
+        }
+
+        Optional<LikeEntity> reverseLike = likeRepo.findBySenderIdAndReceiverId(receiverId, sender.getId());
+
+        if (reverseLike.isPresent()) {
+            likeRepo.delete(reverseLike.get());
+            return addFriend(accessToken, receiverId);
+        }
+
         LikeEntity like = new LikeEntity();
-        like.setSenderId(sender);
-        like.setReceiverId(receiver);
+        like.setSender(sender);
+        like.setReceiver(receiver);
 
         likeRepo.save(like);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<LikeEntity> getRecievedLikes(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getReceivedLikes().stream().toList());
+    public ResponseDTO<UserDTO> getRecievedLikes(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        List<LikeEntity> likes = likeRepo.findByReceiverId(user.getId());
+        List<UserDTO> senders = new ArrayList<>();
+        for (LikeEntity like : likes) {
+            senders.add(new UserDTO(like.getSender().getId(), like.getSender().getName(),
+                    like.getSender().getDescr()));
+        }
+        return new ResponseDTO<>(200, "", senders);
     }
 
     @Transactional
-    public ResponseDTO<LikeEntity> getSentLikes(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getSentLikes().stream().toList());
+    public ResponseDTO<UserDTO> getSentLikes(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+        List<LikeEntity> likes = likeRepo.findBySenderId(user.getId());
+        List<UserDTO> recievers = new ArrayList<>();
+        for (LikeEntity like : likes) {
+            recievers.add(new UserDTO(like.getReceiver().getId(), like.getReceiver().getName(),
+                    like.getReceiver().getDescr()));
+        }
+        return new ResponseDTO<>(200, "", recievers);
     }
 
     @Transactional
-    public ResponseDTO<Object> changeName(Long userId, String newName) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> changeName(UUID accessToken, String newName) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         user.setName(newName);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> changeDescr(Long userId, String newDescr) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> changeDescr(UUID accessToken, String newDescr) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         user.setDescr(newDescr);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 }

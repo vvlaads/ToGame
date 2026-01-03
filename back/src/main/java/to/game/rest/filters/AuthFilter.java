@@ -2,26 +2,20 @@ package to.game.rest.filters;
 
 import java.util.UUID;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.ext.Provider;
 import to.game.exceptions.AuthorizationException;
-import to.game.exceptions.EntityNotFoundException;
-import to.game.model.dto.UserDTO;
-import to.game.model.entity.UserEntity;
-import to.game.model.repos.UserRepository;
+import to.game.model.dto.AccessTokenDTO;
 
 @Provider
 public class AuthFilter implements ContainerRequestFilter {
-    @Inject
-    UserRepository userRepo;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        if (requestContext.getUriInfo().getPath().equals("user/register") ||
-                requestContext.getUriInfo().getPath().equals("user/sign-in")) {
+        if (requestContext.getUriInfo().getPath().contains("user/register") ||
+                requestContext.getUriInfo().getPath().contains("user/sign-in")) {
             return;
         }
 
@@ -31,11 +25,9 @@ public class AuthFilter implements ContainerRequestFilter {
             throw new AuthorizationException("AccessToken cookie is missing");
         }
 
-        UserEntity user = userRepo.findByAccessToken(UUID.fromString(cookie.getValue()))
-                .orElseThrow(() -> new EntityNotFoundException("User"));
+        AccessTokenDTO token = new AccessTokenDTO();
+        token.setAccessToken(UUID.fromString(cookie.getValue()));
 
-        UserDTO userDTO = new UserDTO(user);
-        requestContext.setProperty("user", userDTO);
+        requestContext.setProperty("token", token);
     }
-
 }

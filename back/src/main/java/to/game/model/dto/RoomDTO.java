@@ -6,6 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RoomDTO {
+    public RoomDTO() {
+    }
+
     private Long chatId;
     private Long id;
     private String name;
