@@ -6,6 +6,7 @@ import { useGame } from '../context/GameContext';
 import { useEffect, useState } from 'react';
 import GameCard from '../components/GameCard';
 import CrossIcon from '../assets/icons/cross.svg';
+import AddIcon from '../assets/icons/add.svg';
 import Modal from '../components/Modal';
 import Tag from '../components/Tag';
 
@@ -14,7 +15,7 @@ function ProfilePage() {
     const { games, getGameList, findTagsForGame, deleteGameForUser } = useGame();
     const [loading, setLoading] = useState(true);
     const [currentGame, setCurrentGame] = useState(null);
-    const [currentGameTags, sebtCurrentGameTags] = useState([]);
+    const [currentGameTags, setCurrentGameTags] = useState([]);
     const [gameInfoIsOpen, setGameInfoIsOpen] = useState(false);
     const [gameListIsOpen, setGameListIsOpen] = useState(false);
 
@@ -30,10 +31,12 @@ function ProfilePage() {
         setCurrentGame(null);
         setGameInfoIsOpen(false);
     };
+
     // Открыть модальное окно
     function openGameList() {
         setGameListIsOpen(true);
     }
+
     // Закрыть модальное окно
     function closeGameList() {
         setGameListIsOpen(false);
@@ -52,7 +55,7 @@ function ProfilePage() {
         }
     }
 
-    function addGame() {
+    function addGame(game) {
         if (gameListIsOpen) {
             closeGameList();
         }
@@ -125,11 +128,12 @@ function ProfilePage() {
                                     <GameCard
                                         key={game.id}
                                         game={game}
-                                        onClick={() => openModal(game)}
+                                        onClick={() => openGameInfo(game)}
                                         onTrashClick={(e) => deleteGame(e, game.id)}
                                     />
                                 ))}
                                 <div className='profile-page__add-game' onClick={openGameList}>
+                                    <img src={AddIcon} className='profile-page__add-game-icon' />
                                     Добавить
                                 </div>
                             </div>
@@ -178,6 +182,25 @@ function ProfilePage() {
                             </div>
                         )}
 
+                </Modal>
+
+                <Modal isOpen={gameListIsOpen} onClose={closeGameList}>
+                    <div className='profile-page__game-list-window-container'>
+                        <div className='profile-page__game-list-window-header'>Список игр</div>
+                        <div className='profile-page__game-list-window-list'>
+                            {games.map(game => (
+                                <GameCard
+                                    key={game.id}
+                                    game={game}
+                                    onClick={() => addGame(game)}
+                                />
+                            )
+                            )}
+                        </div>
+                        <button onClick={closeGameList} className='profile-page__game-list-window-button'>
+                            Закрыть
+                        </button>
+                    </div>
                 </Modal>
 
                 <div className='profile-page__exit-button-container'>

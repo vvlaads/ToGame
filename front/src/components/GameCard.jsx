@@ -6,7 +6,11 @@ import { getPathForImage } from '../utils/imageFormat';
 function GameCard({ game, onClick, onTrashClick }) {
     return (
         <div className='game-card__container' onClick={onClick}>
-            <img src={TrashIcon} className='game-card__trash' onClick={onTrashClick} />
+            {onTrashClick ?
+                (<img src={TrashIcon} className='game-card__trash' onClick={onTrashClick} />)
+                : (<></>)
+            }
+
 
             <img
                 className='game-card__image'

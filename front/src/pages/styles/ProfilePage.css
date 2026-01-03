@@ -206,3 +206,46 @@
     padding: 20px;
     box-sizing: border-box;
 }
+
+.profile-page__add-game:hover {
+    background-color: var(--color-gray-800);
+    cursor: pointer;
+}
+
+.profile-page__game-list-window-container {
+    width: 50vw;
+    height: 70vh;
+    background-color: var(--color-gray-900);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-page__game-list-window-header {
+    font-size: 32px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.profile-page__game-list-window-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    justify-items: center;
+}
+
+.profile-page__game-list-window-button {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--color-red);
+    height: 50px;
+    color: inherit;
+    font-size: 20px;
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+.profile-page__game-list-window-button:hover {
+    background-color: var(--color-red-dark);
+}
