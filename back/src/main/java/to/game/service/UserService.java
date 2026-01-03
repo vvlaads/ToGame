@@ -129,19 +129,21 @@ public class UserService {
 
     @Transactional
     public ResponseDTO<Object> joinChat(UUID accessToken, Long chatId) {
-        UserEntity user = userRepo.findByAccessToken(accessToken)
+        UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        user.addChat(chat);
+        user.getChats().add(chat);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
     public ResponseDTO<Object> leaveChat(UUID accessToken, Long chatId) {
-        UserEntity user = userRepo.findByAccessToken(accessToken)
+        UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
-        user.deleteChat(chat);
+        user.getChats().remove(chat);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
@@ -188,9 +190,10 @@ public class UserService {
     public ResponseDTO<Object> joinRoom(UUID accessToken, Long chatId, Long roomId) {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
+        ChatEntity chat = chatRepo.findByIdWithRooms(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
         user.setRoom(chat.getRooms().stream().filter(r -> r.getId().equals(roomId)).findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Room")));
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
@@ -199,6 +202,7 @@ public class UserService {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         user.deleteRoom();
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 

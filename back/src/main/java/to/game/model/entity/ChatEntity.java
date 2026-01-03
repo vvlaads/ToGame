@@ -63,4 +63,25 @@ public class ChatEntity {
         messages.add(message);
         message.setChatId(this);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+
+        if (getClass() != o.getClass())
+            return false;
+
+        ChatEntity that = (ChatEntity) o;
+
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }

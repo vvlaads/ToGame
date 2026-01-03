@@ -12,8 +12,12 @@ import to.game.model.entity.ChatEntity;
 @Repository
 @ApplicationScoped
 public interface ChatRepository extends CrudRepository<ChatEntity, Long>, Serializable {
-    @Override
-    @Query("select c from ChatEntity c left join fetch c.users left join fetch c.rooms where c.id = :id")
-    Optional<ChatEntity> findById(Long id);
+    @Query("select c from ChatEntity c left join fetch c.users where c.id = :id")
+    Optional<ChatEntity> findByIdWithUsers(Long id);
 
+    @Query("select c from ChatEntity c left join fetch c.rooms where c.id = :id")
+    Optional<ChatEntity> findByIdWithRooms(Long id);
+
+    @Query("select c from ChatEntity c left join fetch c.messages where c.id = :id")
+    Optional<ChatEntity> findByIdWithMessages(Long id);
 }

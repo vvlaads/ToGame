@@ -63,8 +63,8 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response joinChat(@CookieParam("AccessToken") String token, Long chatId) {
-        ResponseDTO<Object> resp = userService.joinChat(UUID.fromString(token), chatId);
+    public Response joinChat(@CookieParam("AccessToken") String token, ChatDTO chat) {
+        ResponseDTO<Object> resp = userService.joinChat(UUID.fromString(token), chat.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -72,8 +72,8 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response leaveChat(@CookieParam("AccessToken") String token, Long chatId) {
-        ResponseDTO<Object> resp = userService.leaveChat(UUID.fromString(token), chatId);
+    public Response leaveChat(@CookieParam("AccessToken") String token, ChatDTO chat) {
+        ResponseDTO<Object> resp = userService.leaveChat(UUID.fromString(token), chat.getId());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -123,5 +123,14 @@ public class ChatResource {
         ResponseDTO<Object> resp = chatManagmentService.sendMessage(UUID.fromString(token), message.getChatId(),
                 message.getContent());
         return Response.status(resp.getStatus()).build();
+    }
+
+    @Path("/get-messages")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getMessages(@CookieParam("AccessToken") String token, ChatDTO chat) {
+        ResponseDTO<MessageDTO> resp = chatManagmentService.getMessages(chat.getId());
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 }
