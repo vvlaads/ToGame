@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -111,16 +112,18 @@ public class UserService {
 
     @Transactional
     public ResponseDTO<UserDTO> userInfo(UUID accessToken) {
-        UserEntity user = userRepo.findByAccessToken(accessToken)
+        UserEntity user = userRepo.findByAccessTokenWithGames(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        UserDTO userDTO = new UserDTO(user);
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
     @Transactional
     public ResponseDTO<UserDTO> userInfoById(Long userId) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
-        UserDTO userDTO = new UserDTO(user);
+        UserEntity user = userRepo.findByIdWithGames(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet())); 
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
@@ -143,18 +146,22 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseDTO<Object> addGame(Long userId, String gameName) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> addGame(UUID accessToken, String gameName) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new EntityNotFoundException("Game"));
         user.addGame(game);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteGame(Long userId, String gameName) {
-        UserEntity user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+    public ResponseDTO<Object> deleteGame(UUID accessToken, String gameName) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         GameEntity game = gameRepo.findByName(gameName).orElseThrow(() -> new EntityNotFoundException("Game"));
         user.deleteGame(game);
+        userRepo.update(user);
         return new ResponseDTO<>(200);
     }
 

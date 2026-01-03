@@ -1,11 +1,14 @@
 package to.game.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import to.game.exceptions.EntityNotFoundException;
+import to.game.model.dto.GameDTO;
 import to.game.model.dto.ResponseDTO;
 import to.game.model.entity.GameEntity;
 import to.game.model.entity.UserEntity;
@@ -21,14 +24,20 @@ public class GameService {
     UserRepository userRepo;
 
     @Transactional
-    public ResponseDTO<GameEntity> getAllGames() {
-        return new ResponseDTO<>(200, "", gameRepo.findAll().toList());
+    public ResponseDTO<GameDTO> getAllGames() {
+        List<GameDTO> games = new ArrayList<>();
+        for (GameEntity game : gameRepo.findAllJoinTag())
+            games.add(new GameDTO(game));
+        return new ResponseDTO<>(200, "", games);
     }
 
     @Transactional
-    public ResponseDTO<GameEntity> getAllGamesByUser(UUID accessToken) {
+    public ResponseDTO<GameDTO> getAllGamesByUser(UUID accessToken) {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
-        return new ResponseDTO<>(200, "", user.getGames().stream().toList());
+        List<GameDTO> games = new ArrayList<>();
+        for (GameEntity game : gameRepo.findAllByUserIdWithTags(user.getId()))
+            games.add(new GameDTO(game));
+        return new ResponseDTO<>(200, "", games);
     }
 }

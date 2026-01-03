@@ -9,14 +9,10 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import to.game.model.dto.GameDTO;
 import to.game.model.dto.ResponseDTO;
-import to.game.model.dto.UserDTO;
-import to.game.model.entity.GameEntity;
 import to.game.service.GameService;
 import to.game.service.UserService;
 
@@ -33,7 +29,7 @@ public class GameResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getAll() {
-        ResponseDTO<GameEntity> resp = gameService.getAllGames();
+        ResponseDTO<GameDTO> resp = gameService.getAllGames();
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -42,7 +38,7 @@ public class GameResource {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     public Response getAllByUser(@CookieParam("AccessToken") String token) {
-        ResponseDTO<GameEntity> resp = gameService.getAllGamesByUser(UUID.fromString(token));
+        ResponseDTO<GameDTO> resp = gameService.getAllGamesByUser(UUID.fromString(token));
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
@@ -50,9 +46,8 @@ public class GameResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response addGame(@Context ContainerRequestContext ctx, GameDTO game) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.addGame(user.getId(), game.getName());
+    public Response addGame(@CookieParam("AccessToken") String token, GameDTO game) {
+        ResponseDTO<Object> resp = userService.addGame(UUID.fromString(token), game.getName());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -60,9 +55,8 @@ public class GameResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @DELETE
-    public Response removeGame(@Context ContainerRequestContext ctx, GameDTO game) {
-        UserDTO user = (UserDTO) ctx.getProperty("user");
-        ResponseDTO<Object> resp = userService.deleteGame(user.getId(), game.getName());
+    public Response removeGame(@CookieParam("AccessToken") String token, GameDTO game) {
+        ResponseDTO<Object> resp = userService.deleteGame(UUID.fromString(token), game.getName());
         return Response.status(resp.getStatus()).build();
     }
 }
