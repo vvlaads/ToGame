@@ -7,7 +7,7 @@ import { useChats } from '../context/ChatsContext';
 import { useNavigate } from 'react-router-dom';
 import { useSearchPlayers } from '../context/SearchPlayersContext';
 import { useAuth } from '../context/AuthContext';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForImage } from '../utils/pathFormat';
 import { useGame } from '../context/GameContext';
 
 function SearchPlayersPage() {

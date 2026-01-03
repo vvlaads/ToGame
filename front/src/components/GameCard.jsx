@@ -1,27 +1,45 @@
 import './styles/GameCard.css'
 import TrashIcon from '../assets/icons/trash.svg';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForGame } from '../utils/pathFormat';
 
+function GameCard({ game, onClick, onTrashClick, isSelected = false }) {
+    const handleContainerClick = (e) => {
+        // Предотвращаем срабатывание при клике на иконку корзины
+        if (e.target.closest('.game-card__trash')) {
+            return;
+        }
+        if (onClick) {
+            onClick(game);
+        }
+    };
 
-function GameCard({ game, onClick, onTrashClick }) {
     return (
-        <div className='game-card__container' onClick={onClick}>
-            {onTrashClick ?
-                (<img src={TrashIcon} className='game-card__trash' onClick={onTrashClick} />)
-                : (<></>)
-            }
-
+        <div
+            className={`game-card__container ${isSelected ? 'game-card__container--selected' : ''}`}
+            onClick={handleContainerClick}
+        >
+            {onTrashClick && (
+                <img
+                    src={TrashIcon}
+                    className='game-card__trash'
+                    onClick={(e) => {
+                        e.stopPropagation(); // Останавливаем всплытие
+                        onTrashClick(game);
+                    }}
+                    alt="Удалить"
+                />
+            )}
 
             <img
                 className='game-card__image'
-                src={getPathForImage(game.image)}
+                src={getPathForGame(game.filepath)}
                 alt={game.name}
             />
             <div className='game-card__name'>
                 {game.name}
             </div>
         </div>
-    )
+    );
 }
 
 export default GameCard;

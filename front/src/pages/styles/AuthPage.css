@@ -101,3 +101,118 @@
 .auth-page__login-button:hover {
     background: var(--color-purple-dark);
 }
+
+.auth-page__games-step {
+    width: 60vw;
+    padding: 30px;
+    background: var(--color-gray-800);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.auth-page__1);
+    border: 1px solid var(--color-gray-700);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.auth-page__games-step-header {
+    font-size: 32px;
+    text-align: center;
+}
+
+.auth-page__games-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    justify-items: center;
+}
+
+.auth-page__pagination {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+}
+
+.auth-page__pagination-button {
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--color-gray-700);
+    color: inherit;
+    width: 40px;
+    height: 40px;
+}
+
+.auth-page__pagination-button:hover {
+    background-color: var(--color-gray-600);
+}
+
+.auth-page__pagination-button-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.auth-page__page-numbers {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.auth-page__page-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 0;
+    font-size: 16px;
+    background-color: var(--color-gray-700);
+    color: inherit;
+}
+
+.auth-page__page-number:hover {
+    background-color: var(--color-gray-600);
+}
+
+.auth-page__page-number--active {
+    background-color: var(--color-purple);
+}
+
+.auth-page__page-number--active:hover {
+    background-color: var(--color-purple-dark);
+}
+
+.auth-page__selected-count {
+    text-align: center;
+    font-size: 24px;
+}
+
+.auth-page__step-2-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.auth-page__step-2-button {
+    border: 0;
+    border-radius: 10px;
+    height: 50px;
+    color: inherit;
+    font-size: 20px;
+}
+
+#auth-page__step-2-submit {
+    width: 70%;
+    background-color: var(--color-purple);
+}
+
+#auth-page__step-2-submit:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#auth-page__step-2-cancel {
+    width: 30%;
+    background-color: var(--color-gray-600);
+}
+
+#auth-page__step-2-cancel:hover {
+    background-color: var(--color-gray-500);
+}

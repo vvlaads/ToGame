@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
 import { useEffect, useState } from 'react';
 import { useFriends } from '../context/FriendsContext';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForImage } from '../utils/pathFormat';
 
 function HomePage() {
     const { user } = useAuth();

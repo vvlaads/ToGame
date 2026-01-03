@@ -17,6 +17,14 @@
     background-color: var(--color-gray-600);
 }
 
+.game-card__container--selected {
+    background-color: var(--color-purple);
+}
+
+.game-card__container--selected:hover {
+    background-color: var(--color-purple-dark);
+}
+
 .game-card__trash {
     position: absolute;
     top: 10px;

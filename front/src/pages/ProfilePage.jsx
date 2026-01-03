@@ -1,7 +1,7 @@
 import './styles/ProfilePage.css';
 import LayoutWithNav from '../components/LayoutWithNav';
 import { useAuth } from '../context/AuthContext';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForImage } from '../utils/pathFormat';
 import { useGame } from '../context/GameContext';
 import { useEffect, useState } from 'react';
 import GameCard from '../components/GameCard';

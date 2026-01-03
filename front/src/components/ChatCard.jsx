@@ -1,6 +1,6 @@
 import './styles/ChatCard.css';
 import { useState, useEffect } from 'react';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForImage } from '../utils/pathFormat';
 import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
 import { formatTimestamp } from '../utils/chatUtils';

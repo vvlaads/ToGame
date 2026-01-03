@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
 import { useAuth } from '../context/AuthContext';
 import { loadCurrentChatId, loadCurrentRoomId, saveCurrentChatId, saveCurrentRoomId } from '../utils/sessionStorage';
-import { getPathForImage } from '../utils/imageFormat';
+import { getPathForImage } from '../utils/pathFormat';
 import { formatTimestamp } from '../utils/chatUtils';
 
 function ChatsPage() {
