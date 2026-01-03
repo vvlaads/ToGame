@@ -83,46 +83,6 @@
     width: 100%;
 }
 
-.profile-page__game {
-    background-color: var(--color-gray-700);
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.2s, background-color 0.2s;
-    cursor: pointer;
-    height: auto;
-    justify-content: flex-start;
-    width: 144px;
-    padding-bottom: 15px;
-}
-
-.profile-page__game:hover {
-    transform: translateY(-5px);
-    background-color: var(--color-gray-600);
-}
-
-.profile-page__game-image {
-    width: 144px;
-    height: 192px;
-    border-radius: 15px;
-    object-fit: cover;
-    background-color: var(--color-gray-500);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.profile-page__game-name {
-    font-size: 20px;
-    text-align: center;
-    padding: 10px 8px 0;
-    font-weight: 500;
-    width: 100%;
-    box-sizing: border-box;
-}
-
 .profile-page__no-games {
     color: var(--color-gray-400);
     text-align: center;
@@ -156,4 +116,93 @@
 .profile-page__exit-button:hover {
     background-color: color-mix(in oklab, var(--color-red-dark) 40%, transparent);
     border-color: var(--color-red);
+}
+
+.profile-page__game-modal-window {
+    height: 600px;
+    width: 1000px;
+    background-color: var(--color-gray-900);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 20px;
+    gap: 30px;
+    border-radius: 20px;
+    position: relative;
+}
+
+.profile-page__game-modal-window-cross {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.profile-page__game-modal-window-cross:hover {
+    cursor: pointer;
+}
+
+.profile-page__game-modal-window-image {
+    border-radius: 20px;
+    height: 80%;
+    width: auto;
+}
+
+.profile-page__game-modal-window-text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 80%;
+    gap: 10px;
+}
+
+.profile-page__game-modal-window-name {
+    font-size: 32px;
+}
+
+.profile-page__game-modal-window-descr {
+    font-size: 16px;
+    color: var(--color-gray-400);
+}
+
+.profile-page__game-modal-window-button {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--color-red);
+    font-size: 20px;
+    color: inherit;
+    height: 50px;
+    margin-top: auto;
+}
+
+.profile-page__game-modal-window-button:hover {
+    background-color: var(--color-red-dark);
+}
+
+.profile-page__game-modal-window-tag-header {
+    font-size: 20px;
+}
+
+.profile-page__game-modal-window-tags {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.profile-page__add-game {
+    height: 100%;
+    width: 144px;
+    background-color: var(--color-gray-900);
+    border-radius: 20px;
+    border: 2px dashed var(--color-gray-600);
+    color: var(--color-gray-400);
+    font-size: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
 }

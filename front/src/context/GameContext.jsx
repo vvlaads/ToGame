@@ -135,13 +135,32 @@ function GameProvider({ children }) {
         return { success: false, error: 'Не удалось загрузить список тегов' };
     }
 
+    async function findTagsForGame(gameId) {
+        const pairs = TAG_TO_GAME.filter(pair => pair.gameId === gameId);
+        let tags = [];
+        pairs.forEach(async pair => {
+            let response = await getTagById(pair.tagId);
+            if (response.success) {
+                tags.push(response.data);
+            }
+        })
+        return tags;
+    }
+
+    async function deleteGameForUser(gameId) {
+        console.log(`Удаление игры с id: ${gameId}, userId: ${user.id}, `);
+        //TODO: Обращение на сервер
+    }
+
     const value = {
         games,
         tags,
         getGameList,
         getTagList,
         findGamesForUser,
-        findTagsForUser
+        findTagsForUser,
+        findTagsForGame,
+        deleteGameForUser
     };
 
     return (
