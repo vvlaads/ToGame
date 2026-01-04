@@ -15,7 +15,7 @@
     background-color: var(--color-gray-500);
 }
 
-.chat-card__chat-avatar {
+.chat-card__chat-image {
     border-radius: 50%;
     background-color: var(--color-white);
     width: 50px;

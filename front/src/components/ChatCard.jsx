@@ -1,71 +1,37 @@
 import './styles/ChatCard.css';
-import { useState, useEffect } from 'react';
 import { getPathForImage } from '../utils/pathFormat';
 import { useChats } from '../context/ChatsContext';
-import { useAuth } from '../context/AuthContext';
-import { formatTimestamp } from '../utils/chatUtils';
+import { useEffect, useState } from 'react';
 
 function ChatCard({ chat, onClick, className }) {
-    const { getLastMessage } = useChats();
-    const { getUserInfo } = useAuth()
+    const { getMessages } = useChats();
+    const [messages, setMessages] = useState([]);
 
-    const [lastMessage, setLastMessage] = useState(null);
-    const [senderName, setSenderName] = useState('');
-
-
+    // Загрузка сообщений чата
     useEffect(() => {
-        const fetchLastMessage = async () => {
-            const response = await getLastMessage(chat.id);
-            if (response) {
-                setLastMessage(response);
-            }
-        };
+        async function fetchMessages() {
+            const responseBody = await getMessages(chat);
+            setMessages(responseBody);
+        }
 
-        fetchLastMessage();
-    }, [chat, getLastMessage]);
-
-    // Загружаем имя отправителя, когда есть lastMessage
-    useEffect(() => {
-        const fetchSenderName = async () => {
-            if (!lastMessage?.userId) {
-                setSenderName('');
-                return;
-            }
-
-            try {
-                const userResponse = await getUserInfo(lastMessage.userId);
-                if (userResponse) {
-                    setSenderName(userResponse.name);
-                } else {
-                    setSenderName('Неизвестно');
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки информации об отправителе:', error);
-                setSenderName('Неизвестно');
-            }
-        };
-
-        fetchSenderName();
-    }, [lastMessage, getUserInfo]);
+        fetchMessages();
+    }, [chat])
 
     return (
         <div className={`chat-card__chat ${className}`} onClick={onClick}>
             <img
-                className='chat-card__chat-avatar'
+                className='chat-card__chat-image'
                 src={getPathForImage(chat.image)}
-                alt={`Изображение чата ${chat.name}`}
             />
             <div className='chat-card__chat-info'>
                 <div className='chat-card__chat-name'>{chat.name}</div>
                 <div className='chat-card__chat-last-message-container'>
                     <span className='chat-card__chat-last-message'>
-                        {senderName}: {lastMessage?.text}
+                        sender: lastMessage
                     </span>
-                    {lastMessage?.createdAt && (
-                        <span className='chat-card__chat-time'>
-                            {formatTimestamp(lastMessage?.createdAt)}
-                        </span>
-                    )}
+                    <span className='chat-card__chat-time'>
+                        date
+                    </span>
                 </div>
             </div>
         </div>

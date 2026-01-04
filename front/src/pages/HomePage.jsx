@@ -1,96 +1,79 @@
 import './styles/HomePage.css'
-import ChatCard from '../components/ChatCard';
 import LayoutWithNav from '../components/LayoutWithNav';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useChats } from '../context/ChatsContext';
 import { useEffect, useState } from 'react';
-import { useFriends } from '../context/FriendsContext';
-import { getPathForImage } from '../utils/pathFormat';
+import UserCard from '../components/UserCard';
+import ChatCard from '../components/ChatCard';
 
 function HomePage() {
-    const { user } = useAuth();
-    const { chats } = useChats();
-    const { friends, getFriendList } = useFriends();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [friends, setFriends] = useState([]);
+    const [chats, setChats] = useState([]);
+    const { user, getFriends } = useAuth();
 
-    const activeChats = chats;
-
-    // Переход к выбранному чату
-    function redirectToChat(chatId) {
-        navigate(`/chats?chatId=${chatId}`);
+    // Переход к другу
+    function goToFriend(friend) {
+        console.log(friend);
     }
 
+    // Переход к чату
+    function goToChat(chat) {
+        console.log(chat);
+    }
 
-    // Получаем друзей при загрузке компонента
+    // Загрузка друзей и чатов
     useEffect(() => {
-        const fetchFriends = async () => {
-            setLoading(true);
-            try {
-                await getFriendList();
-            } catch (error) {
-                console.error('Ошибка загрузки друзей:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user) {
-            fetchFriends();
+        async function fetchFriends() {
+            const response = await getFriends();
+            setFriends(response);
         }
-    }, [user]);
 
-    if (loading) {
-        return (
-            <LayoutWithNav>
-                <div className='home-page__container'>
-                    <div className="loading">Загрузка...</div>
-                </div>
-            </LayoutWithNav>
-        );
-    }
+        fetchFriends();
+    }, [user])
 
     return (
         <LayoutWithNav>
             <div className='home-page__container'>
                 <h1>С возвращением, {user?.name}!</h1>
+
                 <div className='home-page__info'>
                     <div className='home-page__active-chats-container'>
-                        <h2>Активные чаты:</h2>
-                        <div className='home-page__active-chats-list'>
-                            {activeChats.length > 0 ? (
-                                activeChats.map((chat) => (
-                                    <ChatCard
-                                        key={chat.id}
-                                        chat={chat}
-                                        onClick={() => redirectToChat(chat.id)}
-                                    />
-                                ))
-                            ) : (
-                                <div className='home-page__no-active-chats'>
-                                    Нет активных чатов за последний час
+                        <h2>Чаты:</h2>
+                        {chats && chats.length > 0 ?
+                            (
+                                <div className='home-page__active-chats-list'>
+                                    {chats.map(chat => (
+                                        <ChatCard
+                                            chat={chat}
+                                            onClick={() => goToChat(chat)}
+                                        />
+                                    ))}
+                                </div>
+                            ) :
+                            (
+                                <div className='home-page__empty-list'>
+                                    У вас пока нет чатов
                                 </div>
                             )}
-                        </div>
                     </div>
 
                     <div className='home-page__online-friends-container'>
-                        <h2>Друзья в сети:</h2>
-                        <div className='home-page__online-friends-list'>
-                            {friends.map((friend) => (
-                                <div key={friend.id} className='home-page__friend-info'>
-                                    <img
-                                        className='home-page__friend-avatar'
-                                        src={getPathForImage(friend.image)}
-                                        alt={friend.name}
-                                    />
-                                    <span className='home-page__friend-name'>
-                                        {friend.name}
-                                    </span>
+                        <h2>Друзья:</h2>
+                        {friends && friends.length > 0 ?
+                            (
+                                <div className='home-page__online-friends-list'>
+                                    {friends.map(friend => (
+                                        <UserCard
+                                            user={friend}
+                                            onClick={() => goToFriend(friend)}
+                                        />
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            ) :
+                            (
+                                <div className='home-page__empty-list'>
+                                    У вас пока нет друзей
+                                </div>
+                            )}
                     </div>
                 </div>
             </div>
