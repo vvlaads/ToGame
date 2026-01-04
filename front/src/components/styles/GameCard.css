@@ -1,5 +1,5 @@
 .game-card__container {
-    background-color: var(--color-gray-700);
+    background-color: var(--color-gray-800);
     border-radius: 15px;
     display: flex;
     flex-direction: column;

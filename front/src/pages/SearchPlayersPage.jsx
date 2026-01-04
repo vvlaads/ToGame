@@ -5,16 +5,14 @@ import LeftArrow from '../assets/icons/left arrow.svg';
 import RightArrow from '../assets/icons/right arrow.svg';
 import { useChats } from '../context/ChatsContext';
 import { useNavigate } from 'react-router-dom';
-import { useSearchPlayers } from '../context/SearchPlayersContext';
-import { useAuth } from '../context/AuthContext';
 import { getPathForImage } from '../utils/pathFormat';
 import { useGame } from '../context/GameContext';
+import { useUser } from '../context/UserContext';
 
 function SearchPlayersPage() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user } = useUser();
     const { chats, addChat } = useChats();
-    const { players, findPlayers } = useSearchPlayers();
     const { findGamesForUser, findTagsForUser } = useGame();
     const [loading, setLoading] = useState(true);
     const [curPos, setCurPos] = useState(0);

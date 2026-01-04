@@ -1,6 +1,6 @@
 import './styles/ProfilePage.css';
 import LayoutWithNav from '../components/LayoutWithNav';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 import { getPathForGame, getPathForImage } from '../utils/pathFormat';
 import { useGame } from '../context/GameContext';
 import { useEffect, useState } from 'react';
@@ -10,10 +10,12 @@ import AddIcon from '../assets/icons/add.svg';
 import Modal from '../components/Modal';
 import Tag from '../components/Tag';
 import GamesListWithPagination from '../components/GamesListWithPagination';
+import UserCard from '../components/UserCard';
 
 function ProfilePage() {
-    const { user, logout } = useAuth();
+    const { user, logout, getFriends } = useUser();
     const { getAllGames, getAllGamesByUser, addGame, removeGame } = useGame();
+    const [friends, setFriends] = useState([]);
     const [userGames, setUserGames] = useState([]);
     const [allGames, setAllGames] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -94,29 +96,31 @@ function ProfilePage() {
         setUserGames(updatedUserGames);
     }
 
-    // Получаем игры при загрузке компонента
+    // Загрузка игр и друзей
     useEffect(() => {
-        const fetchGames = async () => {
+        async function fetchInfo() {
             setLoading(true);
             try {
                 const userGames = await getAllGamesByUser();
                 const allGames = await getAllGames();
-                if (userGames && allGames) {
+                const friends = await getFriends();
+                if (userGames && allGames && friends) {
                     setUserGames(userGames);
                     setAllGames(allGames);
+                    setFriends(friends);
                 }
                 else {
                     throw Error();
                 }
             } catch (error) {
-                console.error('Ошибка загрузки игр:', error);
+                console.error('Ошибка загрузки:', error);
             } finally {
                 setLoading(false);
             }
         };
 
         if (user) {
-            fetchGames();
+            fetchInfo();
         }
     }, [user]);
 
@@ -138,23 +142,26 @@ function ProfilePage() {
         <LayoutWithNav>
             <div className="profile-page__container">
                 <div className="profile-page__content">
+
                     <div className='profile-page__header'>
                         <img className='profile-page__image' src={getPathForImage(user.bannerImage)} />
+
                         <div className='profile-page__user-info'>
                             <img className='profile-page__user-image' src={getPathForImage(user.image)} />
+
                             <div className='profile-page__info'>
                                 <div className='profile-page__username'>{user?.name}</div>
-                                <div className='profile-page__id'>#{user?.id?.toString().padStart(7, '0')}</div>
+                                <div className='profile-page__id'>#{user?.id?.toString()}</div>
                             </div>
                         </div>
                     </div>
 
                     <div className='profile-page__user-descr'>
-                        {user.descr}
+                        Описание
                     </div >
 
                     <div className='profile-page__game-list'>
-                        <h3>Любимые игры:</h3>
+                        <h3 className='profile-page__sector-header'>Любимые игры:</h3>
 
                         <div className='profile-page__games-grid'>
                             {userGames.map((game) => (
@@ -170,6 +177,26 @@ function ProfilePage() {
                                 Добавить
                             </div>
                         </div>
+                    </div>
+
+                    <div className='profile-page__friend-list'>
+                        <h3 className='profile-page__sector-header'>Друзья:</h3>
+
+                        {friends && friends.length > 0 ?
+                            (
+                                <div className='profile-page__friends-grid'>
+                                    {friends.map(friend => (
+                                        <UserCard
+                                            user={friend}
+                                        />
+                                    ))}
+                                </div>
+                            )
+                            : (
+                                <div className='profile-page__empty-list'>
+                                    У вас пока нет друзей
+                                </div>
+                            )}
                     </div>
                 </div>
 

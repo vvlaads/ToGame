@@ -59,7 +59,7 @@
 .profile-page__user-image {
     width: 100px;
     height: 100px;
-    background-color: var(--color-purple);
+    background-color: var(--color-white);
     border-radius: 100%;
     display: flex;
     align-items: center;
@@ -96,7 +96,7 @@
     flex: 1;
 }
 
-.profile-page__game-list h3 {
+.profile-page__sector-header {
     font-size: 24px;
     margin-bottom: 20px;
     color: var(--color-white);
@@ -294,4 +294,24 @@
 
 #profile-page__game-list-window-cancel:hover {
     background-color: var(--color-red-dark);
+}
+
+.profile-page__friends-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    justify-items: center;
+}
+
+.profile-page__empty-list {
+    width: 100%;
+    background-color: var(--color-gray-800);
+    color: var(--color-gray-400);
+    font-size: 20px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px dashed var(--color-gray-600);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }

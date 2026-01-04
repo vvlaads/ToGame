@@ -1,11 +1,11 @@
 import './styles/AuthPage.css';
 import GamePad from '../assets/icons/gamepad.svg';
+import GamesListWithPagination from '../components/GamesListWithPagination';
 import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext'
 import { AUTH_TYPE } from '../constants/enums';
 import { Toaster, toast } from 'sonner';
 import { useGame } from '../context/GameContext';
-import GamesListWithPagination from '../components/GamesListWithPagination';
+import { useUser } from '../context/UserContext';
 
 
 function AuthPage() {
@@ -19,7 +19,7 @@ function AuthPage() {
     const [step, setStep] = useState(1); // 1 - форма, 2 - выбор игр
     const [availableGames, setAvailableGames] = useState([]); // Новое состояние для игр
     const [loadingGames, setLoadingGames] = useState(false); // Состояние загрузки
-    const { signIn, register } = useAuth();
+    const { signIn, register } = useUser();
     const { getAllGames } = useGame();
 
     // Изменение формы авторизации

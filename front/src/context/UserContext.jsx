@@ -3,7 +3,7 @@ import { createContext, useState, useContext } from 'react';
 import { API_ENDPOINTS } from '../constants/api.jsx';
 import { deleteRequest, postRequest } from '../utils/requests.jsx'
 
-const AuthContext = createContext();
+const UserContext = createContext();
 
 const API_BASE_URL = config.apiUrl;
 const REGISTER_URL = `${API_BASE_URL}${API_ENDPOINTS.REGISTER}`
@@ -18,7 +18,7 @@ const GET_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_FRIENDS}`
 const GET_RECIEVED_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_RECIEVED_LIKES}`
 const GET_SENT_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_SENT_LIKES}`
 
-function AuthProvider({ children }) {
+function UserProvider({ children }) {
     const [user, setUser] = useState(null);
 
     // Вспомогательный метод для входа/регистрации
@@ -139,14 +139,14 @@ function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={value}>
+        <UserContext.Provider value={value}>
             {children}
-        </AuthContext.Provider>
+        </UserContext.Provider>
     );
 };
 
-function useAuth() {
-    return useContext(AuthContext);
+function useUser() {
+    return useContext(UserContext);
 };
 
-export { AuthProvider, useAuth };
+export { UserProvider, useUser };

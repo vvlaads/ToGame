@@ -1,6 +1,6 @@
 import './styles/HomePage.css'
 import LayoutWithNav from '../components/LayoutWithNav';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 import { useEffect, useState } from 'react';
 import UserCard from '../components/UserCard';
 import ChatCard from '../components/ChatCard';
@@ -8,7 +8,7 @@ import ChatCard from '../components/ChatCard';
 function HomePage() {
     const [friends, setFriends] = useState([]);
     const [chats, setChats] = useState([]);
-    const { user, getFriends } = useAuth();
+    const { user, getFriends } = useUser();
 
     // Переход к другу
     function goToFriend(friend) {
@@ -43,6 +43,7 @@ function HomePage() {
                                 <div className='home-page__active-chats-list'>
                                     {chats.map(chat => (
                                         <ChatCard
+                                            key={chat.id}
                                             chat={chat}
                                             onClick={() => goToChat(chat)}
                                         />
@@ -63,6 +64,7 @@ function HomePage() {
                                 <div className='home-page__online-friends-list'>
                                     {friends.map(friend => (
                                         <UserCard
+                                            key={friend.id}
                                             user={friend}
                                             onClick={() => goToFriend(friend)}
                                         />

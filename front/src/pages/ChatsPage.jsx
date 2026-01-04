@@ -7,13 +7,13 @@ import Modal from '../components/Modal';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useChats } from '../context/ChatsContext';
-import { useAuth } from '../context/AuthContext';
 import { loadCurrentChatId, loadCurrentRoomId, saveCurrentChatId, saveCurrentRoomId } from '../utils/sessionStorage';
 import { getPathForImage } from '../utils/pathFormat';
 import { formatTimestamp } from '../utils/chatUtils';
+import { useUser } from '../context/UserContext';
 
 function ChatsPage() {
-    const { user, getUserInfo, setRoomId } = useAuth();
+    const { user, getUserInfo, setRoomId } = useUser();
     const {
         chats,
         loading,

@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '../context/UserContext';
 
 // Защищенный маршрут - только для авторизованных
 function ProtectedRoute({ children }) {
-    const { user } = useAuth();
+    const { user } = useUser();
 
     if (!user) {
         // Если не авторизован, перенаправляем на логин
@@ -15,7 +15,7 @@ function ProtectedRoute({ children }) {
 
 // Публичный маршрут - только для неавторизованных
 function PublicRoute({ children }) {
-    const { user } = useAuth();
+    const { user } = useUser();
 
     if (user) {
         // Если уже авторизован, перенаправляем на главную
