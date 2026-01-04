@@ -23,24 +23,24 @@ function ProfilePage() {
     const [gamesToAdd, setGamesToAdd] = useState([]);
 
 
-    // Открыть модальное окно
+    // Открыть информацию по игре
     function openGameInfo(game) {
         setCurrentGame(game);
         setGameInfoIsOpen(true);
     };
 
-    // Закрыть модальное окно
+    // Закрыть информацию по игре
     function closeGameInfo() {
         setCurrentGame(null);
         setGameInfoIsOpen(false);
     };
 
-    // Открыть модальное окно
+    // Открыть список игр для добавления
     function openGameList() {
         setGameListIsOpen(true);
     }
 
-    // Закрыть модальное окно
+    // Закрыть список игр для добавления
     function closeGameList() {
         setGameListIsOpen(false);
     }
@@ -64,6 +64,7 @@ function ProfilePage() {
         });
     }
 
+    // Добавить выбранные игры
     async function addGames() {
         try {
             for (const game of gamesToAdd) {
@@ -81,6 +82,8 @@ function ProfilePage() {
         }
     }
 
+
+    // Удалить выбранную игру
     async function deleteGame(gameName) {
         await removeGame({ name: gameName });
         if (gameInfoIsOpen) {
@@ -90,8 +93,6 @@ function ProfilePage() {
         const updatedUserGames = await getAllGamesByUser();
         setUserGames(updatedUserGames);
     }
-
-
 
     // Получаем игры при загрузке компонента
     useEffect(() => {
@@ -119,11 +120,15 @@ function ProfilePage() {
         }
     }, [user]);
 
+
+    // Заглушка на время загрузки
     if (loading) {
         return (
             <LayoutWithNav>
                 <div className='profile-page__container'>
-                    <div className="loading">Загрузка...</div>
+                    <div className="profile-page__loading">
+                        <div className="profile-page__spinner"></div>
+                    </div>
                 </div>
             </LayoutWithNav>
         );
