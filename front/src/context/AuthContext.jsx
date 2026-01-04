@@ -18,7 +18,7 @@ function AuthProvider({ children }) {
         const body = {
             name: userData.name,
             password: userData.password,
-            games: []
+            games: userData.games
         }
 
         try {
@@ -37,8 +37,7 @@ function AuthProvider({ children }) {
     async function signIn(userData) {
         const body = {
             name: userData.name,
-            password: userData.password,
-            games: []
+            password: userData.password
         }
 
         try {
@@ -57,7 +56,7 @@ function AuthProvider({ children }) {
     async function userInfo() {
         try {
             const responseBody = await postRequest(INFO_URL);
-            return responseBody;
+            return responseBody[0];
         } catch (error) {
             console.error('User Info failed', error);
             return null;

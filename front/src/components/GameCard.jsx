@@ -23,7 +23,7 @@ function GameCard({ game, onClick, onTrashClick, isSelected = false }) {
                     src={TrashIcon}
                     className='game-card__trash'
                     onClick={(e) => {
-                        e.stopPropagation(); // Останавливаем всплытие
+                        e.stopPropagation();
                         onTrashClick(game);
                     }}
                     alt="Удалить"
