@@ -13,11 +13,13 @@ public class GameDTO {
     }
 
     public GameDTO(GameEntity game) {
+        this.filepath = game.getFilepath();
         this.name = game.getName();
         this.descr = game.getDescr();
         this.tags = game.getTags().stream().map(TagDTO::new).collect(java.util.stream.Collectors.toSet());
     }
 
+    private String filepath;
     private Set<TagDTO> tags;
     private String name;
     private String descr;
