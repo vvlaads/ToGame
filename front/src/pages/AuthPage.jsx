@@ -44,16 +44,6 @@ function AuthPage() {
         }));
     }
 
-    // Обработчик выбора игр
-    function handleGameSelect(game) {
-        setUserData(prev => {
-            const newGames = prev.games.includes(game)
-                ? prev.games.filter(g => g !== game)
-                : [...prev.games, game];
-            return { ...prev, games: newGames };
-        });
-    }
-
     // Переход к выбору игр
     function handleNextStep(e) {
         e.preventDefault();
@@ -93,7 +83,9 @@ function AuthPage() {
                     response = await register({
                         name: userData.name,
                         password: userData.password,
-                        games: userData.games
+                        games: userData.games.map(game => ({
+                            name: game.name
+                        }))
                     });
                     break;
             }
