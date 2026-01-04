@@ -1,13 +1,11 @@
 import './styles/AuthPage.css';
 import GamePad from '../assets/icons/gamepad.svg';
-import LeftArrow from '../assets/icons/left arrow.svg';
-import RightArrow from '../assets/icons/right arrow.svg';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext'
 import { AUTH_TYPE } from '../constants/enums';
 import { Toaster, toast } from 'sonner';
 import { useGame } from '../context/GameContext';
-import GameCard from '../components/GameCard';
+import GamesListWithPagination from '../components/GamesListWithPagination';
 
 
 function AuthPage() {
@@ -21,8 +19,6 @@ function AuthPage() {
     const [step, setStep] = useState(1); // 1 - форма, 2 - выбор игр
     const [availableGames, setAvailableGames] = useState([]); // Новое состояние для игр
     const [loadingGames, setLoadingGames] = useState(false); // Состояние загрузки
-    const [currentPage, setCurrentPage] = useState(1); // Страница с играми
-    const [gamesPerPage] = useState(5); // Сколько игр на одной странице
     const { signIn, register } = useAuth();
     const { getAllGames } = useGame();
 
@@ -199,62 +195,11 @@ function AuthPage() {
                         Загрузка игр...
                     </div>
                 ) : (
-                    <>
-                        <div className='auth-page__games-grid'>
-                            {currentGames.map(game => {
-                                // Правильно проверяем, выбрана ли игра
-                                const isSelected = userData.games.some(selectedGame => {
-                                    return selectedGame.name === game.name;
-                                });
-
-                                return (
-                                    <GameCard
-                                        key={game.name}
-                                        game={game}
-                                        isSelected={isSelected}
-                                        onClick={() => handleGameSelect(game)}
-                                    />
-                                );
-                            })}
-                        </div>
-
-                        {/* Пагинация */}
-                        {totalPages > 1 && (
-                            <div className='auth-page__pagination'>
-                                <button
-                                    onClick={prevPage}
-                                    disabled={currentPage === 1}
-                                    className='auth-page__pagination-button'
-                                >
-                                    <img src={LeftArrow} className='auth-page__pagination-button-icon' />
-                                </button>
-
-                                <div className='auth-page__page-numbers'>
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
-                                        <button
-                                            key={pageNumber}
-                                            onClick={() => goToPage(pageNumber)}
-                                            className={`auth-page__page-number ${currentPage === pageNumber ? 'auth-page__page-number--active' : ''}`}
-                                        >
-                                            {pageNumber}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={nextPage}
-                                    disabled={currentPage === totalPages}
-                                    className='auth-page__pagination-button'
-                                >
-                                    <img src={RightArrow} className='auth-page__pagination-button-icon' />
-                                </button>
-                            </div>
-                        )}
-
-                        <div className='auth-page__selected-count'>
-                            Выбрано игр: {userData.games.length}
-                        </div>
-                    </>)
+                    <GamesListWithPagination
+                        games={availableGames}
+                        selectedGames={userData.games}
+                        onGameSelect={handleGameSelect}
+                    />)
                 }
 
                 <div className='auth-page__step-2-buttons'>
@@ -298,31 +243,6 @@ function AuthPage() {
             setLoadingGames(false);
         }
     }
-
-    // Вычисляем, какие игры показывать на текущей странице
-    const indexOfLastGame = currentPage * gamesPerPage;
-    const indexOfFirstGame = indexOfLastGame - gamesPerPage;
-    const currentGames = availableGames.slice(indexOfFirstGame, indexOfLastGame);
-
-    // Вычисляем общее количество страниц
-    const totalPages = Math.ceil(availableGames.length / gamesPerPage);
-
-    // Функции для смены страниц
-    const nextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const prevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const goToPage = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
 
     return (
         <div className='auth-page__login-container'>

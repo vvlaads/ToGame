@@ -1,7 +1,7 @@
 import './styles/ProfilePage.css';
 import LayoutWithNav from '../components/LayoutWithNav';
 import { useAuth } from '../context/AuthContext';
-import { getPathForImage } from '../utils/pathFormat';
+import { getPathForGame, getPathForImage } from '../utils/pathFormat';
 import { useGame } from '../context/GameContext';
 import { useEffect, useState } from 'react';
 import GameCard from '../components/GameCard';
@@ -9,15 +9,18 @@ import CrossIcon from '../assets/icons/cross.svg';
 import AddIcon from '../assets/icons/add.svg';
 import Modal from '../components/Modal';
 import Tag from '../components/Tag';
+import GamesListWithPagination from '../components/GamesListWithPagination';
 
 function ProfilePage() {
     const { user, logout } = useAuth();
-    const { games, getGameList, findTagsForGame, deleteGameForUser } = useGame();
+    const { getAllGames, getAllGamesByUser, addGame, removeGame } = useGame();
+    const [userGames, setUserGames] = useState([]);
+    const [allGames, setAllGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentGame, setCurrentGame] = useState(null);
-    const [currentGameTags, setCurrentGameTags] = useState([]);
     const [gameInfoIsOpen, setGameInfoIsOpen] = useState(false);
     const [gameListIsOpen, setGameListIsOpen] = useState(false);
+    const [gamesToAdd, setGamesToAdd] = useState([]);
 
 
     // Открыть модальное окно
@@ -47,26 +50,63 @@ function ProfilePage() {
         logout();
     };
 
-    function deleteGame(e, gameId) {
-        e.stopPropagation();
-        deleteGameForUser(gameId);
-        if (gameInfoIsOpen) {
-            closeGameInfo();
+
+    // Обработчик выбора игр
+    function handleGameSelect(game) {
+        setGamesToAdd(prev => {
+            const gameName = game.name;
+
+            const isSelected = prev.some(g => g.name === gameName);
+
+            return isSelected
+                ? prev.filter(g => g.name !== gameName)
+                : [...prev, game];
+        });
+    }
+
+    async function addGames() {
+        try {
+            for (const game of gamesToAdd) {
+                await addGame({ name: game.name });
+            }
+
+            closeGameList();
+            setGamesToAdd([]);
+
+            const updatedUserGames = await getAllGamesByUser();
+            setUserGames(updatedUserGames);
+
+        } catch (error) {
+            console.error('Ошибка при добавлении игр:', error);
         }
     }
 
-    function addGame(game) {
-        if (gameListIsOpen) {
-            closeGameList();
+    async function deleteGame(gameName) {
+        await removeGame({ name: gameName });
+        if (gameInfoIsOpen) {
+            closeGameInfo();
         }
+
+        const updatedUserGames = await getAllGamesByUser();
+        setUserGames(updatedUserGames);
     }
+
+
 
     // Получаем игры при загрузке компонента
     useEffect(() => {
         const fetchGames = async () => {
             setLoading(true);
             try {
-                await getGameList();
+                const userGames = await getAllGamesByUser();
+                const allGames = await getAllGames();
+                if (userGames && allGames) {
+                    setUserGames(userGames);
+                    setAllGames(allGames);
+                }
+                else {
+                    throw Error();
+                }
             } catch (error) {
                 console.error('Ошибка загрузки игр:', error);
             } finally {
@@ -78,17 +118,6 @@ function ProfilePage() {
             fetchGames();
         }
     }, [user]);
-
-    // Обновление тегов для игры
-    useEffect(() => {
-        async function fetchTags() {
-            if (currentGame) {
-                const tags = await findTagsForGame(currentGame.id);
-                setCurrentGameTags(tags);
-            }
-        }
-        fetchTags();
-    }, [currentGame])
 
     if (loading) {
         return (
@@ -122,26 +151,20 @@ function ProfilePage() {
                     <div className='profile-page__game-list'>
                         <h3>Любимые игры:</h3>
 
-                        {games && games.length > 0 ? (
-                            <div className='profile-page__games-grid'>
-                                {games.map((game) => (
-                                    <GameCard
-                                        key={game.id}
-                                        game={game}
-                                        onClick={() => openGameInfo(game)}
-                                        onTrashClick={(e) => deleteGame(e, game.id)}
-                                    />
-                                ))}
-                                <div className='profile-page__add-game' onClick={openGameList}>
-                                    <img src={AddIcon} className='profile-page__add-game-icon' />
-                                    Добавить
-                                </div>
+                        <div className='profile-page__games-grid'>
+                            {userGames.map((game) => (
+                                <GameCard
+                                    key={game.name}
+                                    game={game}
+                                    onClick={() => openGameInfo(game)}
+                                    onTrashClick={() => deleteGame(game.name)}
+                                />
+                            ))}
+                            <div className='profile-page__add-game' onClick={openGameList}>
+                                <img src={AddIcon} className='profile-page__add-game-icon' />
+                                Добавить
                             </div>
-                        ) : (
-                            <div className='profile-page__no-games'>
-                                Игры не добавлены
-                            </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
@@ -150,7 +173,7 @@ function ProfilePage() {
                         (<div className='profile-page__game-modal-window'>
                             <img src={CrossIcon} className='profile-page__game-modal-window-cross' onClick={closeGameInfo} />
 
-                            <img src={currentGame?.image} className='profile-page__game-modal-window-image' />
+                            <img src={getPathForGame(currentGame.filepath)} className='profile-page__game-modal-window-image' />
                             <div className='profile-page__game-modal-window-text'>
                                 <div className='profile-page__game-modal-window-name'>
                                     {currentGame?.name}
@@ -161,17 +184,16 @@ function ProfilePage() {
                                 <div className='profile-page__game-modal-window-tag-header'>
                                     ТЕГИ:
                                 </div>
-                                {currentGameTags && currentGameTags.length > 0 ?
-                                    (<div className='profile-page__game-modal-window-tags'>
-                                        {currentGameTags.map(tag => (
-                                            <Tag key={tag.id} tag={tag} />
-                                        ))}
-                                    </div>)
-                                    : (<div className='profile-page__game-modal-window-tags'>Не найдено тегов...</div>)}
+
+                                <div className='profile-page__game-modal-window-tags'>
+                                    {currentGame.tags.map(tag => (
+                                        <Tag key={tag.name} tag={tag} />
+                                    ))}
+                                </div>
 
                                 <button
                                     className='profile-page__game-modal-window-button'
-                                    onClick={(e) => deleteGame(e, currentGame?.id)}>
+                                    onClick={() => deleteGame(currentGame?.name)}>
                                     Удалить
                                 </button>
                             </div>
@@ -187,19 +209,28 @@ function ProfilePage() {
                 <Modal isOpen={gameListIsOpen} onClose={closeGameList}>
                     <div className='profile-page__game-list-window-container'>
                         <div className='profile-page__game-list-window-header'>Список игр</div>
-                        <div className='profile-page__game-list-window-list'>
-                            {games.map(game => (
-                                <GameCard
-                                    key={game.id}
-                                    game={game}
-                                    onClick={() => addGame(game)}
-                                />
-                            )
+                        <GamesListWithPagination
+                            games={allGames.filter(
+                                game => !userGames.some(userGame => userGame.name === game.name)
                             )}
+                            selectedGames={gamesToAdd}
+                            onGameSelect={handleGameSelect}
+                        />
+                        <div className='profile-page__game-list-window-buttons'>
+                            <button
+                                onClick={addGames}
+                                className='profile-page__game-list-window-button'
+                                id='profile-page__game-list-window-save'>
+                                Сохранить
+                            </button>
+                            <button
+                                onClick={closeGameList}
+                                className='profile-page__game-list-window-button'
+                                id='profile-page__game-list-window-cancel'>
+                                Отмена
+                            </button>
                         </div>
-                        <button onClick={closeGameList} className='profile-page__game-list-window-button'>
-                            Закрыть
-                        </button>
+
                     </div>
                 </Modal>
 

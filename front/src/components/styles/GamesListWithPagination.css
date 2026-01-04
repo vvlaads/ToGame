@@ -1,0 +1,88 @@
+.games-list-with-pagination__container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.games-list-with-pagination__top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+}
+
+.games-list-with-pagination__search {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 20px;
+    width: 80%;
+    background-color: var(--color-gray-900);
+    border: 0;
+    color: inherit;
+}
+
+.games-list-with-pagination__selected-count {
+    text-align: center;
+    font-size: 24px;
+}
+
+
+.games-list-with-pagination__games-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    justify-items: center;
+}
+
+.games-list-with-pagination__pagination {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+}
+
+.games-list-with-pagination__pagination-button {
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--color-gray-700);
+    color: inherit;
+    width: 40px;
+    height: 40px;
+}
+
+.games-list-with-pagination__pagination-button:hover {
+    background-color: var(--color-gray-600);
+}
+
+.games-list-with-pagination__pagination-button-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.games-list-with-pagination__page-numbers {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.games-list-with-pagination__page-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 0;
+    font-size: 16px;
+    background-color: var(--color-gray-700);
+    color: inherit;
+}
+
+.games-list-with-pagination__page-number:hover {
+    background-color: var(--color-gray-600);
+}
+
+.games-list-with-pagination__page-number--active {
+    background-color: var(--color-purple);
+}
+
+.games-list-with-pagination__page-number--active:hover {
+    background-color: var(--color-purple-dark);
+}

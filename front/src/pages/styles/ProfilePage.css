@@ -4,7 +4,6 @@
     min-height: calc(100vh - 60px);
     padding: 20px;
     gap: 30px;
-    height: 100%;
     box-sizing: border-box;
 }
 
@@ -181,6 +180,7 @@
 
 .profile-page__game-modal-window-tag-header {
     font-size: 20px;
+    color: var(--color-gray-400);
 }
 
 .profile-page__game-modal-window-tags {
@@ -215,7 +215,7 @@
 .profile-page__game-list-window-container {
     width: 50vw;
     height: 70vh;
-    background-color: var(--color-gray-900);
+    background-color: var(--color-gray-800);
     border-radius: 20px;
     display: flex;
     flex-direction: column;
@@ -234,18 +234,37 @@
     justify-items: center;
 }
 
-.profile-page__game-list-window-button {
+.profile-page__game-list-window-buttons {
     width: 100%;
+    margin-top: auto;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.profile-page__game-list-window-button {
     border: 0;
     border-radius: 10px;
-    background-color: var(--color-red);
     height: 50px;
     color: inherit;
     font-size: 20px;
-    margin-top: auto;
-    margin-bottom: 20px;
 }
 
-.profile-page__game-list-window-button:hover {
+#profile-page__game-list-window-save {
+    background-color: var(--color-purple);
+    width: 60%;
+}
+
+#profile-page__game-list-window-cancel {
+    background-color: var(--color-red);
+    width: 30%;
+}
+
+#profile-page__game-list-window-save:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#profile-page__game-list-window-cancel:hover {
     background-color: var(--color-red-dark);
 }
