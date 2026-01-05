@@ -29,6 +29,26 @@
     margin-top: 20px;
 }
 
+.profile-page__edit-button {
+    width: 300px;
+    height: 60px;
+    color: inherit;
+    background-color: var(--color-gray-700);
+    border: 0;
+    border-radius: 10px;
+    margin-left: auto;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    display: flex;
+    gap: 10px;
+    font-size: 20px;
+}
+
+.profile-page__edit-button:hover {
+    background-color: var(--color-gray-600);
+}
+
 .profile-page__user-image {
     width: 100px;
     height: 100px;
@@ -287,4 +307,80 @@
     justify-content: center;
     align-items: center;
     display: flex;
+}
+
+.profile-page__form {
+    width: 60vw;
+    height: auto;
+    border-radius: 20px;
+    background-color: var(--color-gray-800);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+}
+
+.profile-page__form-cross {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.profile-page__form-header {
+    font-size: 32px;
+    text-align: center;
+}
+
+.profile-page__label {
+    font-size: 20px;
+    color: var(--color-gray-400);
+}
+
+.profile-page__form-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.profile-page__form-button {
+    border-radius: 10px;
+    border: 0;
+    height: 50px;
+    color: inherit;
+    font-size: 20px;
+}
+
+#profile-page__form-submit {
+    width: 60%;
+    background-color: var(--color-purple);
+}
+
+#profile-page__form-submit:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#profile-page__form-cancel {
+    width: 30%;
+    background-color: var(--color-red);
+}
+
+#profile-page__form-cancel:hover {
+    background-color: var(--color-red-dark);
+}
+
+.profile-page__form-input {
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-gray-700);
+    border-radius: 6px;
+    background: var(--color-gray-900);
+    border-radius: 10px;
+    font-size: 20px;
+    resize: none;
 }

@@ -1,6 +1,7 @@
 import './styles/ProfilePage.css';
 import AddIcon from '../assets/icons/add.svg';
 import CrossIcon from '../assets/icons/cross.svg';
+import SettingsIcon from '../assets/icons/settings.svg';
 import Tag from '../components/Tag';
 import Modal from '../components/Modal';
 import Loading from '../components/Loading';
@@ -29,6 +30,8 @@ function ProfilePage() {
     const [gameInfoIsOpen, setGameInfoIsOpen] = useState(false);
     const [gameListIsOpen, setGameListIsOpen] = useState(false);
     const [gamesToAdd, setGamesToAdd] = useState([]);
+    const [isEditMode, setEditMode] = useState(false);
+    const [userData, setUserData] = useState({ descr: '' });
     const isMyProfile = !userId || Number(userId) === user.id;
 
 
@@ -54,10 +57,35 @@ function ProfilePage() {
         setGameListIsOpen(false);
     }
 
+    // Открыть режим редактирования
+    function openEditMode() {
+        setEditMode(true);
+    }
+
+    // Закрыть режим редактирования
+    function closeEditMode() {
+        setEditMode(false);
+    }
+
     // Выход из аккаунта
     function handleLogout() {
         logout();
     };
+
+    function handleUserFormChange(e) {
+        const { name, value } = e.target;
+        setUserData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    }
+
+    // Обновить информацию о пользователе
+    function updateUser(e) {
+        e.preventDefault(); // Не перезагружать страницу
+        //TODO: отправка запроса к API
+        closeEditMode();
+    }
 
 
     // Обработчик выбора игр
@@ -162,8 +190,20 @@ function ProfilePage() {
                                 <div className='profile-page__username'>{currentUser?.name}</div>
                                 <div className='profile-page__id'>#{currentUser?.id?.toString()}</div>
                             </div>
+
+                            {isMyProfile && (
+                                <button className='profile-page__edit-button' onClick={openEditMode}>
+                                    <img src={SettingsIcon} className='profile-page__edit-button-image' />
+                                    <span className='profile-page__edit-button-text' >
+                                        Редактировать
+                                    </span>
+                                </button>
+                            )}
+
                         </div>
                     </div>
+
+
 
                     <div className='profile-page__user-descr'>
                         Описание
@@ -210,6 +250,41 @@ function ProfilePage() {
                             )}
                     </div>)}
                 </div>
+
+                <Modal isOpen={isEditMode} onClose={closeEditMode}>
+                    <form onSubmit={updateUser} className='profile-page__form'>
+                        <img src={CrossIcon} className='profile-page__form-cross' onClick={closeEditMode} />
+                        <div className='profile-page__form-header'>Редактировать профиль</div>
+
+                        <div className='profile-page__form-group'>
+                            <label className='profile-page__label'>Описание</label>
+                            <input
+                                type='text'
+                                name='descr'
+                                className='profile-page__form-input'
+                                placeholder='Введите описание'
+                                value={userData.descr}
+                                onChange={handleUserFormChange}
+                                required
+                            />
+                        </div>
+                        <div className='profile-page__form-buttons'>
+                            <button
+                                type='submit'
+                                className='profile-page__form-button'
+                                id='profile-page__form-submit'>
+                                Сохранить
+                            </button>
+                            <button
+                                type='button'
+                                className='profile-page__form-button'
+                                id='profile-page__form-cancel'
+                                onClick={closeEditMode}>
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
 
                 <Modal isOpen={gameInfoIsOpen} onClose={closeGameInfo}>
                     {currentGame ?
@@ -288,7 +363,7 @@ function ProfilePage() {
 
                 </div>
             </div>
-        </LayoutWithNav>
+        </LayoutWithNav >
     );
 }
 
