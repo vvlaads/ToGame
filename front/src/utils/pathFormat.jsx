@@ -3,5 +3,6 @@ export function getPathForImage(imageName) {
 }
 
 export function getPathForGame(gameName) {
-    return `./public/games/${gameName}`;
+    if (!gameName) return '';
+    return `/games/${gameName}`;
 }

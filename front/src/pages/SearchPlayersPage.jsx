@@ -1,209 +1,190 @@
 import './styles/SearchPlayersPage.css';
 import LayoutWithNav from '../components/LayoutWithNav';
-import { useEffect, useState } from 'react';
 import LeftArrow from '../assets/icons/left arrow.svg';
 import RightArrow from '../assets/icons/right arrow.svg';
-import { useChats } from '../context/ChatsContext';
-import { useNavigate } from 'react-router-dom';
 import { getPathForImage } from '../utils/pathFormat';
-import { useGame } from '../context/GameContext';
+import { useEffect, useState } from 'react';
+import Tag from '../components/Tag';
 import { useUser } from '../context/UserContext';
+import Loading from '../components/Loading';
 
 function SearchPlayersPage() {
-    const navigate = useNavigate();
-    const { user } = useUser();
-    const { chats, addChat } = useChats();
-    const { findGamesForUser, findTagsForUser } = useGame();
-    const [loading, setLoading] = useState(true);
-    const [curPos, setCurPos] = useState(0);
-    const [currentTags, setCurrentTags] = useState([]);
-    const [currentGames, setCurrentGames] = useState([]);
-    const [loadingTagsGames, setLoadingTagsGames] = useState(false);
+    const [recUsers, setRecUsers] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [games, setGames] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const { userInfoById, sendLike } = useUser()
 
-    // Перейти к предыдущему игроку
-    function prevUser() {
-        setCurPos(curPos - 1 < 0 ? players.length - 1 : curPos - 1);
-    }
+    // Константы для ограничения отображения
+    const MAX_VISIBLE_TAGS = 6;
+    const MAX_VISIBLE_GAMES = 6;
 
-    // Перейти к следующему игроку
+    // Следующий пользователь
     function nextUser() {
-        setCurPos(curPos + 1 > players.length - 1 ? 0 : curPos + 1);
-    }
-
-    // Перейти в чат с игроком
-    function chatToPerson() {
-        const existingChat = chats.find(chat => chat.name === players[curPos].name);
-
-        if (existingChat) {
-            navigate(`/chats?chatId=${existingChat.id}`);
-            return;
+        if (currentIndex + 1 < recUsers.length) {
+            setCurrentIndex(i => i + 1);
         }
-
-        const newChatId = addChat({
-            name: players[curPos].name,
-            image: "../../public/vite.svg",
-        });
-
-        navigate(`/chats?chatId=${newChatId}`);
     }
 
-    // Загрузка тегов и игр для текущего игрока
-    useEffect(() => {
-        const loadTagsAndGames = async () => {
-            if (players.length === 0 || !players[curPos]) return;
+    // Предыдущий пользователь
+    function prevUser() {
+        if (currentIndex > 0) {
+            setCurrentIndex(i => i - 1);
+        }
+    }
 
-            setLoadingTagsGames(true);
-            try {
-                const user = players[curPos];
+    // Отправить лайк пользователю
+    function handleLikeButton() {
+        sendLike(currentUser.id);
+        setRecUsers(prev => {
+            const newList = prev.filter(
+                (_, index) => index !== currentIndex
+            );
 
-                // Загружаем параллельно
-                const [tagsResponse, gamesResponse] = await Promise.all([
-                    findTagsForUser(user.id),
-                    findGamesForUser(user.id)
-                ]);
-
-                if (tagsResponse.success) {
-                    setCurrentTags(tagsResponse.data || []);
-                } else {
-                    setCurrentTags([]);
-                    console.error('Ошибка загрузки тегов:', tagsResponse.error);
-                }
-
-                if (gamesResponse.success) {
-                    setCurrentGames(gamesResponse.data || []);
-                } else {
-                    setCurrentGames([]);
-                    console.error('Ошибка загрузки игр:', gamesResponse.error);
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки данных игрока:', error);
-                setCurrentTags([]);
-                setCurrentGames([]);
-            } finally {
-                setLoadingTagsGames(false);
+            // если мы были на последнем — сдвигаем индекс влево
+            if (currentIndex >= newList.length && newList.length > 0) {
+                setCurrentIndex(newList.length - 1);
             }
-        };
 
-        loadTagsAndGames();
-    }, [curPos, players, findTagsForUser, findGamesForUser]);
+            return newList;
+        });
+    }
 
-    // Получаем игроков при загрузке компонента
+    // Загрузка рекомендуемых пользователей
     useEffect(() => {
-        const fetchPlayers = async () => {
+        setLoading(true);
+        try {
+            setRecUsers([{ id: 1 }, { id: 2 }, { id: 4 }]); //TODO: заменить на вызов API
+        }
+        catch (error) {
+            console.error('Ошибка загрузки рекомендуемых пользователей', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    }, [])
+
+    // Обновление текущего пользователя при изменении индекса или списка
+    useEffect(() => {
+        async function fetchUser() {
+            if (!recUsers.length) return;
+
             setLoading(true);
             try {
-                await findPlayers();
-            } catch (error) {
-                console.error('Ошибка поиска игроков:', error);
+                const user = await userInfoById(recUsers[currentIndex]);
+
+                setCurrentUser(user);
+                setGames(user.games ?? []);
+
+                const uniqueTags = [];
+                const names = new Set();
+
+                user.games?.forEach(game => {
+                    game.tags?.forEach(tag => {
+                        if (tag?.name && !names.has(tag.name)) {
+                            names.add(tag.name);
+                            uniqueTags.push(tag);
+                        }
+                    });
+                });
+
+                setTags(uniqueTags);
+            } catch (e) {
+                console.error(e);
             } finally {
                 setLoading(false);
             }
-        };
-
-        if (user) {
-            fetchPlayers();
         }
-    }, [user]);
+
+        fetchUser();
+    }, [currentIndex, recUsers]);
+
+
+    // Рассчитываем количество скрытых элементов
+    const hiddenTagsCount = Math.max(0, tags.length - MAX_VISIBLE_TAGS);
+    const hiddenGamesCount = Math.max(0, games.length - MAX_VISIBLE_GAMES);
+
+    // Получаем только видимые элементы
+    const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS);
+    const visibleGames = games.slice(0, MAX_VISIBLE_GAMES);
 
     if (loading) {
-        return (
-            <LayoutWithNav>
-                <div className='search-players-page__container'>
-                    <div className="loading">Загрузка...</div>
-                </div>
-            </LayoutWithNav>
-        );
+        return <Loading />
     }
-
-    if (players.length === 0) {
-        return (
-            <LayoutWithNav>
-                <div className='search-players-page__container'>
-                    <div className="no-players">Игроки не найдены</div>
-                </div>
-            </LayoutWithNav>
-        );
-    }
-
-    const currentPlayer = players[curPos];
 
     return (
         <LayoutWithNav>
             <div className='search-players-page__container'>
-                <div className='search-players-page__card'>
-                    <div className='search-players-page__button-container'>
-                        <button onClick={prevUser} className='search-players-page__button search-players-page__button--prev'>
-                            <img src={LeftArrow} alt="Назад" className='search-players-page___icon' />
-                        </button>
-                    </div>
-                    <div className='search-players-page__info'>
-                        <img
-                            className='search-players-page__banner_image'
-                            src={getPathForImage(currentPlayer.bannerImage)}
-                            alt="Баннер"
-                        />
-
-                        <div className='search-players-page__image_and_name'>
-                            <img
-                                className='search-players-page__image'
-                                src={getPathForImage(currentPlayer.image)}
-                                alt={currentPlayer.name}
-                            />
-                            <div className='search-players-page__name'>{currentPlayer.name}</div>
+                {recUsers.length === 0 ?
+                    (
+                        <div className="search-players-page__empty">
+                            Пользователей больше нет
                         </div>
+                    )
+                    : (
+                        <div className='search-players-page__card'>
+                            <div className='search-players-page__button-container'>
+                                <button
+                                    onClick={prevUser}
+                                    className='search-players-page__button search-players-page__button--prev'
+                                    disabled={currentIndex === 0}>
+                                    <img src={LeftArrow} className='search-players-page___icon' />
+                                </button>
+                            </div>
 
-                        <div className='search-players-page__descr'>{currentPlayer.descr}</div>
+                            <div className='search-players-page__info'>
+                                <img
+                                    className='search-players-page__banner_image'
+                                    src={getPathForImage(currentUser?.bannerImage)}
+                                />
 
-                        <div className='search-players-page__section'>
-                            <div className='search-players-page__label'>ТЕГИ:</div>
-                            {loadingTagsGames ? (
-                                <div className="loading-small">Загрузка тегов...</div>
-                            ) : (
-                                <div className='search-players-page__tags'>
-                                    {currentTags.length > 0 ? (
-                                        currentTags.map(tag => (
-                                            <div key={tag.id} className='search-players-page__tag'>
-                                                {tag.name}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="no-data">Теги не указаны</div>
-                                    )}
+                                <div className='search-players-page__image_and_name'>
+                                    <img
+                                        className='search-players-page__image'
+                                        src={getPathForImage(currentUser?.image)}
+                                    />
+                                    <div className='search-players-page__name'>{currentUser?.name}</div>
                                 </div>
-                            )}
-                        </div>
 
-                        <div className='search-players-page__section'>
-                            <div className='search-players-page__label'>ИГРАЕТ В:</div>
-                            {loadingTagsGames ? (
-                                <div className="loading-small">Загрузка игр...</div>
-                            ) : (
-                                <div className='search-players-page__games'>
-                                    {currentGames.length > 0 ? (
-                                        currentGames.map(game => (
-                                            <div key={game.id} className='search-players-page__game'>
-                                                {game.name}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="no-data">Игры не указаны</div>
-                                    )}
+                                <div className='search-players-page__descr'>{currentUser?.descr}</div>
+
+                                <div className='search-players-page__section'>
+                                    <div className='search-players-page__label'>ТЕГИ:</div>
+                                    <div className='search-players-page__tags'>
+                                        {visibleTags.map(tag =>
+                                            <Tag
+                                                tag={tag}
+                                            />)}
+                                    </div>
+                                    {hiddenTagsCount > 0 && (<div className='search-players-page__hidden-count'>+ {hiddenTagsCount} тегов</div>)}
                                 </div>
-                            )}
-                        </div>
 
-                        <button
-                            className='search-players-page__success-button'
-                            onClick={chatToPerson}>
-                            Написать
-                        </button>
-                    </div>
-                    <div className='search-players-page__button-container'>
-                        <button onClick={nextUser} className='search-players-page__button search-players-page__button--next'>
-                            <img src={RightArrow} alt="Далее" className='search-players-page___icon' />
-                        </button>
-                    </div>
-                </div>
+                                <div className='search-players-page__section'>
+                                    <div className='search-players-page__label'>ИГРАЕТ В:</div>
+                                    <div className='search-players-page__games'>
+                                        {visibleGames.map(game =>
+                                            <div className='search-players-page__game'>{game.name}</div>
+                                        )}
+                                    </div>
+                                    {hiddenGamesCount > 0 && (<div className='search-players-page__hidden-count'>+ {hiddenGamesCount} игры</div>)}
+                                </div>
+
+                                <button
+                                    className='search-players-page__like-button'
+                                    onClick={handleLikeButton}>
+                                    Лайк
+                                </button>
+                            </div>
+
+                            <div className='search-players-page__button-container'>
+                                <button onClick={nextUser} className='search-players-page__button search-players-page__button--next'>
+                                    <img src={RightArrow} className='search-players-page___icon' />
+                                </button>
+                            </div>
+                        </div>
+                    )}
             </div>
         </LayoutWithNav>
     );

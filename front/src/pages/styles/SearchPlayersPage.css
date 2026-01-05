@@ -23,6 +23,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    height: 100%;
 }
 
 .search-players-page__banner_image {
@@ -42,6 +43,7 @@
     width: 60px;
     height: 60px;
     border-radius: 100%;
+    background-color: var(--color-white);
 }
 
 .search-players-page__name {
@@ -63,32 +65,29 @@
 }
 
 .search-players-page__tags {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-}
-
-.search-players-page__tag {
-    padding: 8px 20px;
-    border-radius: 5px;
-    width: auto;
-    background-color: color-mix(in oklab, var(--color-green-dark) 20%, transparent);
-    color: var(--color-green);
-    border: 1px solid var(--color-green);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    justify-items: center;
 }
 
 .search-players-page__games {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    justify-items: center;
 }
 
 .search-players-page__game {
     padding: 10px 20px;
     border-radius: 20px;
-    width: auto;
+    width: 100%;
     background-color: var(--color-gray-700);
     color: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .search-players-page__button-container {
@@ -123,17 +122,34 @@
     border-radius: 0 10px 10px 0;
 }
 
-.search-players-page__success-button {
+.search-players-page__like-button {
     width: 100%;
     background-color: var(--color-purple);
     border: 0;
     font-size: 24px;
     color: inherit;
     border-radius: 10px;
-    height: 80px;
-    margin-top: 30px;
+    height: 60px;
+    margin-top: auto;
 }
 
-.search-players-page__success-button:hover {
+.search-players-page__like-button:hover {
     background-color: var(--color-purple-dark);
+}
+
+.search-players-page__empty {
+    width: 100%;
+    background-color: var(--color-gray-800);
+    color: var(--color-gray-400);
+    font-size: 20px;
+    height: 80vh;
+    border-radius: 10px;
+    border: 2px dashed var(--color-gray-600);
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.search-players-page__hidden-count {
+    color: var(--color-gray-400);
 }

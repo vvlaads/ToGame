@@ -1,20 +1,26 @@
 import './styles/ProfilePage.css';
-import LayoutWithNav from '../components/LayoutWithNav';
-import { useUser } from '../context/UserContext';
-import { getPathForGame, getPathForImage } from '../utils/pathFormat';
-import { useGame } from '../context/GameContext';
-import { useEffect, useState } from 'react';
-import GameCard from '../components/GameCard';
-import CrossIcon from '../assets/icons/cross.svg';
 import AddIcon from '../assets/icons/add.svg';
-import Modal from '../components/Modal';
+import CrossIcon from '../assets/icons/cross.svg';
 import Tag from '../components/Tag';
-import GamesListWithPagination from '../components/GamesListWithPagination';
+import Modal from '../components/Modal';
+import Loading from '../components/Loading';
 import UserCard from '../components/UserCard';
+import GameCard from '../components/GameCard';
+import LayoutWithNav from '../components/LayoutWithNav';
+import GamesListWithPagination from '../components/GamesListWithPagination';
+import { useEffect, useState } from 'react';
+import { useUser } from '../context/UserContext';
+import { useGame } from '../context/GameContext';
+import { getPathForGame, getPathForImage } from '../utils/pathFormat';
+import { useParams } from 'react-router-dom';
+
 
 function ProfilePage() {
-    const { user, logout, getFriends } = useUser();
+
+    const { userId } = useParams();
+    const { user, logout, getFriends, userInfoById } = useUser();
     const { getAllGames, getAllGamesByUser, addGame, removeGame } = useGame();
+    const [currentUser, setCurrentUser] = useState(null);
     const [friends, setFriends] = useState([]);
     const [userGames, setUserGames] = useState([]);
     const [allGames, setAllGames] = useState([]);
@@ -23,6 +29,7 @@ function ProfilePage() {
     const [gameInfoIsOpen, setGameInfoIsOpen] = useState(false);
     const [gameListIsOpen, setGameListIsOpen] = useState(false);
     const [gamesToAdd, setGamesToAdd] = useState([]);
+    const isMyProfile = !userId || Number(userId) === user.id;
 
 
     // Открыть информацию по игре
@@ -101,40 +108,42 @@ function ProfilePage() {
         async function fetchInfo() {
             setLoading(true);
             try {
-                const userGames = await getAllGamesByUser();
-                const allGames = await getAllGames();
-                const friends = await getFriends();
-                if (userGames && allGames && friends) {
+                if (isMyProfile) {
+                    setCurrentUser(user);
+
+                    const userGames = await getAllGamesByUser();
+                    const allGames = await getAllGames();
+                    const friends = await getFriends();
+
                     setUserGames(userGames);
                     setAllGames(allGames);
                     setFriends(friends);
-                }
-                else {
-                    throw Error();
+                } else {
+                    const profileUser = await userInfoById({ id: userId });
+
+                    setCurrentUser(profileUser);
+                    setUserGames(profileUser.games);
+                    setFriends([]);
+                    setAllGames([]);
                 }
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
         if (user) {
             fetchInfo();
         }
-    }, [user]);
+    }, [user, userId]);
+
 
 
     // Заглушка на время загрузки
     if (loading) {
         return (
-            <LayoutWithNav>
-                <div className='profile-page__container'>
-                    <div className="profile-page__loading">
-                        <div className="profile-page__spinner"></div>
-                    </div>
-                </div>
-            </LayoutWithNav>
+            <Loading />
         );
     }
 
@@ -144,14 +153,14 @@ function ProfilePage() {
                 <div className="profile-page__content">
 
                     <div className='profile-page__header'>
-                        <img className='profile-page__image' src={getPathForImage(user.bannerImage)} />
+                        <img className='profile-page__image' src={getPathForImage(currentUser.bannerImage)} />
 
                         <div className='profile-page__user-info'>
-                            <img className='profile-page__user-image' src={getPathForImage(user.image)} />
+                            <img className='profile-page__user-image' src={getPathForImage(currentUser.image)} />
 
                             <div className='profile-page__info'>
-                                <div className='profile-page__username'>{user?.name}</div>
-                                <div className='profile-page__id'>#{user?.id?.toString()}</div>
+                                <div className='profile-page__username'>{currentUser?.name}</div>
+                                <div className='profile-page__id'>#{currentUser?.id?.toString()}</div>
                             </div>
                         </div>
                     </div>
@@ -164,22 +173,24 @@ function ProfilePage() {
                         <h3 className='profile-page__sector-header'>Любимые игры:</h3>
 
                         <div className='profile-page__games-grid'>
-                            {userGames.map((game) => (
+                            {userGames.map(game => (
                                 <GameCard
                                     key={game.name}
                                     game={game}
                                     onClick={() => openGameInfo(game)}
-                                    onTrashClick={() => deleteGame(game.name)}
+                                    onTrashClick={isMyProfile ? () => deleteGame(game.name) : undefined}
                                 />
                             ))}
-                            <div className='profile-page__add-game' onClick={openGameList}>
-                                <img src={AddIcon} className='profile-page__add-game-icon' />
-                                Добавить
-                            </div>
+                            {isMyProfile &&
+                                (<div className='profile-page__add-game' onClick={openGameList}>
+                                    <img src={AddIcon} className='profile-page__add-game-icon' />
+                                    Добавить
+                                </div>)
+                            }
                         </div>
                     </div>
 
-                    <div className='profile-page__friend-list'>
+                    {isMyProfile && (<div className='profile-page__friend-list'>
                         <h3 className='profile-page__sector-header'>Друзья:</h3>
 
                         {friends && friends.length > 0 ?
@@ -197,7 +208,7 @@ function ProfilePage() {
                                     У вас пока нет друзей
                                 </div>
                             )}
-                    </div>
+                    </div>)}
                 </div>
 
                 <Modal isOpen={gameInfoIsOpen} onClose={closeGameInfo}>
@@ -223,11 +234,11 @@ function ProfilePage() {
                                     ))}
                                 </div>
 
-                                <button
+                                {isMyProfile && (<button
                                     className='profile-page__game-modal-window-button'
                                     onClick={() => deleteGame(currentGame?.name)}>
                                     Удалить
-                                </button>
+                                </button>)}
                             </div>
                         </div>)
                         : (
@@ -267,9 +278,14 @@ function ProfilePage() {
                 </Modal>
 
                 <div className='profile-page__exit-button-container'>
-                    <button className='profile-page__exit-button' onClick={handleLogout}>
-                        Выйти
-                    </button>
+                    {isMyProfile &&
+                        (
+                            <button className='profile-page__exit-button' onClick={handleLogout}>
+                                Выйти
+                            </button>
+                        )
+                    }
+
                 </div>
             </div>
         </LayoutWithNav>

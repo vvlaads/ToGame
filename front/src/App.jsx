@@ -49,6 +49,12 @@ function App() {
                   </ProtectedRoute>
                 } />
 
+                <Route path="/profile/:userId" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
+
                 {/* Редирект с несуществующих путей */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

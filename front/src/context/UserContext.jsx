@@ -1,5 +1,5 @@
 import config from '../config/index.jsx'
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import { API_ENDPOINTS } from '../constants/api.jsx';
 import { deleteRequest, postRequest } from '../utils/requests.jsx'
 
@@ -20,6 +20,34 @@ const GET_SENT_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_SENT_LIKES}`
 
 function UserProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function initUser() {
+            try {
+                // 1. Пытаемся восстановить из localStorage
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                } else {
+                    // 2. Или проверяем с бэка (если у тебя сессия / cookie)
+                    const responseBody = await userInfo();
+                    if (responseBody) {
+                        setUser(responseBody);
+                        localStorage.setItem('user', JSON.stringify(responseBody));
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to init user', error);
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        initUser();
+    }, []);
+
 
     // Вспомогательный метод для входа/регистрации
     async function handleAuth(url, body) {
@@ -67,7 +95,8 @@ function UserProvider({ children }) {
 
     // Информация о пользователе с выбранным ID
     async function userInfoById(userId) {
-        return await postRequest(INFO_BY_ID_URL, userId);
+        const responseBody = await postRequest(INFO_BY_ID_URL, userId);
+        return responseBody[0];
     }
 
     // Обновление данных пользователя
@@ -123,6 +152,7 @@ function UserProvider({ children }) {
 
     const value = {
         user,
+        loading,
         signIn,
         register,
         logout,

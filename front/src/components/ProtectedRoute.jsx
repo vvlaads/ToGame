@@ -3,10 +3,13 @@ import { useUser } from '../context/UserContext';
 
 // Защищенный маршрут - только для авторизованных
 function ProtectedRoute({ children }) {
-    const { user } = useUser();
+    const { user, loading } = useUser();
+
+    if (loading) {
+        return null;
+    }
 
     if (!user) {
-        // Если не авторизован, перенаправляем на логин
         return <Navigate to="/auth" replace />;
     }
 

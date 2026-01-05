@@ -19,14 +19,6 @@
     overflow-y: auto;
 }
 
-.chat-page__chat--active {
-    background-color: var(--color-purple);
-}
-
-.chat-page__chat--active:hover {
-    background-color: var(--color-purple-dark);
-}
-
 .chat-page__main {
     min-height: 100%;
     width: 50%;
@@ -45,22 +37,12 @@
     margin-bottom: 70px;
 }
 
-.chat-page__chat_message {
-    background-color: var(--color-gray-700);
-    padding: 15px;
-    border-radius: 10px;
-}
-
 .chat-page__current-chat-container {
     position: relative;
     height: 90vh;
     width: 100%;
     display: flex;
     flex-direction: column;
-}
-
-.chat-page__message-date {
-    color: var(--color-gray-400);
 }
 
 .chat-page__input-message {
@@ -118,6 +100,11 @@
     height: 24px;
 }
 
+.chat-page__no-chat-selected {
+    display: flex;
+    justify-content: center;
+}
+
 .chat-page__rooms-container {
     min-height: 100%;
     width: 20%;
@@ -134,155 +121,70 @@
     gap: 20px;
 }
 
-.chat-page__room {
-    background-color: var(--color-gray-700);
-    padding: 15px;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-}
-
-.chat-page__room-info {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    cursor: pointer;
-}
-
-.chat-page__delete-room {
-    border-radius: 100%;
-    height: 40px;
-    width: 40px;
-    min-width: 40px;
-    border: 0;
-    background-color: var(--color-red);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background-color 0.2s;
-}
-
-.chat-page__delete-room:hover {
-    background-color: var(--color-red-dark);
-}
-
-.chat-page__delete-room-icon {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(1);
-}
-
-.chat-page__room:hover {
-    background-color: var(--color-gray-500);
-    cursor: pointer;
-}
-
-.chat-page__room--active {
-    background-color: var(--color-purple);
-}
-
-.chat-page__room--active:hover {
-    background-color: var(--color-purple);
-}
-
-.chat-page__room-players-list-header {
-    color: var(--color-gray-400);
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-.chat-page__room-players-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.chat-page__room-player {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-.chat-page__room-player-avatar {
-    width: 40px;
-    height: 40px;
-    background-color: var(--color-white);
-    border-radius: 100%;
-}
-
-.chat-page__room-player-name {
-    font-size: 20px;
-}
-
-.chat-page__active-room-info {
-    position: relative;
-    height: 100%;
-}
-
-.chat-page__room-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-}
-
-.chat-page__room-button {
-    width: 100%;
-    height: 50px;
-    border-radius: 10px;
-    background-color: var(--color-gray-700);
-    border: 0;
-    color: inherit;
-    font-size: 20px;
-}
-
-.chat-page__room-button:hover {
-    background-color: var(--color-gray-500);
-}
-
-.chat-page__room-leave-button {
-    background-color: var(--color-red);
-}
-
-.chat-page__room-leave-button:hover {
-    background-color: var(--color-red-dark);
-}
-
-.chat-page__add-room {
-    width: 100%;
-    height: 80px;
-    color: inherit;
-    background-color: var(--color-gray-700);
-    border: 0;
-    border-radius: 10px;
-    font-size: 20px;
-}
-
-.chat-page__add-room:hover {
-    background-color: var(--color-gray-500);
-}
-
-.chat-page__add-room-window {
-    padding: 20px;
+.chat-page__form {
+    width: 60vw;
+    height: auto;
     border-radius: 20px;
-    width: 800px;
     background-color: var(--color-gray-800);
-}
-
-.chat-page__add-room-window-form {
+    padding: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: relative;
 }
 
-.chat-page__add-room-window-input {
+.chat-page__form-cross {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.chat-page__form-header {
+    font-size: 32px;
+    text-align: center;
+}
+
+.chat-page__label {
+    font-size: 20px;
+    color: var(--color-gray-400);
+}
+
+.chat-page__form-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.chat-page__form-button {
+    border-radius: 10px;
+    border: 0;
+    height: 50px;
+    color: inherit;
+    font-size: 20px;
+}
+
+#chat-page__form-submit {
+    width: 60%;
+    background-color: var(--color-purple);
+}
+
+#chat-page__form-submit:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#chat-page__form-cancel {
+    width: 30%;
+    background-color: var(--color-red);
+}
+
+#chat-page__form-cancel:hover {
+    background-color: var(--color-red-dark);
+}
+
+.chat-page__form-input {
     font: inherit;
     color: inherit;
     width: 100%;
@@ -291,49 +193,20 @@
     border-radius: 6px;
     background: var(--color-gray-900);
     border-radius: 10px;
+    font-size: 20px;
+    resize: none;
 }
 
-.chat-page__add-room-window-input:focus {
-    outline: none;
-    border-color: var(--color-purple);
-}
-
-.chat-page__add-room-window-buttons {
+.chat-page__create-button {
     width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-}
-
-.chat-page__add-room-window-button {
-    height: 50px;
-    color: inherit;
+    height: 80px;
+    border-radius: 20px;
     border: 0;
-    border-radius: 10px;
+    background-color: var(--color-gray-700);
+    color: inherit;
     font-size: 20px;
 }
 
-#chat-page__add-room-window-submit-button {
-    width: 50%;
-    background-color: var(--color-purple);
-}
-
-#chat-page__add-room-window-submit-button:hover {
-    background-color: var(--color-purple-dark);
-}
-
-#chat-page__add-room-window-cancel-button {
-    width: 40%;
-    background-color: var(--color-red);
-}
-
-#chat-page__add-room-window-cancel-button:hover {
-    background-color: var(--color-red-dark);
-}
-
-.chat-page__loading {
-    height: 100%;
-    font-size: 32px;
-    text-align: center;
-    align-content: center;
+.chat-page__create-button:hover {
+    background-color: var(--color-gray-600);
 }

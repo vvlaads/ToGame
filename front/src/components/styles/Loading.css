@@ -1,0 +1,35 @@
+.loading__container {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 60px);
+    padding: 20px;
+    gap: 30px;
+    box-sizing: border-box;
+}
+
+.loading__loading {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+}
+
+.loading__spinner {
+    width: 100px;
+    height: 100px;
+    border: 10px solid var(--color-gray-500);
+    border-top: 10px solid var(--color-purple);
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
