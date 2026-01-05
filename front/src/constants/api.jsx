@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:8080/ToGame-back-1.0-SNAPSHOT'
+export const API_BASE_URL = 'http://localhost:8080/ToGame-back-1.0-SNAPSHOT/to-game-api'
 
 export const API_ENDPOINTS = {
     REGISTER: '/user/register',
