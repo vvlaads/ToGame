@@ -25,7 +25,7 @@ function ChatsPage() {
     const [roomFormIsOpen, setRoomFormIsOpen] = useState(false);
     const [roomData, setRoomData] = useState({
         name: '',
-        chatId: 0,
+        chatId: 1,
     });
 
     const [chatFormIsOpen, setChatFormIsOpen] = useState(false);

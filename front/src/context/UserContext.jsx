@@ -1,11 +1,9 @@
-import config from '../config/index.jsx'
 import { createContext, useState, useContext, useEffect } from 'react';
-import { API_ENDPOINTS } from '../constants/api.jsx';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants/api.jsx';
 import { deleteRequest, postRequest } from '../utils/requests.jsx'
 
 const UserContext = createContext();
 
-const API_BASE_URL = config.apiUrl;
 const REGISTER_URL = `${API_BASE_URL}${API_ENDPOINTS.REGISTER}`
 const SIGN_IN_URL = `${API_BASE_URL}${API_ENDPOINTS.SIGN_IN}`
 const INFO_URL = `${API_BASE_URL}${API_ENDPOINTS.USER_INFO}`

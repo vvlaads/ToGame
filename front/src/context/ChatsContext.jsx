@@ -1,11 +1,9 @@
-import config from '../config/index.jsx'
 import { createContext, useContext } from 'react';
-import { API_ENDPOINTS } from '../constants/api.jsx';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants/api.jsx';
 import { deleteRequest, patchRequest, postRequest } from '../utils/requests.jsx';
 
 const ChatsContext = createContext();
 
-const API_BASE_URL = config.apiUrl;
 const CREATE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.CREATE_CHAT}`;
 const UPDATE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.UPDATE_CHAT}`;
 const DELETE_CHAT_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_CHAT}`;

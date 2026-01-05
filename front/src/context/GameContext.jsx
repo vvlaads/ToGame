@@ -1,11 +1,8 @@
-import config from "../config";
 import { createContext, useContext } from "react";
-import { API_ENDPOINTS } from "../constants/api";
+import { API_BASE_URL, API_ENDPOINTS } from "../constants/api";
 import { deleteRequest, postRequest } from "../utils/requests";
 
 const GameContext = createContext();
-
-const API_BASE_URL = config.apiUrl;
 const GAME_ALL_URL = `${API_BASE_URL}${API_ENDPOINTS.GAME_ALL}`
 const GAME_ALL_BY_USER_URL = `${API_BASE_URL}${API_ENDPOINTS.GAME_ALL_BY_USER}`
 const ADD_GAME_URL = `${API_BASE_URL}${API_ENDPOINTS.ADD_GAME}`
