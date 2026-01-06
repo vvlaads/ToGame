@@ -17,7 +17,7 @@ function ChatsPage() {
     const navigate = useNavigate();
     const { chatId } = useParams();
     const { user, userInfoById } = useUser();
-    const { createChat, deleteChat, getMessages, sendMessage, createRoom } = useChats();
+    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom } = useChats();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -81,6 +81,10 @@ function ChatsPage() {
     // Отправка сообщения в чат
     async function sendMessageForm(e) {
         e.preventDefault();
+
+        const trimmed = messageData.content.trim();
+        if (!trimmed) return;
+
         await sendMessage({
             ...messageData,
             chatId: currentChat.id,
@@ -161,8 +165,8 @@ function ChatsPage() {
 
     async function openCurrentChatInfo() {
         setCurrentChatInfoIsOpen(true);
-        const userInfo = await userInfoById({ id: currentChat.owner_id });
-        if (user.id === currentChat.owner_id) {
+        const userInfo = await userInfoById({ id: currentChat.ownerId });
+        if (user.id === currentChat.ownerId) {
             setIsMyChat(true);
         }
         setOwnerInfo(userInfo);
@@ -187,12 +191,16 @@ function ChatsPage() {
         closeCurrentChatInfo();
     }
 
+    async function handleDeleteRoom(room) {
+        await deleteRoom(room);
+    }
+
     // Загрузка информации о чатах
     useEffect(() => {
         async function fetchChats() {
             const chatsFromApi = [
-                { id: 13, descr: 'd', name: 'd', owner_id: 2 },
-                { id: 12, descr: 'aaaa', name: 'aaa', owner_id: 2 }
+                { id: 13, descr: 'd', name: 'd', ownerId: 2 },
+                { id: 12, descr: 'aaaa', name: 'aaa', ownerId: 2 }
             ];
             setChats(chatsFromApi);
         }
@@ -227,7 +235,9 @@ function ChatsPage() {
                 return;
             }
 
-            const rooms = [{ id: 2, name: 'test', chatId: 13 }] //TODO: получение списка комнат
+            const rooms = [
+                { id: 2, name: 'test', chatId: 13 }
+            ] //TODO: получение списка комнат
             setRooms(rooms);
         }
 
@@ -341,8 +351,10 @@ function ChatsPage() {
                                         key={room.id}
                                         room={room}
                                         onClick={() => joinToRoom(room)}
+                                        onTrashClick={() => handleDeleteRoom(room)}
+                                        isOwner={currentChat.ownerId === user.id}
                                     />))}
-                                {currentChat && (<button className='chat-page__create-button' onClick={openRoomForm}>
+                                {currentChat && currentChat.ownerId === user.id && (<button className='chat-page__create-button' onClick={openRoomForm}>
                                     Добавить комнату
                                 </button>)}
                             </div>

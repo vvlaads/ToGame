@@ -3,6 +3,13 @@
     border-radius: 10px;
     padding: 20px;
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.room-card__main {
+    display: flex;
     flex-direction: column;
     gap: 5px;
 }
@@ -26,4 +33,12 @@
 
 .room-card__info {
     color: var(--color-gray-400);
+}
+
+.room-card__trash-icon {
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-red);
+    padding: 10px;
 }

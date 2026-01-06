@@ -1,5 +1,4 @@
 export function getPathForImage(imageName) {
-    if (!imageName) return '';
     return `/${imageName}`;
 }
 
