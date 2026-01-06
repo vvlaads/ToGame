@@ -1,0 +1,29 @@
+.room-card__container {
+    background-color: var(--color-gray-700);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.room-card__container:hover {
+    background-color: var(--color-gray-600);
+    cursor: pointer;
+}
+
+.room-card__container--active {
+    background-color: var(--color-purple)
+}
+
+.room-card__container--active:hover {
+    background-color: var(--color-purple-dark)
+}
+
+.room-card__name {
+    font-size: 20px;
+}
+
+.room-card__info {
+    color: var(--color-gray-400);
+}

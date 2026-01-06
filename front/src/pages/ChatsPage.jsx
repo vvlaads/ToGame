@@ -11,8 +11,11 @@ import { useUser } from '../context/UserContext';
 import UserCard from '../components/UserCard';
 import { getPathForImage } from '../utils/pathFormat';
 import MessageCard from '../components/MessageCard';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function ChatsPage() {
+    const navigate = useNavigate();
+    const { chatId } = useParams();
     const { user, userInfoById } = useUser();
     const { createChat, deleteChat, getMessages, sendMessage, createRoom } = useChats();
     const [chats, setChats] = useState([]);
@@ -20,10 +23,13 @@ function ChatsPage() {
     const [messages, setMessages] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(null);
+    const [currentRoomChatName, setCurrentRoomChatName] = useState('');
     const [currentChatInfoIsOpen, setCurrentChatInfoIsOpen] = useState(false);
+    const [currentRoomUsers, setCurrentRoomUsers] = useState([]);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
+    const [isMute, setIsMute] = useState(false);
 
     const [messageData, setMessageData] = useState({
         content: ''
@@ -41,18 +47,22 @@ function ChatsPage() {
     });
 
     // Присоединиться к комнате
-    function joinToRoom() {
-
+    function joinToRoom(room) {
+        setCurrentRoom(room);
+        setCurrentRoomChatName(currentChat.name);
+        setCurrentRoomUsers([user, user, user]); //TODO: Получить список участников комнаты
     }
 
     // Выйти из комнаты
     function leaveRoom() {
-
+        setCurrentRoom(null);
+        setCurrentRoomChatName('');
+        setCurrentRoomUsers([]);
     }
 
     // Нажатие на кнопку Mute
     function handleMuteButton() {
-        //TODO: muting and unmuting of micro
+        setIsMute(!isMute);
     }
 
     // Обновляем данные о новом сообщении
@@ -169,7 +179,7 @@ function ChatsPage() {
         if (currentChat && currentChat.id === chat.id) {
             openCurrentChatInfo();
         }
-        setCurrentChat(chat);
+        navigate(`/chats/${chat.id}`);
     }
 
     async function handleDeleteChat() {
@@ -180,14 +190,28 @@ function ChatsPage() {
     // Загрузка информации о чатах
     useEffect(() => {
         async function fetchChats() {
-            const chats = [{ id: 13, descr: 'd', name: 'd', owner_id: 2 }]; //TODO: Отправка запроса к API
-            setChats(chats);
+            const chatsFromApi = [
+                { id: 13, descr: 'd', name: 'd', owner_id: 2 },
+                { id: 12, descr: 'aaaa', name: 'aaa', owner_id: 2 }
+            ];
+            setChats(chatsFromApi);
         }
 
         fetchChats();
     }, []);
 
-    // Загрузка сообщений текущего чата
+    useEffect(() => {
+        if (!chatId || chats.length === 0) return;
+
+        const numericChatId = Number(chatId);
+        const chatFromUrl = chats.find(chat => chat.id === numericChatId);
+
+        if (chatFromUrl) {
+            setCurrentChat(chatFromUrl);
+        }
+    }, [chatId, chats]);
+
+    // Загрузка сообщений и комнат текущего чата
     useEffect(() => {
         async function fetchMessages() {
             if (!currentChat) {
@@ -198,7 +222,17 @@ function ChatsPage() {
             setMessages(messages);
         }
 
+        async function fetchRooms() {
+            if (!currentChat) {
+                return;
+            }
+
+            const rooms = [{ id: 2, name: 'test', chatId: 13 }] //TODO: получение списка комнат
+            setRooms(rooms);
+        }
+
         fetchMessages();
+        fetchRooms();
     }, [currentChat])
 
     return (
@@ -268,17 +302,45 @@ function ChatsPage() {
                 <div className='chat-page__rooms-container'>
                     {currentRoom ?
                         (
-                            <div className='chat-page__current-room'>
+                            <div className='chat-page__current-room-container'>
                                 <RoomCard
                                     room={currentRoom}
+                                    chatName={currentRoomChatName}
+                                    isActive={true}
                                 />
+
+                                <div>
+                                    <div className='chat-page__current-room-users-header'>
+                                        Участники:
+                                    </div>
+                                    <div className='chat-page__current-room-users'>
+                                        {currentRoomUsers.map(user =>
+                                            <UserCard user={user} />
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className='chat-page__current-room-bottom'>
+                                    <button
+                                        className={`chat-page__mute-button ${isMute ? 'chat-page__mute-button--active' : ''}`}
+                                        onClick={handleMuteButton}>
+                                        {isMute ? 'Включить микро' : 'Выключить микро'}
+                                    </button>
+                                    <button
+                                        id='chat-page__leave-room'
+                                        onClick={leaveRoom}>
+                                        Покинуть комнату
+                                    </button>
+                                </div>
                             </div>
                         )
                         : (
-                            <div>
+                            <div className='chat-page__rooms'>
                                 {rooms.map(room => (
                                     <RoomCard
+                                        key={room.id}
                                         room={room}
+                                        onClick={() => joinToRoom(room)}
                                     />))}
                                 {currentChat && (<button className='chat-page__create-button' onClick={openRoomForm}>
                                     Добавить комнату

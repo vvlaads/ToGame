@@ -1,5 +1,6 @@
 export function getPathForImage(imageName) {
-    return `./public/${imageName}`;
+    if (!imageName) return '';
+    return `/${imageName}`;
 }
 
 export function getPathForGame(gameName) {

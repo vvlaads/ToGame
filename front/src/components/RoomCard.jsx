@@ -1,10 +1,25 @@
 import './styles/RoomCard.css';
+import { useState } from 'react';
 
-function RoomCard({ room, onClick }) {
+function RoomCard({ room, chatName, onClick, isActive = false }) {
+    const [userCount, setUserCount] = useState(0); //TODO: получение числа участников
+
     return (
-        <div onClick={onClick}>
-            {room.name}
-        </div>
+        <div onClick={onClick} className={`room-card__container ${isActive ? 'room-card__container--active' : ''}`}>
+            <div className='room-card__name'>
+                {room.name}
+            </div>
+            {isActive ?
+                (<div className='room-card__info'>
+                    <span>Чат: {chatName}</span>
+                </div>)
+                : (
+                    <div className='room-card__info'>
+                        <span>Участники: {userCount}</span>
+                    </div >
+                )
+            }
+        </div >
     );
 }
 
