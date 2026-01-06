@@ -17,7 +17,7 @@ function ChatsPage() {
     const navigate = useNavigate();
     const { chatId } = useParams();
     const { user, userInfoById } = useUser();
-    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom } = useChats();
+    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom, joinRoom, leaveRoom } = useChats();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -47,14 +47,16 @@ function ChatsPage() {
     });
 
     // Присоединиться к комнате
-    function joinToRoom(room) {
+    async function handleJoinRoom(room) {
+        await joinRoom(room);
         setCurrentRoom(room);
         setCurrentRoomChatName(currentChat.name);
         setCurrentRoomUsers([user, user, user]); //TODO: Получить список участников комнаты
     }
 
     // Выйти из комнаты
-    function leaveRoom() {
+    async function handleLeaveRoom() {
+        await leaveRoom(currentRoom);
         setCurrentRoom(null);
         setCurrentRoomChatName('');
         setCurrentRoomUsers([]);
@@ -338,7 +340,7 @@ function ChatsPage() {
                                     </button>
                                     <button
                                         id='chat-page__leave-room'
-                                        onClick={leaveRoom}>
+                                        onClick={handleLeaveRoom}>
                                         Покинуть комнату
                                     </button>
                                 </div>
@@ -350,7 +352,7 @@ function ChatsPage() {
                                     <RoomCard
                                         key={room.id}
                                         room={room}
-                                        onClick={() => joinToRoom(room)}
+                                        onClick={() => handleJoinRoom(room)}
                                         onTrashClick={() => handleDeleteRoom(room)}
                                         isOwner={currentChat.ownerId === user.id}
                                     />))}
