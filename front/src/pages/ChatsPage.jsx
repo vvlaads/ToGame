@@ -4,14 +4,15 @@ import CrossIcon from '../assets/icons/cross.svg';
 import Modal from '../components/Modal';
 import RoomCard from '../components/RoomCard';
 import ChatCard from '../components/ChatCard';
+import UserCard from '../components/UserCard';
+import MessageCard from '../components/MessageCard';
 import LayoutWithNav from '../components/LayoutWithNav';
 import { useEffect, useState } from 'react';
 import { useChats } from '../context/ChatsContext';
 import { useUser } from '../context/UserContext';
-import UserCard from '../components/UserCard';
 import { getPathForImage } from '../utils/pathFormat';
-import MessageCard from '../components/MessageCard';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useVoiceRoom } from '../utils/useVoiceRoom';
 
 function ChatsPage() {
     const navigate = useNavigate();
@@ -29,7 +30,17 @@ function ChatsPage() {
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
-    const [isMute, setIsMute] = useState(false);
+    const {
+        join,
+        leave,
+        toggleMute,
+        toggleSelfTest,
+        connected,
+        connecting,
+        selfTesting,
+        muted,
+        error
+    } = useVoiceRoom();
 
     const [messageData, setMessageData] = useState({
         content: ''
@@ -48,6 +59,7 @@ function ChatsPage() {
 
     // Присоединиться к комнате
     async function handleJoinRoom(room) {
+        await join();
         await joinRoom(room);
         setCurrentRoom(room);
         setCurrentRoomChatName(currentChat.name);
@@ -56,15 +68,11 @@ function ChatsPage() {
 
     // Выйти из комнаты
     async function handleLeaveRoom() {
+        leave();
         await leaveRoom(currentRoom);
         setCurrentRoom(null);
         setCurrentRoomChatName('');
         setCurrentRoomUsers([]);
-    }
-
-    // Нажатие на кнопку Mute
-    function handleMuteButton() {
-        setIsMute(!isMute);
     }
 
     // Обновляем данные о новом сообщении
@@ -334,9 +342,20 @@ function ChatsPage() {
 
                                 <div className='chat-page__current-room-bottom'>
                                     <button
-                                        className={`chat-page__mute-button ${isMute ? 'chat-page__mute-button--active' : ''}`}
-                                        onClick={handleMuteButton}>
-                                        {isMute ? 'Включить микро' : 'Выключить микро'}
+                                        onClick={toggleSelfTest}
+                                        disabled={!connected}
+                                        className={`chat-page__test-button ${selfTesting ? 'chat-page__test-button--active' : ''
+                                            }`}
+                                    >
+                                        {selfTesting ? 'Остановить проверку' : 'Проверить микрофон'}
+                                    </button>
+
+                                    <button
+                                        className={`chat-page__mute-button ${muted ? 'chat-page__mute-button--active' : ''}`}
+                                        onClick={toggleMute}
+                                        disabled={!connected}
+                                    >
+                                        {muted ? 'Включить микро' : 'Выключить микро'}
                                     </button>
                                     <button
                                         id='chat-page__leave-room'
