@@ -277,7 +277,7 @@ function ChatsPage() {
                             <div className='chat-page__messages'>
                                 {messages.map(message =>
                                     <MessageCard
-                                        key={message.id}
+                                        key={message.time}
                                         message={message}
                                         className={user.id === message.senderId ? 'chat-page__my-message' : ''}
                                     />
