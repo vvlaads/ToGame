@@ -212,6 +212,12 @@ function ProfilePage() {
                     <div className='profile-page__game-list'>
                         <h3 className='profile-page__sector-header'>Любимые игры:</h3>
 
+                        {!userGames || userGames.length === 0 && !isMyProfile && (
+                            <div className='profile-page__empty-list'>
+                                У этого пользователя нет любимых игр
+                            </div>
+                        )}
+
                         <div className='profile-page__games-grid'>
                             {userGames.map(game => (
                                 <GameCard
@@ -221,6 +227,7 @@ function ProfilePage() {
                                     onTrashClick={isMyProfile ? () => deleteGame(game.name) : undefined}
                                 />
                             ))}
+
                             {isMyProfile &&
                                 (<div className='profile-page__add-game' onClick={openGameList}>
                                     <img src={AddIcon} className='profile-page__add-game-icon' />
