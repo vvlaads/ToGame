@@ -1,21 +1,19 @@
+import './styles/Modal.css';
 import { useEffect } from 'react';
-import './styles/Modal.css'
 
 const Modal = ({ isOpen, onClose, children }) => {
-    if (!isOpen) return null;
 
-    // Обработчик нажатия клавиши Esc
     useEffect(() => {
+        if (!isOpen) return;
+
         const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && isOpen) {
+            if (e.key === 'Escape') {
                 onClose();
             }
         };
 
-        if (isOpen) {
-            document.addEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = 'hidden';
-        }
+        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'hidden';
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
@@ -23,9 +21,15 @@ const Modal = ({ isOpen, onClose, children }) => {
         };
     }, [isOpen, onClose]);
 
+
+    if (!isOpen) return null;
+
     return (
         <div className="modal__background" onClick={onClose}>
-            <div className="modal__content" onClick={(e) => { e.stopPropagation(); }}>
+            <div
+                className="modal__content"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {children}
             </div>
         </div>

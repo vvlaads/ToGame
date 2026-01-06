@@ -7,6 +7,7 @@
   --color-black: #000;
   --color-purple: #9810fa;
   --color-purple-dark: #8712db;
+  --color-purple-light: #8e4ec6;
   --color-gray-200: oklch(.92 .004 286.32);
   --color-gray-300: oklch(.871 .006 286.286);
   --color-gray-400: oklch(.705 .015 286.067);

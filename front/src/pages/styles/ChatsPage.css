@@ -19,6 +19,14 @@
     overflow-y: auto;
 }
 
+.chat-page__chat--active {
+    background-color: var(--color-purple);
+}
+
+.chat-page__chat--active:hover {
+    background-color: var(--color-purple-dark);
+}
+
 .chat-page__main {
     min-height: 100%;
     width: 50%;
@@ -35,6 +43,10 @@
     flex-grow: 1;
     overflow-y: auto;
     margin-bottom: 70px;
+}
+
+.chat-page__my-message {
+    background-color: var(--color-purple-light) !important;
 }
 
 .chat-page__current-chat-container {
@@ -209,4 +221,60 @@
 
 .chat-page__create-button:hover {
     background-color: var(--color-gray-600);
+}
+
+.chat-page__chat-info-window {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    background-color: var(--color-gray-800);
+    width: auto;
+    min-width: 30vw;
+    height: 80vh;
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    overflow-y: auto;
+}
+
+.chat-page__chat-info-window-header {
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.chat-page__chat-info-window-chat-image {
+    width: 100px;
+    height: 100px;
+    background-color: var(--color-white);
+    border-radius: 100%;
+}
+
+.chat-page__chat-info-window-chat-name {
+    font-size: 32px;
+}
+
+.chat-page__chat-info-window-chat-descr {
+    font-size: 20px;
+    color: var(--color-gray-400);
+}
+
+.chat-page__chat-info-window-label {
+    font-size: 24px;
+}
+
+#chat-page__chat-info-window-delete {
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--color-red);
+    height: 60px;
+    color: inherit;
+    font-size: 20px;
+    margin-top: auto;
+}
+
+#chat-page__chat-info-window-delete:hover {
+    background-color: var(--color-red-dark);
 }

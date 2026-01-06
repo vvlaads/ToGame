@@ -1,19 +1,14 @@
 import './styles/HomePage.css'
-import LayoutWithNav from '../components/LayoutWithNav';
 import { useUser } from '../context/UserContext';
 import { useEffect, useState } from 'react';
 import UserCard from '../components/UserCard';
 import ChatCard from '../components/ChatCard';
+import LayoutWithNav from '../components/LayoutWithNav';
 
 function HomePage() {
     const [friends, setFriends] = useState([]);
     const [chats, setChats] = useState([]);
     const { user, getFriends } = useUser();
-
-    // Переход к другу
-    function goToFriend(friend) {
-        console.log(friend);
-    }
 
     // Переход к чату
     function goToChat(chat) {
@@ -66,7 +61,6 @@ function HomePage() {
                                         <UserCard
                                             key={friend.id}
                                             user={friend}
-                                            onClick={() => goToFriend(friend)}
                                         />
                                     ))}
                                 </div>

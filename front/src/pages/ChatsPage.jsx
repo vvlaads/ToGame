@@ -5,27 +5,33 @@ import Modal from '../components/Modal';
 import RoomCard from '../components/RoomCard';
 import ChatCard from '../components/ChatCard';
 import LayoutWithNav from '../components/LayoutWithNav';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useChats } from '../context/ChatsContext';
+import { useUser } from '../context/UserContext';
+import UserCard from '../components/UserCard';
+import { getPathForImage } from '../utils/pathFormat';
+import MessageCard from '../components/MessageCard';
 
 function ChatsPage() {
-    const { createChat, createRoom } = useChats();
+    const { user, userInfoById } = useUser();
+    const { createChat, deleteChat, getMessages, sendMessage, createRoom } = useChats();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
+    const [messages, setMessages] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(null);
+    const [currentChatInfoIsOpen, setCurrentChatInfoIsOpen] = useState(false);
+    const [ownerInfo, setOwnerInfo] = useState(null);
+    const [currentChatUsers, setCurrentChatUsers] = useState([]);
+    const [isMyChat, setIsMyChat] = useState(false);
 
     const [messageData, setMessageData] = useState({
-        userId: 0,
-        text: '',
-        createdAt: 0,
-        chatId: 0
+        content: ''
     });
 
     const [roomFormIsOpen, setRoomFormIsOpen] = useState(false);
     const [roomData, setRoomData] = useState({
-        name: '',
-        chatId: 1,
+        name: ''
     });
 
     const [chatFormIsOpen, setChatFormIsOpen] = useState(false);
@@ -63,15 +69,25 @@ function ChatsPage() {
     }
 
     // Отправка сообщения в чат
-    async function sendMessage(e) {
-
+    async function sendMessageForm(e) {
+        e.preventDefault();
+        await sendMessage({
+            ...messageData,
+            chatId: currentChat.id,
+            senderId: user.id
+        });
+        setMessageData({
+            content: ''
+        });
+        const messages = await getMessages(currentChat);
+        setMessages(messages);
     }
 
     // Отправка сообщения при нажатии Enter
     function handleKeyDown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage(e);
+            sendMessageForm(e);
         }
     }
 
@@ -113,8 +129,7 @@ function ChatsPage() {
     function closeRoomForm() {
         setRoomFormIsOpen(false);
         setRoomData({
-            name: '',
-            chatId: 0
+            name: ''
         })
     };
 
@@ -127,11 +142,64 @@ function ChatsPage() {
         }));
     }
 
+    // Отправить запрос на создание новой комнаты
     async function sendRoomForm(e) {
         e.preventDefault(); // Не перезагружать страницу
-        await createRoom(roomData);
+        await createRoom({ ...roomData, chatId: currentChat.id });
         closeRoomForm();
     }
+
+    async function openCurrentChatInfo() {
+        setCurrentChatInfoIsOpen(true);
+        const userInfo = await userInfoById({ id: currentChat.owner_id });
+        if (user.id === currentChat.owner_id) {
+            setIsMyChat(true);
+        }
+        setOwnerInfo(userInfo);
+    }
+
+    function closeCurrentChatInfo() {
+        setCurrentChatInfoIsOpen(false);
+        setOwnerInfo(null);
+        setIsMyChat(false);
+    }
+
+    // Обработка нажатия на чат
+    function handleChatClick(chat) {
+        if (currentChat && currentChat.id === chat.id) {
+            openCurrentChatInfo();
+        }
+        setCurrentChat(chat);
+    }
+
+    async function handleDeleteChat() {
+        await deleteChat(currentChat);
+        closeCurrentChatInfo();
+    }
+
+    // Загрузка информации о чатах
+    useEffect(() => {
+        async function fetchChats() {
+            const chats = [{ id: 13, descr: 'd', name: 'd', owner_id: 2 }]; //TODO: Отправка запроса к API
+            setChats(chats);
+        }
+
+        fetchChats();
+    }, []);
+
+    // Загрузка сообщений текущего чата
+    useEffect(() => {
+        async function fetchMessages() {
+            if (!currentChat) {
+                return;
+            }
+
+            const messages = await getMessages(currentChat);
+            setMessages(messages);
+        }
+
+        fetchMessages();
+    }, [currentChat])
 
     return (
         <LayoutWithNav>
@@ -142,6 +210,8 @@ function ChatsPage() {
                         <ChatCard
                             key={chat.id}
                             chat={chat}
+                            onClick={() => handleChatClick(chat)}
+                            className={currentChat && currentChat.id === chat.id ? 'chat-page__chat--active' : ''}
                         />
                     ))}
 
@@ -151,46 +221,6 @@ function ChatsPage() {
                         Добавить чат
                     </button>
 
-                    <Modal isOpen={chatFormIsOpen} onClose={closeChatForm}>
-
-                        <form onSubmit={sendChatForm} className='chat-page__form'>
-                            <img src={CrossIcon} className='chat-page__form-cross' onClick={closeChatForm} />
-                            <div className='chat-page__form-header'>Создание чата</div>
-
-                            <div className='chat-page__form-group'>
-                                <label className='chat-page__label'>Название</label>
-                                <input
-                                    type='text'
-                                    name='name'
-                                    className='chat-page__form-input'
-                                    placeholder='Введите название'
-                                    value={chatData.name}
-                                    onChange={handleChatFormChange}
-                                    required
-                                />
-                            </div>
-                            <div className='chat-page__form-group'>
-                                <label className='chat-page__label'>Описание</label>
-                                <textarea
-                                    type='text'
-                                    name='descr'
-                                    className='chat-page__form-input'
-                                    placeholder='Введите описание'
-                                    value={chatData.descr}
-                                    onChange={handleChatFormChange}
-                                    required
-                                />
-                            </div>
-                            <div className='chat-page__form-buttons'>
-                                <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
-                                    Создать
-                                </button>
-                                <button type='button' className='chat-page__form-button' id='chat-page__form-cancel' onClick={closeChatForm}>
-                                    Отмена
-                                </button>
-                            </div>
-                        </form>
-                    </Modal>
 
                 </div>
 
@@ -201,14 +231,21 @@ function ChatsPage() {
                     {currentChat ? (
                         <div className='chat-page__current-chat-container'>
                             <div className='chat-page__messages'>
+                                {messages.map(message =>
+                                    <MessageCard
+                                        key={message.id}
+                                        message={message}
+                                        className={user.id === message.senderId ? 'chat-page__my-message' : ''}
+                                    />
+                                )}
                             </div>
 
-                            <form className='chat-page__input-message' onSubmit={sendMessage}>
+                            <form className='chat-page__input-message' onSubmit={sendMessageForm}>
                                 <textarea
                                     className='chat-page__input'
                                     placeholder='Сообщение...'
-                                    name="text"
-                                    value={messageData.text}
+                                    name="content"
+                                    value={messageData.content}
                                     onChange={changeMessageForm}
                                     onKeyDown={handleKeyDown}
                                     rows={1}
@@ -243,41 +280,131 @@ function ChatsPage() {
                                     <RoomCard
                                         room={room}
                                     />))}
-                                < button className='chat-page__create-button' onClick={openRoomForm}>
+                                {currentChat && (<button className='chat-page__create-button' onClick={openRoomForm}>
                                     Добавить комнату
-                                </button>
+                                </button>)}
                             </div>
 
                         )}
-
-                    < Modal isOpen={roomFormIsOpen} onClose={closeRoomForm}>
-                        <form onSubmit={sendRoomForm} className='chat-page__form'>
-                            <img src={CrossIcon} className='chat-page__form-cross' onClick={closeRoomForm} />
-                            <div className='chat-page__form-header'>Создание комнаты</div>
-
-                            <div className='chat-page__form-group'>
-                                <label className='chat-page__label'>Название</label>
-                                <input
-                                    type='text'
-                                    name='name'
-                                    className='chat-page__form-input'
-                                    placeholder='Введите название'
-                                    value={roomData.name}
-                                    onChange={handleRoomFormChange}
-                                    required
-                                />
-                            </div>
-                            <div className='chat-page__form-buttons'>
-                                <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
-                                    Создать
-                                </button>
-                                <button type='button' className='chat-page__form-button' id='chat-page__form-cancel' onClick={closeRoomForm}>
-                                    Отмена
-                                </button>
-                            </div>
-                        </form>
-                    </Modal>
                 </div>
+
+                <Modal isOpen={chatFormIsOpen} onClose={closeChatForm}>
+
+                    <form onSubmit={sendChatForm} className='chat-page__form'>
+                        <img src={CrossIcon} className='chat-page__form-cross' onClick={closeChatForm} />
+                        <div className='chat-page__form-header'>Создание чата</div>
+
+                        <div className='chat-page__form-group'>
+                            <label className='chat-page__label'>Название</label>
+                            <input
+                                type='text'
+                                name='name'
+                                className='chat-page__form-input'
+                                placeholder='Введите название'
+                                value={chatData.name}
+                                onChange={handleChatFormChange}
+                                required
+                            />
+                        </div>
+                        <div className='chat-page__form-group'>
+                            <label className='chat-page__label'>Описание</label>
+                            <textarea
+                                type='text'
+                                name='descr'
+                                className='chat-page__form-input'
+                                placeholder='Введите описание'
+                                value={chatData.descr}
+                                onChange={handleChatFormChange}
+                                required
+                            />
+                        </div>
+                        <div className='chat-page__form-buttons'>
+                            <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
+                                Создать
+                            </button>
+                            <button type='button' className='chat-page__form-button' id='chat-page__form-cancel' onClick={closeChatForm}>
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+
+                < Modal isOpen={roomFormIsOpen} onClose={closeRoomForm}>
+                    <form onSubmit={sendRoomForm} className='chat-page__form'>
+                        <img src={CrossIcon} className='chat-page__form-cross' onClick={closeRoomForm} />
+                        <div className='chat-page__form-header'>Создание комнаты</div>
+
+                        <div className='chat-page__form-group'>
+                            <label className='chat-page__label'>Название</label>
+                            <input
+                                type='text'
+                                name='name'
+                                className='chat-page__form-input'
+                                placeholder='Введите название'
+                                value={roomData.name}
+                                onChange={handleRoomFormChange}
+                                required
+                            />
+                        </div>
+                        <div className='chat-page__form-buttons'>
+                            <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
+                                Создать
+                            </button>
+                            <button type='button' className='chat-page__form-button' id='chat-page__form-cancel' onClick={closeRoomForm}>
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+
+                <Modal isOpen={currentChatInfoIsOpen} onClose={closeCurrentChatInfo}>
+                    <div className='chat-page__chat-info-window'>
+                        <img src={CrossIcon} className='chat-page__form-cross' onClick={closeCurrentChatInfo} />
+
+                        <div className='chat-page__chat-info-window-header'>
+                            <img className='chat-page__chat-info-window-chat-image'
+                                src={getPathForImage(currentChat?.image)}
+                            />
+                            <div className='chat-page__chat-info-window-chat-name'>
+                                {currentChat?.name}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className='chat-page__chat-info-window-label'>Описание:</div>
+                            <div className='chat-page__chat-info-window-chat-descr'>
+                                {currentChat?.descr}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className='chat-page__chat-info-window-label'>Владелец:</div>
+                            <UserCard
+                                user={ownerInfo}
+                            />
+                        </div>
+
+                        <div>
+                            <div className='chat-page__chat-info-window-label'>Участники:</div>
+                            <div>
+                                {currentChatUsers.map(user =>
+                                    <UserCard
+                                        user={user}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {isMyChat && (
+                            <button
+                                id='chat-page__chat-info-window-delete'
+                                onClick={handleDeleteChat}>
+                                Удалить чат
+                            </button>
+                        )}
+
+                    </div>
+                </Modal>
             </div>
         </LayoutWithNav >
     );

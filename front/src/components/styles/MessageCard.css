@@ -1,0 +1,24 @@
+.message-card__container {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-radius: 10px;
+    padding: 5px;
+    background-color: var(--color-gray-700);
+}
+
+.message-card__main {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.message-card__sender {
+    font-weight: 600;
+}
+
+.message-card__time {
+    color: var(--color-gray-400);
+    margin-left: auto;
+}
