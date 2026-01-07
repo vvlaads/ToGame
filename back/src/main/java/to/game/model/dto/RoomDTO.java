@@ -13,6 +13,7 @@ public class RoomDTO {
     public RoomDTO(RoomEntity room){
         this.id = room.getId();
         this.name = room.getName();
+        this.chatId = room.getChat().getId();
     }
 
     private Long chatId;
