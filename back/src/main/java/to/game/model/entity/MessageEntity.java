@@ -1,6 +1,6 @@
 package to.game.model.entity;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -20,7 +20,7 @@ import lombok.Setter;
 @Setter
 public class MessageEntity {
     public MessageEntity() {
-        this.time = LocalTime.now();
+        this.datetime = LocalDateTime.now();
     }
 
     @Id
@@ -37,5 +37,5 @@ public class MessageEntity {
     @JoinColumn(name = "chat_id", nullable = false)
     private ChatEntity chatId;
 
-    private LocalTime time;
+    private LocalDateTime datetime;
 }
