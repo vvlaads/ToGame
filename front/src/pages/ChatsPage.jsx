@@ -17,8 +17,8 @@ import { useVoiceRoom } from '../utils/useVoiceRoom';
 function ChatsPage() {
     const navigate = useNavigate();
     const { chatId } = useParams();
-    const { user, userInfoById } = useUser();
-    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom, joinRoom, leaveRoom } = useChats();
+    const { user, userInfo, userInfoById } = useUser();
+    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom, joinRoom, leaveRoom, getChatUsers } = useChats();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -137,11 +137,17 @@ function ChatsPage() {
         }));
     }
 
+    async function updateChats() {
+        const responseUser = await userInfo();
+        setChats(responseUser.chats);
+    }
+
     // отправить запрос на создания чата
     async function sendChatForm(e) {
         e.preventDefault(); // Не перезагружать страницу
         await createChat(chatData);
         closeChatForm();
+        updateChats();
     }
 
     // Открыть окно создания комнаты
@@ -199,6 +205,7 @@ function ChatsPage() {
     async function handleDeleteChat() {
         await deleteChat(currentChat);
         closeCurrentChatInfo();
+        updateChats();
     }
 
     async function handleDeleteRoom(room) {
@@ -207,15 +214,7 @@ function ChatsPage() {
 
     // Загрузка информации о чатах
     useEffect(() => {
-        async function fetchChats() {
-            const chatsFromApi = [
-                { id: 13, descr: 'd', name: 'd', ownerId: 2 },
-                { id: 12, descr: 'aaaa', name: 'aaa', ownerId: 2 }
-            ];
-            setChats(chatsFromApi);
-        }
-
-        fetchChats();
+        updateChats();
     }, []);
 
     useEffect(() => {
@@ -251,6 +250,16 @@ function ChatsPage() {
             setRooms(rooms);
         }
 
+        async function fetchUsers() {
+            if (!currentChat) {
+                return;
+            }
+
+            const users = await getChatUsers(currentChat);
+            console.log(users);
+        }
+
+        fetchUsers();
         fetchMessages();
         fetchRooms();
     }, [currentChat])

@@ -29,5 +29,6 @@ export const API_ENDPOINTS = {
     DELETE_ROOM: '/chat/delete-room',
     SEND_MESSAGE: '/chat/send-message',
     GET_MESSAGES: '/chat/get-messages',
+    CHAT_GET_USERS: '/chat/get-users'
 };
 

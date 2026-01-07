@@ -23,17 +23,10 @@ function UserProvider({ children }) {
     useEffect(() => {
         async function initUser() {
             try {
-                // 1. Пытаемся восстановить из localStorage
+                // Пытаемся восстановить из localStorage
                 const savedUser = localStorage.getItem('user');
                 if (savedUser) {
                     setUser(JSON.parse(savedUser));
-                } else {
-                    // 2. Или проверяем с бэка (если у тебя сессия / cookie)
-                    const responseBody = await userInfo();
-                    if (responseBody) {
-                        setUser(responseBody);
-                        localStorage.setItem('user', JSON.stringify(responseBody));
-                    }
                 }
             } catch (error) {
                 console.error('Failed to init user', error);
@@ -42,7 +35,6 @@ function UserProvider({ children }) {
                 setLoading(false);
             }
         }
-
         initUser();
     }, []);
 
@@ -84,6 +76,7 @@ function UserProvider({ children }) {
     async function userInfo() {
         try {
             const responseBody = await postRequest(INFO_URL);
+            console.log(responseBody[0])
             return responseBody[0];
         } catch (error) {
             console.error('User Info failed', error);
@@ -154,6 +147,7 @@ function UserProvider({ children }) {
         signIn,
         register,
         logout,
+        userInfo,
         userInfoById,
         updateUser,
         deleteUser,
