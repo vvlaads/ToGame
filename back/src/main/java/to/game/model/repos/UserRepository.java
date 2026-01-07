@@ -64,6 +64,14 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>, Serial
 	Optional<UserEntity> findByIdWithGamesAndAvatar(Long id);
 
 	@Query("""
+			select distinct u from UserEntity u
+			left join fetch u.games
+			left join fetch u.avatar
+			where u.id <> :userId
+			""")
+	List<UserEntity> findAllWithGamesAndAvatarExceptSelf(Long userId);
+
+	@Query("""
 			select u from UserEntity u
 			where u.room.id = :roomId
 			""")

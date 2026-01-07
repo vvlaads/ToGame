@@ -130,6 +130,15 @@ public class UserResource {
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 
+    @Path("/get-recommended-friends")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getRecommendedFriends(@CookieParam("AccessToken") String token) {
+        ResponseDTO<UserDTO> resp = userService.getRecommendedFriends(UUID.fromString(token));
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
+    }
+
     @Path("/get-recieved-likes")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

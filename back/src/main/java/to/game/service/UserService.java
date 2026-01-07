@@ -247,6 +247,32 @@ public class UserService {
     }
 
     @Transactional
+    public ResponseDTO<UserDTO> getRecommendedFriends(UUID accessToken) {
+        UserEntity user = userRepo.findByAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
+
+        Set<GameEntity> userGames = user.getGames();
+        List<UserEntity> candidates = userRepo.findAllWithGamesAndAvatarExceptSelf(user.getId());
+
+        candidates.removeIf(c -> user.getFriends().contains(c));
+        candidates.removeIf(c -> c.getGames().stream().noneMatch(userGames::contains));
+
+        candidates.sort((a, b) -> Integer.compare(
+                (int) b.getGames().stream().filter(userGames::contains).count(),
+                (int) a.getGames().stream().filter(userGames::contains).count()));
+
+        List<UserDTO> recommendations = new ArrayList<>();
+        for (UserEntity cand : candidates) {
+            UserDTO dto = new UserDTO(cand.getId(), cand.getName(), cand.getDescr());
+            dto.setAvatar(new AvatarDTO(cand.getAvatar()));
+            dto.setGames(gameRepo.findAllByUserIdWithTags(cand.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
+            recommendations.add(dto);
+        }
+
+        return new ResponseDTO<>(200, "", recommendations);
+    }
+
+    @Transactional
     public ResponseDTO<Object> sendLike(UUID accessToken, Long receiverId) {
         UserEntity sender = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("Sender"));
