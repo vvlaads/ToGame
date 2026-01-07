@@ -16,6 +16,8 @@ const DELETE_ROOM_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_ROOM}`;
 const SEND_MESSAGE_URL = `${API_BASE_URL}${API_ENDPOINTS.SEND_MESSAGE}`;
 const GET_MESSAGES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_MESSAGES}`;
 const GET_USERS_URL = `${API_BASE_URL}${API_ENDPOINTS.CHAT_GET_USERS}`;
+const GET_ROOMS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_ROOMS}`;
+const GET_USERS_IN_ROOM_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_USERS_IN_ROOM}`;
 
 function ChatsProvider({ children }) {
 
@@ -79,6 +81,16 @@ function ChatsProvider({ children }) {
         return await postRequest(GET_USERS_URL, chat);
     }
 
+    // Получение списка комнат
+    async function getRooms(chat) {
+        return await postRequest(GET_ROOMS_URL, chat);
+    }
+
+    // Получение списка участников комнаты
+    async function getUsersInRoom(room) {
+        return await postRequest(GET_USERS_IN_ROOM_URL, room);
+    }
+
     const value = {
         createChat,
         updateChat,
@@ -91,7 +103,9 @@ function ChatsProvider({ children }) {
         deleteRoom,
         sendMessage,
         getMessages,
-        getChatUsers
+        getChatUsers,
+        getRooms,
+        getUsersInRoom
     };
 
     return (

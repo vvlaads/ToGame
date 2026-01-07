@@ -18,7 +18,6 @@ function ChatsPage() {
     const navigate = useNavigate();
     const { chatId } = useParams();
     const { user, userInfo, userInfoById } = useUser();
-    const { createChat, deleteChat, getMessages, sendMessage, createRoom, deleteRoom, joinRoom, leaveRoom, getChatUsers } = useChats();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -30,6 +29,19 @@ function ChatsPage() {
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
+    const {
+        createChat,
+        deleteChat,
+        getMessages,
+        sendMessage,
+        createRoom,
+        deleteRoom,
+        joinRoom,
+        leaveRoom,
+        getChatUsers,
+        getRooms,
+        getUsersInRoom
+    } = useChats();
     const {
         join,
         leave,
@@ -63,7 +75,13 @@ function ChatsPage() {
         await joinRoom(room);
         setCurrentRoom(room);
         setCurrentRoomChatName(currentChat.name);
-        setCurrentRoomUsers([user, user, user]); //TODO: Получить список участников комнаты
+        const users = await getUsersInRoom(room);
+        setCurrentRoomUsers(users);
+        localStorage.setItem('currentRoom', JSON.stringify({
+            room: room,
+            chatName: currentChat.name,
+            users: users
+        }));
     }
 
     // Выйти из комнаты
@@ -73,6 +91,7 @@ function ChatsPage() {
         setCurrentRoom(null);
         setCurrentRoomChatName('');
         setCurrentRoomUsers([]);
+        localStorage.removeItem('currentRoom');
     }
 
     // Обновляем данные о новом сообщении
@@ -103,8 +122,7 @@ function ChatsPage() {
         setMessageData({
             content: ''
         });
-        const messages = await getMessages(currentChat);
-        setMessages(messages);
+        updateMessages();
     }
 
     // Отправка сообщения при нажатии Enter
@@ -129,6 +147,7 @@ function ChatsPage() {
         });
     }
 
+    // Обновляем данные о новом чате
     function handleChatFormChange(e) {
         const { name, value } = e.target;
         setChatData(prev => ({
@@ -137,9 +156,23 @@ function ChatsPage() {
         }));
     }
 
+    // Обновить список чатов
     async function updateChats() {
         const responseUser = await userInfo();
         setChats(responseUser.chats);
+    }
+
+    // Обновить список комнат
+    async function updateRooms() {
+        const rooms = await getRooms(currentChat);
+        setRooms(rooms);
+    }
+
+    // Обновить список сообщений
+    async function updateMessages() {
+        const messages = await getMessages(currentChat);
+        console.log(messages);
+        setMessages(messages);
     }
 
     // отправить запрос на создания чата
@@ -177,8 +210,10 @@ function ChatsPage() {
         e.preventDefault(); // Не перезагружать страницу
         await createRoom({ ...roomData, chatId: currentChat.id });
         closeRoomForm();
+        updateRooms();
     }
 
+    // Открыть окно информации о чате
     async function openCurrentChatInfo() {
         setCurrentChatInfoIsOpen(true);
         const userInfo = await userInfoById({ id: currentChat.ownerId });
@@ -188,6 +223,7 @@ function ChatsPage() {
         setOwnerInfo(userInfo);
     }
 
+    // Закрыть окно информации о чате
     function closeCurrentChatInfo() {
         setCurrentChatInfoIsOpen(false);
         setOwnerInfo(null);
@@ -196,25 +232,47 @@ function ChatsPage() {
 
     // Обработка нажатия на чат
     function handleChatClick(chat) {
+        localStorage.setItem('chatId', chat.id);
         if (currentChat && currentChat.id === chat.id) {
             openCurrentChatInfo();
         }
         navigate(`/chats/${chat.id}`);
     }
 
+    // Отправка запроса на удаление чата
     async function handleDeleteChat() {
         await deleteChat(currentChat);
         closeCurrentChatInfo();
         updateChats();
     }
 
+    // Отправка запроса на удаление комнаты
     async function handleDeleteRoom(room) {
+        console.log(room)
         await deleteRoom(room);
+        updateRooms();
     }
 
     // Загрузка информации о чатах
     useEffect(() => {
         updateChats();
+        const roomInfoRaw = localStorage.getItem('currentRoom');
+
+        if (!chatId) {
+            const savedChatId = localStorage.getItem('chatId');
+            if (savedChatId) {
+                navigate(`/chats/${savedChatId}`);
+            }
+        }
+
+        if (roomInfoRaw) {
+            const roomInfo = JSON.parse(roomInfoRaw);
+
+            setCurrentRoom(roomInfo.room);
+            setCurrentRoomChatName(roomInfo.chatName);
+            setCurrentRoomUsers(roomInfo.users);
+        }
+
     }, []);
 
     useEffect(() => {
@@ -235,8 +293,7 @@ function ChatsPage() {
                 return;
             }
 
-            const messages = await getMessages(currentChat);
-            setMessages(messages);
+            updateMessages();
         }
 
         async function fetchRooms() {
@@ -244,10 +301,7 @@ function ChatsPage() {
                 return;
             }
 
-            const rooms = [
-                { id: 2, name: 'test', chatId: 13 }
-            ] //TODO: получение списка комнат
-            setRooms(rooms);
+            updateRooms();
         }
 
         async function fetchUsers() {
@@ -296,7 +350,7 @@ function ChatsPage() {
                             <div className='chat-page__messages'>
                                 {messages.map(message =>
                                     <MessageCard
-                                        key={message.time}
+                                        key={message.datetime}
                                         message={message}
                                         className={user.id === message.senderId ? 'chat-page__my-message' : ''}
                                     />
