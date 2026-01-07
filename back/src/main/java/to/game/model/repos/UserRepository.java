@@ -1,6 +1,7 @@
 package to.game.model.repos;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,4 +62,10 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>, Serial
 			where u.id = :id
 			""")
 	Optional<UserEntity> findByIdWithGamesAndAvatar(Long id);
+
+	@Query("""
+			select u from UserEntity u
+			where u.room.id = :roomId
+			""")
+	List<UserEntity> findByRoomId(Long roomId);
 }

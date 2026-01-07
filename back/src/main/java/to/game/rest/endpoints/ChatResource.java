@@ -17,6 +17,7 @@ import to.game.model.dto.ChatDTO;
 import to.game.model.dto.MessageDTO;
 import to.game.model.dto.ResponseDTO;
 import to.game.model.dto.RoomDTO;
+import to.game.model.dto.UserDTO;
 import to.game.service.ChatManagmentService;
 import to.game.service.UserService;
 
@@ -131,6 +132,33 @@ public class ChatResource {
     @POST
     public Response getMessages(@CookieParam("AccessToken") String token, ChatDTO chat) {
         ResponseDTO<MessageDTO> resp = chatManagmentService.getMessages(chat.getId());
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
+    }
+
+    @Path("/get-users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getUsers(@CookieParam("AccessToken") String token, ChatDTO chat){
+        ResponseDTO<UserDTO> resp = chatManagmentService.getUsers(chat.getId());
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
+    }
+
+    @Path("/get-rooms")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getRooms(@CookieParam("AccessToken") String token, ChatDTO chat){
+        ResponseDTO<RoomDTO> resp = chatManagmentService.getRooms(chat.getId());
+        return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
+    }
+
+    @Path("/get-users-in-room")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response getRooms(@CookieParam("AccessToken") String token, RoomDTO room){
+        ResponseDTO<UserDTO> resp = chatManagmentService.getUsersInRoom(room.getId());
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
 }

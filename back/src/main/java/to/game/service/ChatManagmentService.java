@@ -12,6 +12,8 @@ import to.game.exceptions.DataConsistencyException;
 import to.game.exceptions.EntityNotFoundException;
 import to.game.model.dto.MessageDTO;
 import to.game.model.dto.ResponseDTO;
+import to.game.model.dto.RoomDTO;
+import to.game.model.dto.UserDTO;
 import to.game.model.entity.ChatEntity;
 import to.game.model.entity.MessageEntity;
 import to.game.model.entity.RoomEntity;
@@ -154,9 +156,36 @@ public class ChatManagmentService {
     @Transactional
     public ResponseDTO<MessageDTO> getMessages(Long chatId) {
         List<MessageDTO> messages = new ArrayList<>();
-        for (MessageEntity message : messageRepo.findByChatIdWithUsers(chatId)){
+        for (MessageEntity message : messageRepo.findByChatIdWithUsers(chatId)) {
             messages.add(new MessageDTO(message));
         }
         return new ResponseDTO<>(200, "", messages);
+    }
+
+    @Transactional
+    public ResponseDTO<UserDTO> getUsers(Long chatId) {
+        List<UserDTO> users = new ArrayList<>();
+        for (UserEntity user : chatRepo.findByIdWithUsers(chatId).get().getUsers()) {
+            users.add(new UserDTO(user.getId(), user.getName(), user.getDescr()));
+        }
+        return new ResponseDTO<>(200, "", users);
+    }
+
+    @Transactional
+    public ResponseDTO<RoomDTO> getRooms(Long chatId) {
+        List<RoomDTO> rooms = new ArrayList<>();
+        for (RoomEntity room : chatRepo.findByIdWithRooms(chatId).get().getRooms()) {
+            rooms.add(new RoomDTO(room));
+        }
+        return new ResponseDTO<>(200, "", rooms);
+    }
+
+    @Transactional
+    public ResponseDTO<UserDTO> getUsersInRoom(Long roomId) {
+        List<UserDTO> users = new ArrayList<>();
+        for (UserEntity user : userRepo.findByRoomId(roomId)) {
+            users.add(new UserDTO(user.getId(), user.getName(), user.getDescr()));
+        }
+        return new ResponseDTO<>(200, "", users);
     }
 }
