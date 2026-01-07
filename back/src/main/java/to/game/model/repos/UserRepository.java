@@ -48,7 +48,17 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>, Serial
 	@Query("""
 			select u from UserEntity u
 			left join fetch u.games
+			left join fetch u.avatar
+			left join fetch u.chats
+			where u.accessToken = :accessToken
+			""")
+	Optional<UserEntity> findByAccessTokenWithEverything(UUID accessToken);
+
+	@Query("""
+			select u from UserEntity u
+			left join fetch u.games
+			left join fetch u.avatar
 			where u.id = :id
 			""")
-	Optional<UserEntity> findByIdWithGames(Long id);
+	Optional<UserEntity> findByIdWithGamesAndAvatar(Long id);
 }

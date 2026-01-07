@@ -31,4 +31,6 @@ public class UserDTO {
     String password;
     String descr;
     Set<GameDTO> games;
+    AvatarDTO avatar;
+    Set<ChatDTO> chats;
 }

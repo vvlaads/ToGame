@@ -22,6 +22,8 @@ public class AvatarEntity {
     @Length(max = 20)
     private String name;
 
-    @Length(max = 20)
+    @Length(max = 50)
     private String descr;
+
+    private String filepath;
 }

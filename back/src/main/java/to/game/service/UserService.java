@@ -17,6 +17,8 @@ import to.game.exceptions.AuthorizationException;
 import to.game.exceptions.DataConsistencyException;
 import to.game.exceptions.EntityNotFoundException;
 import to.game.model.dto.AccessTokenDTO;
+import to.game.model.dto.AvatarDTO;
+import to.game.model.dto.ChatDTO;
 import to.game.model.dto.GameDTO;
 import to.game.model.dto.ResponseDTO;
 import to.game.model.dto.UserDTO;
@@ -112,17 +114,20 @@ public class UserService {
 
     @Transactional
     public ResponseDTO<UserDTO> userInfo(UUID accessToken) {
-        UserEntity user = userRepo.findByAccessTokenWithGames(accessToken)
+        UserEntity user = userRepo.findByAccessTokenWithEverything(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setAvatar(new AvatarDTO(user.getAvatar()));
+        userDTO.setChats(user.getChats().stream().map(c -> new ChatDTO(c)).collect(Collectors.toSet()));
         userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
     @Transactional
     public ResponseDTO<UserDTO> userInfoById(Long userId) {
-        UserEntity user = userRepo.findByIdWithGames(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+        UserEntity user = userRepo.findByIdWithGamesAndAvatar(userId).orElseThrow(() -> new EntityNotFoundException("User"));
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
+        userDTO.setAvatar(new AvatarDTO(user.getAvatar()));
         userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet())); 
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
