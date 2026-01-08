@@ -240,6 +240,7 @@ function ChatsPage() {
         if (user.id === currentChat.ownerId) {
             setIsMyChat(true);
         }
+        console.log(userInfo);
         setOwnerInfo(userInfo);
     }
 
@@ -595,9 +596,9 @@ function ChatsPage() {
 
                         <div>
                             <div className='chat-page__chat-info-window-label'>Владелец:</div>
-                            <UserCard
+                            {ownerInfo && <UserCard
                                 user={ownerInfo}
-                            />
+                            />}
                         </div>
 
                         <div>
