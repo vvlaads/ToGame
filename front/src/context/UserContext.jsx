@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api.jsx';
-import { deleteRequest, postRequest } from '../utils/requests.jsx'
+import { deleteRequest, patchRequest, postRequest } from '../utils/requests.jsx'
 
 const UserContext = createContext();
 
@@ -8,6 +8,7 @@ const REGISTER_URL = `${API_BASE_URL}${API_ENDPOINTS.REGISTER}`
 const SIGN_IN_URL = `${API_BASE_URL}${API_ENDPOINTS.SIGN_IN}`
 const INFO_URL = `${API_BASE_URL}${API_ENDPOINTS.USER_INFO}`
 const INFO_BY_ID_URL = `${API_BASE_URL}${API_ENDPOINTS.USER_INFO_BY_ID}`
+const UPDATE_URL = `${API_BASE_URL}${API_ENDPOINTS.USER_UPDATE}`
 const UPDATE_AVATAR_URL = `${API_BASE_URL}${API_ENDPOINTS.UPDATE_AVATAR}`
 const DELETE_AVATAR_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_AVATAR}`
 const SEND_LIKE_URL = `${API_BASE_URL}${API_ENDPOINTS.SEND_LIKE}`
@@ -44,9 +45,7 @@ function UserProvider({ children }) {
     async function handleAuth(url, body) {
         try {
             await postRequest(url, body);       // Отправляем запрос на бэк
-            const responseBody = await userInfo(); // Получаем инфо о пользователе
-            setUser(responseBody);
-            localStorage.setItem('user', JSON.stringify(responseBody));
+            await userInfo();
             return true;
         } catch (error) {
             console.error('Auth failed', error);
@@ -77,6 +76,8 @@ function UserProvider({ children }) {
     async function userInfo() {
         try {
             const responseBody = await postRequest(INFO_URL);
+            setUser(responseBody[0]);
+            localStorage.setItem('user', JSON.stringify(responseBody[0]))
             return responseBody[0];
         } catch (error) {
             console.error('User Info failed', error);
@@ -92,7 +93,8 @@ function UserProvider({ children }) {
 
     // Обновление данных пользователя
     async function updateUser(newUser) {
-        return await patchRequest(INFO_URL, newUser);
+        const responseBody = await patchRequest(UPDATE_URL, newUser);
+        return responseBody;
     }
 
     // Удаление пользователя

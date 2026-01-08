@@ -1,6 +1,6 @@
 import './styles/UserCard.css';
 import LikeIcon from '../assets/icons/like.svg';
-import { getPathForImage } from '../utils/pathFormat';
+import { getPathForAvatar, getPathForImage } from '../utils/pathFormat';
 import { useNavigate } from 'react-router-dom';
 
 function UserCard({ user, onClick, onLikeClick }) {
@@ -23,7 +23,7 @@ function UserCard({ user, onClick, onLikeClick }) {
 
     return (
         <div className='user-card__container' onClick={handleClick}>
-            <img src={getPathForImage(user?.image)} className='user-card__image' />
+            <img src={getPathForAvatar(user.avatar?.filepath)} className='user-card__image' />
             <div className='user-card__name'>{user?.name}</div>
             {onLikeClick && (<img src={LikeIcon} className='user-card__action' onClick={(e) => {
                 e.stopPropagation();

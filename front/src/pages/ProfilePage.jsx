@@ -12,14 +12,14 @@ import GamesListWithPagination from '../components/GamesListWithPagination';
 import { useEffect, useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { useGame } from '../context/GameContext';
-import { getPathForGame, getPathForImage } from '../utils/pathFormat';
+import { getPathForAvatar, getPathForGame, getPathForImage } from '../utils/pathFormat';
 import { useParams } from 'react-router-dom';
 
 
 function ProfilePage() {
 
     const { userId } = useParams();
-    const { user, logout, getFriends, userInfoById, getReceivedLikes, getSentLikes, sendLike } = useUser();
+    const { user, logout, getFriends, userInfo, userInfoById, getReceivedLikes, getSentLikes, sendLike, updateUser, updateAvatar } = useUser();
     const { getAllGames, getAllGamesByUser, addGame, removeGame } = useGame();
     const [currentUser, setCurrentUser] = useState(null);
     const [friends, setFriends] = useState([]);
@@ -33,7 +33,10 @@ function ProfilePage() {
     const [gameListIsOpen, setGameListIsOpen] = useState(false);
     const [gamesToAdd, setGamesToAdd] = useState([]);
     const [isEditMode, setEditMode] = useState(false);
-    const [userData, setUserData] = useState({ descr: '' });
+    const [userData, setUserData] = useState({
+        descr: '',
+        avatarId: null
+    });
     const isMyProfile = !userId || Number(userId) === user.id;
 
 
@@ -61,6 +64,10 @@ function ProfilePage() {
 
     // Открыть режим редактирования
     function openEditMode() {
+        setUserData({
+            descr: currentUser.descr,
+            avatarId: currentUser.avatar.id
+        });
         setEditMode(true);
     }
 
@@ -76,6 +83,7 @@ function ProfilePage() {
 
     function handleUserFormChange(e) {
         const { name, value } = e.target;
+
         setUserData(prev => ({
             ...prev,
             [name]: value
@@ -83,10 +91,17 @@ function ProfilePage() {
     }
 
     // Обновить информацию о пользователе
-    function updateUser(e) {
-        e.preventDefault(); // Не перезагружать страницу
-        //TODO: отправка запроса к API
+    async function handleUpdateUser(e) {
+        e.preventDefault();
+        const request = {
+            ...user,
+            descr: userData.descr
+        }
         closeEditMode();
+
+        await updateUser(request);
+        await updateAvatar(Number(userData.avatarId))
+        setCurrentUser(await userInfo());
     }
 
 
@@ -200,7 +215,7 @@ function ProfilePage() {
                         <img className='profile-page__image' src={getPathForImage(currentUser.bannerImage)} />
 
                         <div className='profile-page__user-info'>
-                            <img className='profile-page__user-image' src={getPathForImage(currentUser.image)} />
+                            <img className='profile-page__user-image' src={getPathForAvatar(currentUser.avatar?.filepath)} />
 
                             <div className='profile-page__info'>
                                 <div className='profile-page__username'>{currentUser?.name}</div>
@@ -222,7 +237,7 @@ function ProfilePage() {
 
 
                     <div className='profile-page__user-descr'>
-                        Описание
+                        {currentUser.descr}
                     </div >
 
                     <div className='profile-page__game-list'>
@@ -319,7 +334,7 @@ function ProfilePage() {
                 </div>
 
                 <Modal isOpen={isEditMode} onClose={closeEditMode}>
-                    <form onSubmit={updateUser} className='profile-page__form'>
+                    <form onSubmit={handleUpdateUser} className='profile-page__form'>
                         <img src={CrossIcon} className='profile-page__form-cross' onClick={closeEditMode} />
                         <div className='profile-page__form-header'>Редактировать профиль</div>
 
@@ -334,6 +349,24 @@ function ProfilePage() {
                                 onChange={handleUserFormChange}
                                 required
                             />
+                        </div>
+
+                        <div className='profile-page__form-group'>
+                            <label className='profile-page__label'>Аватары</label>
+                            <select
+                                name='avatarId'
+                                value={userData.avatarId ?? ''}
+                                onChange={handleUserFormChange}
+                                className='profile-page__form-input'
+                            >
+                                <option value="">Выберите вариант</option>
+                                <option value="1">Аватар 1</option>
+                                <option value="2">Аватар 2</option>
+                                <option value="3">Аватар 3</option>
+                                <option value="4">Аватар 4</option>
+                                <option value="5">Аватар 5</option>
+                                <option value="6">Аватар 6</option>
+                            </select>
                         </div>
                         <div className='profile-page__form-buttons'>
                             <button

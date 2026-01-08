@@ -54,6 +54,7 @@
     height: 100px;
     background-color: var(--color-white);
     border-radius: 100%;
+    border: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -383,4 +384,9 @@
     border-radius: 10px;
     font-size: 20px;
     resize: none;
+}
+
+.profile-page__form-image {
+    width: 20px;
+    height: 20px;
 }
