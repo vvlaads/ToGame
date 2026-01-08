@@ -38,13 +38,14 @@ public class ChatManagmentService {
     MessageRepository messageRepo;
 
     @Transactional
-    public ResponseDTO<Object> createChat(UUID accessToken, String chatName, String chatDescr) {
+    public ResponseDTO<Object> createChat(UUID accessToken, String chatName, String chatDescr, String chatFilepath) {
         UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = new ChatEntity();
         chat.setName(chatName);
         chat.setDescr(chatDescr);
         chat.setOwner(user);
+        chat.setFilepath(chatFilepath);
         chatRepo.save(chat);
         user.addChat(chat);
         userRepo.update(user);
@@ -120,6 +121,18 @@ public class ChatManagmentService {
         if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
             chat.setDescr(newDscription);
+            chatRepo.update(chat);
+            return new ResponseDTO<>(200);
+        } else
+            throw new DataConsistencyException("User is not owner of this chat");
+
+    }
+
+    @Transactional
+    public ResponseDTO<Object> changeFilepath(Long chatId, UUID accessToken, String newFilepath) {
+        if (checkIfOwner(chatId, accessToken)) {
+            ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
+            chat.setFilepath(newFilepath);
             chatRepo.update(chat);
             return new ResponseDTO<>(200);
         } else

@@ -35,7 +35,7 @@ public class ChatResource {
     @POST
     public Response create(@CookieParam("AccessToken") String token, ChatDTO chat) {
         ResponseDTO<Object> resp = chatManagmentService.createChat(UUID.fromString(token), chat.getName(),
-                chat.getDescr());
+                chat.getDescr(), chat.getFilepath());
         return Response.status(resp.getStatus()).build();
     }
 
@@ -46,6 +46,7 @@ public class ChatResource {
     @Transactional
     public Response update(@CookieParam("AccessToken") String token, ChatDTO chat) {
         chatManagmentService.renameChat(chat.getId(), UUID.fromString(token), chat.getName());
+        chatManagmentService.changeFilepath(chat.getId(), UUID.fromString(token), chat.getFilepath());
         ResponseDTO<Object> resp = chatManagmentService.changeDescr(chat.getId(), UUID.fromString(token),
                 chat.getDescr());
         return Response.status(resp.getStatus()).build();
@@ -139,7 +140,7 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getUsers(@CookieParam("AccessToken") String token, ChatDTO chat){
+    public Response getUsers(@CookieParam("AccessToken") String token, ChatDTO chat) {
         ResponseDTO<UserDTO> resp = chatManagmentService.getUsers(chat.getId());
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
@@ -148,7 +149,7 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getRooms(@CookieParam("AccessToken") String token, ChatDTO chat){
+    public Response getRooms(@CookieParam("AccessToken") String token, ChatDTO chat) {
         ResponseDTO<RoomDTO> resp = chatManagmentService.getRooms(chat.getId());
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }
@@ -157,7 +158,7 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response getRooms(@CookieParam("AccessToken") String token, RoomDTO room){
+    public Response getRooms(@CookieParam("AccessToken") String token, RoomDTO room) {
         ResponseDTO<UserDTO> resp = chatManagmentService.getUsersInRoom(room.getId());
         return Response.status(resp.getStatus()).entity(resp.getEntities()).build();
     }

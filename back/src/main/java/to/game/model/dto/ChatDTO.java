@@ -17,6 +17,7 @@ public class ChatDTO {
             this.descr = chat.getDescr();
             this.name = chat.getName();
             this.ownerId = chat.getOwner().getId();
+            this.filepath = chat.getFilepath();
         }
     }
 
@@ -24,5 +25,6 @@ public class ChatDTO {
     String name;
     String descr;
     Long ownerId;
+    String filepath;
     Set<UserDTO> users;
 }
