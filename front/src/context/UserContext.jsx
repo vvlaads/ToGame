@@ -15,6 +15,7 @@ const DELETE_FRIEND_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_FRIEND}`
 const GET_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_FRIENDS}`
 const GET_RECIEVED_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_RECIEVED_LIKES}`
 const GET_SENT_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_SENT_LIKES}`
+const GET_RECOMMENDED_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_RECOMMENDED_FRIENDS}`
 
 function UserProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -135,6 +136,11 @@ function UserProvider({ children }) {
         return await postRequest(GET_SENT_LIKES_URL);
     }
 
+    // Получить список рекомендованых друзей
+    async function getRecommendedFriends() {
+        return await postRequest(GET_RECOMMENDED_FRIENDS_URL);
+    }
+
     // Выход пользователя
     function logout() {
         setUser(null);
@@ -157,7 +163,8 @@ function UserProvider({ children }) {
         deleteFriend,
         getFriends,
         getReceivedLikes,
-        getSentLikes
+        getSentLikes,
+        getRecommendedFriends
     };
 
     return (

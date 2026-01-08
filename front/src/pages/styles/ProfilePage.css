@@ -289,7 +289,7 @@
     background-color: var(--color-red-dark);
 }
 
-.profile-page__friends-grid {
+.profile-page__users-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;

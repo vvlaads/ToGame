@@ -13,7 +13,8 @@ export const API_ENDPOINTS = {
     DELETE_FRIEND: '/user/delete-friend',
     GET_FRIENDS: '/user/get-friends',
     GET_RECIEVED_LIKES: '/user/get-recieved-likes',
-    GET_SENT_LIKES: '/user/sent-likes',
+    GET_SENT_LIKES: '/user/get-sent-likes',
+    GET_RECOMMENDED_FRIENDS: '/user/get-recommended-friends',
     GAME_ALL: '/game/all',
     GAME_ALL_BY_USER: '/game/all-by-user',
     ADD_GAME: '/game/add-game',
@@ -31,6 +32,6 @@ export const API_ENDPOINTS = {
     GET_MESSAGES: '/chat/get-messages',
     CHAT_GET_USERS: '/chat/get-users',
     GET_ROOMS: '/chat/get-rooms',
-    GET_USERS_IN_ROOM: '/chat/get-users-in-room'
+    GET_USERS_IN_ROOM: '/chat/get-users-in-room',
 };
 
