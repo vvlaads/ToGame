@@ -1,6 +1,5 @@
 import './styles/HomePage.css'
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import UserCard from '../components/UserCard';
 import ChatCard from '../components/ChatCard';
@@ -10,12 +9,7 @@ function HomePage() {
     const [friends, setFriends] = useState([]);
     const [chats, setChats] = useState([]);
     const { user, userInfo, getFriends } = useUser();
-    const navigate = useNavigate();
 
-    // Переход к чату
-    function goToChat(chat) {
-        navigate(`/chats/${chat.id}`);
-    }
 
     // Загрузка друзей и чатов
     useEffect(() => {
@@ -48,7 +42,6 @@ function HomePage() {
                                         <ChatCard
                                             key={chat.id}
                                             chat={chat}
-                                            onClick={() => goToChat(chat)}
                                         />
                                     ))}
                                 </div>

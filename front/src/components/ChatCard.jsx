@@ -4,12 +4,29 @@ import { useChats } from '../context/ChatsContext';
 import { useEffect, useState } from 'react';
 import { dateTimeToDate, formatMessageTime } from '../utils/timeFormat';
 import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 function ChatCard({ chat, onClick, className }) {
+    const navigate = useNavigate();
     const { getMessages } = useChats();
     const { userInfoById } = useUser();
-    const [sender, setSender] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
+    const [sender, setSender] = useState(null);
+
+    // Переход к чату
+    function goToChat() {
+        navigate(`/chats/${chat.id}`);
+        localStorage.setItem('chatId', chat.id);
+    }
+
+    // Обработка нажатия
+    function handleClick() {
+        if (onClick) {
+            onClick();
+        } else {
+            goToChat();
+        }
+    }
 
     // Загрузка последнего сообщения
     useEffect(() => {
@@ -27,7 +44,7 @@ function ChatCard({ chat, onClick, className }) {
     }, [chat])
 
     return (
-        <div className={`chat-card__chat ${className}`} onClick={onClick}>
+        <div className={`chat-card__chat ${className}`} onClick={handleClick}>
             <img
                 className='chat-card__chat-image'
                 src={getPathForImage(chat.image)}
@@ -35,9 +52,10 @@ function ChatCard({ chat, onClick, className }) {
             <div className='chat-card__chat-info'>
                 <div className='chat-card__chat-name'>{chat.name}</div>
                 <div className='chat-card__chat-last-message-container'>
-                    <span className='chat-card__chat-last-message'>
-                        {sender?.name}: {lastMessage?.content}
-                    </span>
+                    {lastMessage && (
+                        <span className='chat-card__chat-last-message'>
+                            {sender?.name}: {lastMessage?.content}
+                        </span>)}
                     <span className='chat-card__chat-time'>
                         {formatMessageTime(lastMessage?.datetime)}
                     </span>
