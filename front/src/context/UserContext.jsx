@@ -25,8 +25,8 @@ function UserProvider({ children }) {
     useEffect(() => {
         async function initUser() {
             try {
-                // Пытаемся восстановить из localStorage
-                const savedUser = localStorage.getItem('user');
+                // Пытаемся восстановить из sessionStorage
+                const savedUser = sessionStorage.getItem('user');
                 if (savedUser) {
                     setUser(JSON.parse(savedUser));
                 }
@@ -77,7 +77,7 @@ function UserProvider({ children }) {
         try {
             const responseBody = await postRequest(INFO_URL);
             setUser(responseBody[0]);
-            localStorage.setItem('user', JSON.stringify(responseBody[0]))
+            sessionStorage.setItem('user', JSON.stringify(responseBody[0]))
             return responseBody[0];
         } catch (error) {
             console.error('User Info failed', error);
@@ -145,7 +145,7 @@ function UserProvider({ children }) {
     // Выход пользователя
     function logout() {
         setUser(null);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
     };
 
     const value = {

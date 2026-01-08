@@ -80,7 +80,7 @@ function ChatsPage() {
         setCurrentRoomChatName(currentChat.name);
         const users = await getUsersInRoom(room);
         setCurrentRoomUsers(users);
-        localStorage.setItem('currentRoom', JSON.stringify({
+        sessionStorage.setItem('currentRoom', JSON.stringify({
             room: room,
             chatName: currentChat.name,
             users: users
@@ -94,7 +94,7 @@ function ChatsPage() {
         setCurrentRoom(null);
         setCurrentRoomChatName('');
         setCurrentRoomUsers([]);
-        localStorage.removeItem('currentRoom');
+        sessionStorage.removeItem('currentRoom');
     }
 
     // Обновляем данные о новом сообщении
@@ -253,7 +253,7 @@ function ChatsPage() {
 
     // Обработка нажатия на чат
     function handleChatClick(chat) {
-        localStorage.setItem('chatId', chat.id);
+        sessionStorage.setItem('chatId', chat.id);
         if (currentChat && currentChat.id === chat.id) {
             openCurrentChatInfo();
         }
@@ -290,10 +290,10 @@ function ChatsPage() {
     // Загрузка информации о чатах
     useEffect(() => {
         updateChats();
-        const roomInfoRaw = localStorage.getItem('currentRoom');
+        const roomInfoRaw = sessionStorage.getItem('currentRoom');
 
         if (!chatId) {
-            const savedChatId = localStorage.getItem('chatId');
+            const savedChatId = sessionStorage.getItem('chatId');
             if (savedChatId) {
                 navigate(`/chats/${savedChatId}`);
             }

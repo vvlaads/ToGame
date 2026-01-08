@@ -16,7 +16,7 @@ function ChatCard({ chat, onClick, className }) {
     // Переход к чату
     function goToChat() {
         navigate(`/chats/${chat.id}`);
-        localStorage.setItem('chatId', chat.id);
+        sessionStorage.setItem('chatId', chat.id);
     }
 
     // Обработка нажатия
