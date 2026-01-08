@@ -7,6 +7,8 @@ import to.game.model.entity.TagEntity;
 @Getter
 @Setter
 public class TagDTO {
+    public TagDTO(){}
+
     public TagDTO(TagEntity tag) {
         this.name = tag.getName();
     }

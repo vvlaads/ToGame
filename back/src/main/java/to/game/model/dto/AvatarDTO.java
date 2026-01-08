@@ -12,6 +12,7 @@ public class AvatarDTO {
 
     public AvatarDTO(AvatarEntity avatar) {
         if (avatar != null) {
+            this.id = avatar.getId();
             this.name = avatar.getName();
             this.descr = avatar.getDescr();
             this.filepath = avatar.getFilepath();
