@@ -25,3 +25,16 @@
 .user-card__name {
     font-size: 20px;
 }
+
+.user-card__action {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    background-color: var(--color-purple);
+    padding: 10px;
+    margin-left: auto;
+}
+
+.user-card__action:hover {
+    background-color: var(--color-purple-dark);
+}

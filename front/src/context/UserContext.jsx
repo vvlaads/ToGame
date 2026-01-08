@@ -15,6 +15,7 @@ const DELETE_FRIEND_URL = `${API_BASE_URL}${API_ENDPOINTS.DELETE_FRIEND}`
 const GET_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_FRIENDS}`
 const GET_RECIEVED_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_RECIEVED_LIKES}`
 const GET_SENT_LIKES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_SENT_LIKES}`
+const GET_RECOMMENDED_FRIENDS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_RECOMMENDED_FRIENDS}`
 
 function UserProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -23,17 +24,10 @@ function UserProvider({ children }) {
     useEffect(() => {
         async function initUser() {
             try {
-                // 1. Пытаемся восстановить из localStorage
+                // Пытаемся восстановить из localStorage
                 const savedUser = localStorage.getItem('user');
                 if (savedUser) {
                     setUser(JSON.parse(savedUser));
-                } else {
-                    // 2. Или проверяем с бэка (если у тебя сессия / cookie)
-                    const responseBody = await userInfo();
-                    if (responseBody) {
-                        setUser(responseBody);
-                        localStorage.setItem('user', JSON.stringify(responseBody));
-                    }
                 }
             } catch (error) {
                 console.error('Failed to init user', error);
@@ -42,7 +36,6 @@ function UserProvider({ children }) {
                 setLoading(false);
             }
         }
-
         initUser();
     }, []);
 
@@ -142,6 +135,11 @@ function UserProvider({ children }) {
         return await postRequest(GET_SENT_LIKES_URL);
     }
 
+    // Получить список рекомендованых друзей
+    async function getRecommendedFriends() {
+        return await postRequest(GET_RECOMMENDED_FRIENDS_URL);
+    }
+
     // Выход пользователя
     function logout() {
         setUser(null);
@@ -154,6 +152,7 @@ function UserProvider({ children }) {
         signIn,
         register,
         logout,
+        userInfo,
         userInfoById,
         updateUser,
         deleteUser,
@@ -163,7 +162,8 @@ function UserProvider({ children }) {
         deleteFriend,
         getFriends,
         getReceivedLikes,
-        getSentLikes
+        getSentLikes,
+        getRecommendedFriends
     };
 
     return (

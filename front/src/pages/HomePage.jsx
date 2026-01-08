@@ -8,12 +8,8 @@ import LayoutWithNav from '../components/LayoutWithNav';
 function HomePage() {
     const [friends, setFriends] = useState([]);
     const [chats, setChats] = useState([]);
-    const { user, getFriends } = useUser();
+    const { user, userInfo, getFriends } = useUser();
 
-    // Переход к чату
-    function goToChat(chat) {
-        console.log(chat);
-    }
 
     // Загрузка друзей и чатов
     useEffect(() => {
@@ -22,6 +18,12 @@ function HomePage() {
             setFriends(response);
         }
 
+        async function fetchChats() {
+            const response = await userInfo();
+            setChats(response.chats);
+        }
+
+        fetchChats();
         fetchFriends();
     }, [user])
 
@@ -40,7 +42,6 @@ function HomePage() {
                                         <ChatCard
                                             key={chat.id}
                                             chat={chat}
-                                            onClick={() => goToChat(chat)}
                                         />
                                     ))}
                                 </div>

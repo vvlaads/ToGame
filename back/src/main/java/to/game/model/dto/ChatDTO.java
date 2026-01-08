@@ -16,6 +16,7 @@ public class ChatDTO {
             this.id = chat.getId();
             this.descr = chat.getDescr();
             this.name = chat.getName();
+            this.ownerId = chat.getOwner().getId();
         }
     }
 

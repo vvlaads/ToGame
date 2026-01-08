@@ -15,7 +15,7 @@ function SearchPlayersPage() {
     const [games, setGames] = useState([]);
     const [tags, setTags] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { userInfoById, sendLike } = useUser()
+    const { userInfoById, sendLike, getRecommendedFriends } = useUser()
 
     // Константы для ограничения отображения
     const MAX_VISIBLE_TAGS = 6;
@@ -54,52 +54,44 @@ function SearchPlayersPage() {
 
     // Загрузка рекомендуемых пользователей
     useEffect(() => {
-        setLoading(true);
-        try {
-            setRecUsers([{ id: 1 }, { id: 2 }, { id: 4 }]); //TODO: заменить на вызов API
-        }
-        catch (error) {
-            console.error('Ошибка загрузки рекомендуемых пользователей', error);
-        }
-        finally {
-            setLoading(false);
-        }
-    }, [])
-
-    // Обновление текущего пользователя при изменении индекса или списка
-    useEffect(() => {
-        async function fetchUser() {
-            if (!recUsers.length) return;
-
-            setLoading(true);
+        async function fetchRecommendations() {
             try {
-                const user = await userInfoById(recUsers[currentIndex]);
-
-                setCurrentUser(user);
-                setGames(user.games ?? []);
-
-                const uniqueTags = [];
-                const names = new Set();
-
-                user.games?.forEach(game => {
-                    game.tags?.forEach(tag => {
-                        if (tag?.name && !names.has(tag.name)) {
-                            names.add(tag.name);
-                            uniqueTags.push(tag);
-                        }
-                    });
-                });
-
-                setTags(uniqueTags);
-            } catch (e) {
-                console.error(e);
+                setLoading(true);
+                const recommendedFriends = await getRecommendedFriends();
+                setRecUsers(recommendedFriends);
+            } catch (error) {
+                console.error('Ошибка загрузки рекомендуемых пользователей', error);
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchUser();
+        fetchRecommendations();
+    }, [])
+
+    // Обновление текущего пользователя при изменении индекса или списка
+    useEffect(() => {
+        const user = recUsers[currentIndex];
+        if (!user) return;
+
+        setCurrentUser(user);
+        setGames(user.games ?? []);
+
+        const uniqueTags = [];
+        const names = new Set();
+
+        user.games?.forEach(game => {
+            game.tags?.forEach(tag => {
+                if (tag?.name && !names.has(tag.name)) {
+                    names.add(tag.name);
+                    uniqueTags.push(tag);
+                }
+            });
+        });
+
+        setTags(uniqueTags);
     }, [currentIndex, recUsers]);
+
 
 
     // Рассчитываем количество скрытых элементов
@@ -155,6 +147,7 @@ function SearchPlayersPage() {
                                     <div className='search-players-page__tags'>
                                         {visibleTags.map(tag =>
                                             <Tag
+                                                key={tag.name}
                                                 tag={tag}
                                             />)}
                                     </div>
@@ -165,7 +158,11 @@ function SearchPlayersPage() {
                                     <div className='search-players-page__label'>ИГРАЕТ В:</div>
                                     <div className='search-players-page__games'>
                                         {visibleGames.map(game =>
-                                            <div className='search-players-page__game'>{game.name}</div>
+                                            <div
+                                                key={game.name}
+                                                className='search-players-page__game'>
+                                                {game.name}
+                                            </div>
                                         )}
                                     </div>
                                     {hiddenGamesCount > 0 && (<div className='search-players-page__hidden-count'>+ {hiddenGamesCount} игры</div>)}

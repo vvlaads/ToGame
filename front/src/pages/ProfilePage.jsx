@@ -19,10 +19,12 @@ import { useParams } from 'react-router-dom';
 function ProfilePage() {
 
     const { userId } = useParams();
-    const { user, logout, getFriends, userInfoById } = useUser();
+    const { user, logout, getFriends, userInfoById, getReceivedLikes, getSentLikes, sendLike } = useUser();
     const { getAllGames, getAllGamesByUser, addGame, removeGame } = useGame();
     const [currentUser, setCurrentUser] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [sendedLikesList, setSendedLikesList] = useState([]);
+    const [receivedLikesList, setReceivedLikesList] = useState([]);
     const [userGames, setUserGames] = useState([]);
     const [allGames, setAllGames] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -131,6 +133,14 @@ function ProfilePage() {
         setUserGames(updatedUserGames);
     }
 
+    async function likeUser(user) {
+        await sendLike(user.id);
+        const receivedLikes = await getReceivedLikes();
+        const friends = await getFriends();
+        setReceivedLikesList(receivedLikes);
+        setFriends(friends);
+    }
+
     // Загрузка игр и друзей
     useEffect(() => {
         async function fetchInfo() {
@@ -142,16 +152,22 @@ function ProfilePage() {
                     const userGames = await getAllGamesByUser();
                     const allGames = await getAllGames();
                     const friends = await getFriends();
+                    const receivedLikes = await getReceivedLikes();
+                    const sentLikes = await getSentLikes();
 
                     setUserGames(userGames);
                     setAllGames(allGames);
                     setFriends(friends);
+                    setReceivedLikesList(receivedLikes);
+                    setSendedLikesList(sentLikes);
                 } else {
                     const profileUser = await userInfoById({ id: userId });
 
                     setCurrentUser(profileUser);
                     setUserGames(profileUser.games);
                     setFriends([]);
+                    setReceivedLikesList([]);
+                    setSendedLikesList([]);
                     setAllGames([]);
                 }
             } catch (error) {
@@ -242,9 +258,10 @@ function ProfilePage() {
 
                         {friends && friends.length > 0 ?
                             (
-                                <div className='profile-page__friends-grid'>
+                                <div className='profile-page__users-grid'>
                                     {friends.map(friend => (
                                         <UserCard
+                                            key={friend.id}
                                             user={friend}
                                         />
                                     ))}
@@ -256,6 +273,49 @@ function ProfilePage() {
                                 </div>
                             )}
                     </div>)}
+
+                    {isMyProfile && (
+                        <div className='profile-page__sended-likes'>
+                            <h3 className='profile-page__sector-header'>Отправленные лайки:</h3>
+                            {sendedLikesList && sendedLikesList.length > 0 ?
+                                (
+                                    <div className='profile-page__users-grid'>
+                                        {sendedLikesList.map(friend =>
+                                            <UserCard
+                                                key={friend.id}
+                                                user={friend}
+                                            />
+                                        )}
+                                    </div>
+                                )
+                                : (
+                                    <div className='profile-page__empty-list'>
+                                        Вы пока не отправляли лайки
+                                    </div>
+                                )}
+                        </div>)}
+
+                    {isMyProfile && (
+                        <div className='profile-page__received-likes'>
+                            <h3 className='profile-page__sector-header'>Полученные лайки:</h3>
+                            {receivedLikesList && receivedLikesList.length > 0 ?
+                                (
+                                    <div className='profile-page__users-grid'>
+                                        {receivedLikesList.map(friend =>
+                                            <UserCard
+                                                key={friend.id}
+                                                user={friend}
+                                                onLikeClick={() => likeUser(friend)}
+                                            />
+                                        )}
+                                    </div>
+                                )
+                                : (
+                                    <div className='profile-page__empty-list'>
+                                        Вы пока не получили лайки
+                                    </div>
+                                )}
+                        </div>)}
                 </div>
 
                 <Modal isOpen={isEditMode} onClose={closeEditMode}>
