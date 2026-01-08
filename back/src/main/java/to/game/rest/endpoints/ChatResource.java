@@ -70,6 +70,16 @@ public class ChatResource {
         return Response.status(resp.getStatus()).build();
     }
 
+    @Path("/add-users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    @Transactional
+    public Response addUsers(@CookieParam("AccessToken") String token, ChatDTO chat){
+        chat.getUsers().stream().forEach(u -> chatManagmentService.addUser(chat.getId(), u.getId()));
+        return Response.ok().build();
+    }
+
     @Path("/leave-chat")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

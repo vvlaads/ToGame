@@ -70,6 +70,15 @@ public class ChatManagmentService {
     }
 
     @Transactional
+    public ResponseDTO<Object> addUser(Long chatId, Long userId) {
+        UserEntity user = userRepo.findByIdWithChats(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+        ChatEntity chat = chatRepo.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
+        user.getChats().add(chat);
+        userRepo.update(user);
+        return new ResponseDTO<>(200);
+    }
+
+    @Transactional
     public ResponseDTO<Object> addRoomToChat(Long chatId, UUID accessToken, String roomName) {
         if (checkIfOwner(chatId, accessToken)) {
             ChatEntity chat = chatRepo.findByIdWithRooms(chatId).orElseThrow(() -> new EntityNotFoundException("Chat"));
