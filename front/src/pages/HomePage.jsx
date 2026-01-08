@@ -13,19 +13,18 @@ function HomePage() {
 
     // Загрузка друзей и чатов
     useEffect(() => {
-        async function fetchFriends() {
-            const response = await getFriends();
-            setFriends(response);
+        async function fetchData() {
+            if (!user) return;
+
+            setChats(user.chats || []);
+
+            const friends = await getFriends();
+            setFriends(friends);
         }
 
-        async function fetchChats() {
-            const response = await userInfo();
-            setChats(response.chats);
-        }
+        fetchData();
+    }, [user?.id]);
 
-        fetchChats();
-        fetchFriends();
-    }, [user])
 
     return (
         <LayoutWithNav>
