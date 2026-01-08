@@ -26,4 +26,6 @@ public class AvatarEntity {
     private String descr;
 
     private String filepath;
+
+    private String bannerFilePath;
 }

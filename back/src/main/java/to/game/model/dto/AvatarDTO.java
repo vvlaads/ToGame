@@ -16,6 +16,7 @@ public class AvatarDTO {
             this.name = avatar.getName();
             this.descr = avatar.getDescr();
             this.filepath = avatar.getFilepath();
+            this.bannerFilePath = avatar.getBannerFilePath();
         }
     }
 
@@ -23,4 +24,5 @@ public class AvatarDTO {
     String name;
     String descr;
     String filepath;
+    String bannerFilePath;
 }
