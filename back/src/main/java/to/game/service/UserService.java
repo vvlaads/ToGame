@@ -119,16 +119,19 @@ public class UserService {
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
         userDTO.setAvatar(new AvatarDTO(user.getAvatar()));
         userDTO.setChats(user.getChats().stream().map(c -> new ChatDTO(c)).collect(Collectors.toSet()));
-        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g))
+                .collect(Collectors.toSet()));
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
     @Transactional
     public ResponseDTO<UserDTO> userInfoById(Long userId) {
-        UserEntity user = userRepo.findByIdWithGamesAndAvatar(userId).orElseThrow(() -> new EntityNotFoundException("User"));
+        UserEntity user = userRepo.findByIdWithGamesAndAvatar(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User"));
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getDescr());
         userDTO.setAvatar(new AvatarDTO(user.getAvatar()));
-        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet())); 
+        userDTO.setGames(gameRepo.findAllByUserIdWithTags(user.getId()).stream().map(g -> new GameDTO(g))
+                .collect(Collectors.toSet()));
         return new ResponseDTO<>(200, "", List.of(userDTO));
     }
 
@@ -240,7 +243,7 @@ public class UserService {
         UserEntity user = userRepo.findByAccessToken(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         List<UserDTO> friends = new ArrayList<>();
-        for (UserEntity friend  : user.getFriends()) {
+        for (UserEntity friend : user.getFriends()) {
             friends.add(new UserDTO(friend.getId(), friend.getName(), friend.getDescr()));
         }
         return new ResponseDTO<>(200, "", friends);
@@ -253,9 +256,11 @@ public class UserService {
 
         Set<GameEntity> userGames = user.getGames();
         List<UserEntity> candidates = userRepo.findAllWithGamesAndAvatarExceptSelf(user.getId());
+        List<LikeEntity> sentLikes = likeRepo.findBySenderId(user.getId());
 
         candidates.removeIf(c -> user.getFriends().contains(c));
         candidates.removeIf(c -> c.getGames().stream().noneMatch(userGames::contains));
+        candidates.removeIf(c -> sentLikes.stream().map(l -> l.getReceiver().getId()).anyMatch(id -> id == c.getId()));
 
         candidates.sort((a, b) -> Integer.compare(
                 (int) b.getGames().stream().filter(userGames::contains).count(),
@@ -265,7 +270,8 @@ public class UserService {
         for (UserEntity cand : candidates) {
             UserDTO dto = new UserDTO(cand.getId(), cand.getName(), cand.getDescr());
             dto.setAvatar(new AvatarDTO(cand.getAvatar()));
-            dto.setGames(gameRepo.findAllByUserIdWithTags(cand.getId()).stream().map(g -> new GameDTO(g)).collect(Collectors.toSet()));
+            dto.setGames(gameRepo.findAllByUserIdWithTags(cand.getId()).stream().map(g -> new GameDTO(g))
+                    .collect(Collectors.toSet()));
             recommendations.add(dto);
         }
 

@@ -36,6 +36,8 @@ public class ChatEntity {
     @Length(max = 200)
     private String descr;
 
+    private String filepath;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
