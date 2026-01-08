@@ -265,14 +265,34 @@
     font-size: 24px;
 }
 
-#chat-page__chat-info-window-delete {
+.chat-page__chat-info-window-buttons {
+    margin-top: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#chat-page__chat-info-window-delete,
+#chat-page__chat-info-window-edit {
     border: 0;
     border-radius: 10px;
-    background-color: var(--color-red);
     height: 60px;
     color: inherit;
     font-size: 20px;
-    margin-top: auto;
+}
+
+#chat-page__chat-info-window-edit {
+    background-color: var(--color-purple);
+    width: 65%;
+}
+
+#chat-page__chat-info-window-edit:hover {
+    background-color: var(--color-purple-dark);
+}
+
+#chat-page__chat-info-window-delete {
+    background-color: var(--color-red);
+    width: 30%;
 }
 
 #chat-page__chat-info-window-delete:hover {

@@ -1,5 +1,5 @@
 import './styles/ChatCard.css';
-import { getPathForImage } from '../utils/pathFormat';
+import { getPathForChat } from '../utils/pathFormat';
 import { useChats } from '../context/ChatsContext';
 import { useEffect, useState } from 'react';
 import { dateTimeToDate, formatMessageTime } from '../utils/timeFormat';
@@ -47,7 +47,7 @@ function ChatCard({ chat, onClick, className }) {
         <div className={`chat-card__chat ${className}`} onClick={handleClick}>
             <img
                 className='chat-card__chat-image'
-                src={getPathForImage(chat.image)}
+                src={getPathForChat(chat.filepath)}
             />
             <div className='chat-card__chat-info'>
                 <div className='chat-card__chat-name'>{chat.name}</div>

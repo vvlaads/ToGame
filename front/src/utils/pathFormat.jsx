@@ -13,3 +13,8 @@ export function getPathForAvatar(avatarName) {
     }
     return `/avatars/${avatarName}`;
 }
+
+export function getPathForChat(chatFilepath) {
+    if (!chatFilepath) return '';
+    return `/chats/${chatFilepath}`;
+}

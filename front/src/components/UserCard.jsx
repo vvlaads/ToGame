@@ -23,7 +23,7 @@ function UserCard({ user, onClick, onLikeClick }) {
 
     return (
         <div className='user-card__container' onClick={handleClick}>
-            <img src={getPathForAvatar(user.avatar?.filepath)} className='user-card__image' />
+            <img src={getPathForAvatar(user?.avatar?.filepath)} className='user-card__image' />
             <div className='user-card__name'>{user?.name}</div>
             {onLikeClick && (<img src={LikeIcon} className='user-card__action' onClick={(e) => {
                 e.stopPropagation();

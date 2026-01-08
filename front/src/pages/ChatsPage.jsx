@@ -10,7 +10,7 @@ import LayoutWithNav from '../components/LayoutWithNav';
 import { useEffect, useState } from 'react';
 import { useChats } from '../context/ChatsContext';
 import { useUser } from '../context/UserContext';
-import { getPathForImage } from '../utils/pathFormat';
+import { getPathForChat, getPathForImage } from '../utils/pathFormat';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVoiceRoom } from '../utils/useVoiceRoom';
 
@@ -29,8 +29,10 @@ function ChatsPage() {
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
     const {
         createChat,
+        updateChat,
         deleteChat,
         getMessages,
         sendMessage,
@@ -66,7 +68,8 @@ function ChatsPage() {
     const [chatFormIsOpen, setChatFormIsOpen] = useState(false);
     const [chatData, setChatData] = useState({
         name: '',
-        descr: ''
+        descr: '',
+        filepath: ''
     });
 
     // Присоединиться к комнате
@@ -135,15 +138,23 @@ function ChatsPage() {
 
     // Открыть окно создания чата
     function openChatForm() {
+        setIsEditMode(false);
+        setChatData({
+            name: '',
+            descr: '',
+            filepath: ''
+        });
         setChatFormIsOpen(true);
     }
 
     // Закрыть окно создания чата
     function closeChatForm() {
         setChatFormIsOpen(false);
+        setIsEditMode(false);
         setChatData({
             name: '',
-            descr: ''
+            descr: '',
+            filepath: ''
         });
     }
 
@@ -177,7 +188,16 @@ function ChatsPage() {
     // отправить запрос на создания чата
     async function sendChatForm(e) {
         e.preventDefault(); // Не перезагружать страницу
-        await createChat(chatData);
+        if (isEditMode) {
+            await updateChat({ ...currentChat, ...chatData });
+        } else {
+            await createChat(chatData);
+        }
+        setChatData({
+            name: '',
+            descr: '',
+            filepath: ''
+        });
         closeChatForm();
         updateChats();
     }
@@ -193,6 +213,7 @@ function ChatsPage() {
         setRoomData({
             name: ''
         })
+        setIsEditMode(false);
     };
 
     // Обновляем данные о новой комнате
@@ -250,6 +271,20 @@ function ChatsPage() {
         await deleteRoom(room);
         updateRooms();
     }
+
+    function handleEditChat() {
+        setIsEditMode(true);
+        closeCurrentChatInfo();
+
+        setChatData({
+            name: currentChat.name,
+            descr: currentChat.descr,
+            filepath: currentChat.filepath,
+        });
+
+        setChatFormIsOpen(true);
+    }
+
 
     // Загрузка информации о чатах
     useEffect(() => {
@@ -447,7 +482,7 @@ function ChatsPage() {
 
                     <form onSubmit={sendChatForm} className='chat-page__form'>
                         <img src={CrossIcon} className='chat-page__form-cross' onClick={closeChatForm} />
-                        <div className='chat-page__form-header'>Создание чата</div>
+                        <div className='chat-page__form-header'> {isEditMode ? 'Редактирование чата' : 'Создание чата'}</div>
 
                         <div className='chat-page__form-group'>
                             <label className='chat-page__label'>Название</label>
@@ -475,12 +510,33 @@ function ChatsPage() {
                         </div>
 
                         <div className='chat-page__form-group'>
+                            <label className='chat-page__label'>Изображение</label>
+                            <select
+                                name='filepath'
+                                value={chatData.filepath}
+                                onChange={handleChatFormChange}
+                                className='profile-page__form-input'
+                            >
+                                <option value="">Выберите вариант</option>
+                                <option value="ball.svg">Шар</option>
+                                <option value="bomb.svg">Бомба</option>
+                                <option value="focus.svg">Цель</option>
+                                <option value="gamepad.svg">Геймпад</option>
+                                <option value="mouse.svg">Мышь</option>
+                                <option value="nintendo.svg">Нинтендо</option>
+                                <option value="pacman.svg">PacMan</option>
+                                <option value="shield.svg">Щит</option>
+                                <option value="sword.svg">Меч</option>
+                            </select>
+                        </div>
+
+                        <div className='chat-page__form-group'>
                             <label className='chat-page__label'>Участники</label>
                             {/*TODO: Выбор из друзей*/}
                         </div>
                         <div className='chat-page__form-buttons'>
                             <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
-                                Создать
+                                {isEditMode ? 'Сохранить' : 'Создать'}
                             </button>
                             <button type='button' className='chat-page__form-button' id='chat-page__form-cancel' onClick={closeChatForm}>
                                 Отмена
@@ -523,7 +579,7 @@ function ChatsPage() {
 
                         <div className='chat-page__chat-info-window-header'>
                             <img className='chat-page__chat-info-window-chat-image'
-                                src={getPathForImage(currentChat?.image)}
+                                src={getPathForChat(currentChat?.filepath)}
                             />
                             <div className='chat-page__chat-info-window-chat-name'>
                                 {currentChat?.name}
@@ -556,11 +612,18 @@ function ChatsPage() {
                         </div>
 
                         {isMyChat && (
-                            <button
-                                id='chat-page__chat-info-window-delete'
-                                onClick={handleDeleteChat}>
-                                Удалить чат
-                            </button>
+                            <div className='chat-page__chat-info-window-buttons'>
+                                <button
+                                    id='chat-page__chat-info-window-edit'
+                                    onClick={handleEditChat}>
+                                    Редактировать чат
+                                </button>
+                                <button
+                                    id='chat-page__chat-info-window-delete'
+                                    onClick={handleDeleteChat}>
+                                    Удалить чат
+                                </button>
+                            </div>
                         )}
 
                     </div>
