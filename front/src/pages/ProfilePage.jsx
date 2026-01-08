@@ -136,7 +136,9 @@ function ProfilePage() {
     async function likeUser(user) {
         await sendLike(user.id);
         const receivedLikes = await getReceivedLikes();
+        const friends = await getFriends();
         setReceivedLikesList(receivedLikes);
+        setFriends(friends);
     }
 
     // Загрузка игр и друзей

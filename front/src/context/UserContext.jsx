@@ -77,7 +77,6 @@ function UserProvider({ children }) {
     async function userInfo() {
         try {
             const responseBody = await postRequest(INFO_URL);
-            console.log(responseBody[0])
             return responseBody[0];
         } catch (error) {
             console.error('User Info failed', error);

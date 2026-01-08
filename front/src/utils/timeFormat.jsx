@@ -1,8 +1,14 @@
+export function dateTimeToDate(datetime) {
+    if (!datetime) return new Date();
+    const iso = datetime.replace(" ", "T");
+    const date = new Date(iso);
+    return date;
+}
+
 export function formatMessageTime(datetime) {
     if (!datetime) return "";
 
-    const iso = datetime.replace(" ", "T");
-    const date = new Date(iso);
+    const date = dateTimeToDate(datetime);
     const now = new Date();
 
     if (isToday(date, now)) {

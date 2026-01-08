@@ -171,7 +171,6 @@ function ChatsPage() {
     // Обновить список сообщений
     async function updateMessages() {
         const messages = await getMessages(currentChat);
-        console.log(messages);
         setMessages(messages);
     }
 
@@ -248,7 +247,6 @@ function ChatsPage() {
 
     // Отправка запроса на удаление комнаты
     async function handleDeleteRoom(room) {
-        console.log(room)
         await deleteRoom(room);
         updateRooms();
     }
@@ -310,7 +308,6 @@ function ChatsPage() {
             }
 
             const users = await getChatUsers(currentChat);
-            console.log(users);
         }
 
         fetchUsers();
@@ -475,6 +472,11 @@ function ChatsPage() {
                                 onChange={handleChatFormChange}
                                 required
                             />
+                        </div>
+
+                        <div className='chat-page__form-group'>
+                            <label className='chat-page__label'>Участники</label>
+                            {/*TODO: Выбор из друзей*/}
                         </div>
                         <div className='chat-page__form-buttons'>
                             <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
