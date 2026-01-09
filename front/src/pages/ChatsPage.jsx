@@ -199,9 +199,9 @@ function ChatsPage() {
             await updateChat({ ...currentChat, ...chatData });
             await addUsers(currentChat, selectedUsers);
         } else {
-            const newChat = await createChat(chatData);
-            // TODO: с сервера должен возвращаться хотя бы id чата
-            // await addUsers(newChat, selectedUsers);
+            const requestBody = { ...chatData, users: selectedUsers };
+            console.log(requestBody);
+            await createChat(requestBody);
         }
         setChatData({
             name: '',
