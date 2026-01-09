@@ -17,7 +17,7 @@ function App() {
       <ChatsProvider>
         <GameProvider>
           <NavProvider>
-            <Router>
+            <Router basename='/ToGame-back-1.0-SNAPSHOT'>
               <Routes>
                 <Route path="/auth" element={
                   <PublicRoute>
