@@ -15,6 +15,7 @@ public class AuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         if (requestContext.getUriInfo().getPath().contains("user/register") ||
+                requestContext.getUriInfo().getPath().contains("game/all") ||
                 requestContext.getUriInfo().getPath().contains("user/sign-in")) {
             return;
         }
