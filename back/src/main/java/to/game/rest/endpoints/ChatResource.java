@@ -35,7 +35,7 @@ public class ChatResource {
     @POST
     public Response create(@CookieParam("AccessToken") String token, ChatDTO chat) {
         ResponseDTO<Object> resp = chatManagmentService.createChat(UUID.fromString(token), chat.getName(),
-                chat.getDescr(), chat.getFilepath());
+                chat.getDescr(), chat.getFilepath(), chat.getUsers());
         return Response.status(resp.getStatus()).build();
     }
 

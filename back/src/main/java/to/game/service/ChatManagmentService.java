@@ -2,6 +2,7 @@ package to.game.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.data.exceptions.DataConnectionException;
@@ -38,7 +39,7 @@ public class ChatManagmentService {
     MessageRepository messageRepo;
 
     @Transactional
-    public ResponseDTO<Object> createChat(UUID accessToken, String chatName, String chatDescr, String chatFilepath) {
+    public ResponseDTO<Object> createChat(UUID accessToken, String chatName, String chatDescr, String chatFilepath, Set<UserDTO> users) {
         UserEntity user = userRepo.findByAccessTokenWithChats(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("User"));
         ChatEntity chat = new ChatEntity();
@@ -49,6 +50,11 @@ public class ChatManagmentService {
         chatRepo.save(chat);
         user.addChat(chat);
         userRepo.update(user);
+        users.forEach(u -> {
+            UserEntity member = userRepo.findByIdWithChats(u.getId()).get();
+            member.getChats().add(chat);
+            userRepo.update(member);
+        });
         return new ResponseDTO<>(200);
     }
 
