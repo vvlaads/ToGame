@@ -1,20 +1,27 @@
-export function getPathForImage(imageName) {
-    return `/${imageName}`;
+export function getPathForBanner(bannerFilepath) {
+    if (!bannerFilepath) {
+        return '/banners/banner.jpg';
+    }
+    return `/banners/${bannerFilepath}`;
 }
 
-export function getPathForGame(gameName) {
-    if (!gameName) return '';
-    return `/games/${gameName}`;
+export function getPathForGame(gameFilepath) {
+    if (!gameFilepath) {
+        return '/games/no_game.jpg';
+    }
+    return `/games/${gameFilepath}`;
 }
 
-export function getPathForAvatar(avatarName) {
-    if (!avatarName) {
+export function getPathForAvatar(avatarFilepath) {
+    if (!avatarFilepath) {
         return '/avatars/avatar.jpg';
     }
-    return `/avatars/${avatarName}`;
+    return `/avatars/${avatarFilepath}`;
 }
 
 export function getPathForChat(chatFilepath) {
-    if (!chatFilepath) return '';
+    if (!chatFilepath) {
+        return 'vite.svg'
+    };
     return `/chats/${chatFilepath}`;
 }

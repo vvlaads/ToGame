@@ -2,7 +2,7 @@ import './styles/SearchPlayersPage.css';
 import LayoutWithNav from '../components/LayoutWithNav';
 import LeftArrow from '../assets/icons/left arrow.svg';
 import RightArrow from '../assets/icons/right arrow.svg';
-import { getPathForImage } from '../utils/pathFormat';
+import { getPathForAvatar, getPathForBanner } from '../utils/pathFormat';
 import { useEffect, useState } from 'react';
 import Tag from '../components/Tag';
 import { useUser } from '../context/UserContext';
@@ -129,13 +129,13 @@ function SearchPlayersPage() {
                             <div className='search-players-page__info'>
                                 <img
                                     className='search-players-page__banner_image'
-                                    src={getPathForImage(currentUser?.bannerImage)}
+                                    src={getPathForBanner(currentUser?.avatar?.bannerFilePath)}
                                 />
 
                                 <div className='search-players-page__image_and_name'>
                                     <img
                                         className='search-players-page__image'
-                                        src={getPathForImage(currentUser?.image)}
+                                        src={getPathForAvatar(currentUser?.avatar?.filepath)}
                                     />
                                     <div className='search-players-page__name'>{currentUser?.name}</div>
                                 </div>

@@ -19,6 +19,7 @@
     height: 300px;
     background-color: var(--color-white);
     border-radius: 20px;
+    object-fit: cover;
 }
 
 .profile-page__user-info {

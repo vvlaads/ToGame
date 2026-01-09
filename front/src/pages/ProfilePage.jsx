@@ -12,7 +12,7 @@ import GamesListWithPagination from '../components/GamesListWithPagination';
 import { useEffect, useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { useGame } from '../context/GameContext';
-import { getPathForAvatar, getPathForGame, getPathForImage } from '../utils/pathFormat';
+import { getPathForAvatar, getPathForBanner, getPathForGame } from '../utils/pathFormat';
 import { useParams } from 'react-router-dom';
 
 
@@ -101,7 +101,9 @@ function ProfilePage() {
 
         await updateUser(request);
         await updateAvatar(Number(userData.avatarId))
-        setCurrentUser(await userInfo());
+        const updatedUser = await userInfo();
+        console.log(updatedUser);
+        setCurrentUser(updatedUser);
     }
 
 
@@ -212,7 +214,7 @@ function ProfilePage() {
                 <div className="profile-page__content">
 
                     <div className='profile-page__header'>
-                        <img className='profile-page__image' src={getPathForImage(currentUser.bannerImage)} />
+                        <img className='profile-page__image' src={getPathForBanner(currentUser.avatar?.bannerFilePath)} />
 
                         <div className='profile-page__user-info'>
                             <img className='profile-page__user-image' src={getPathForAvatar(currentUser.avatar?.filepath)} />

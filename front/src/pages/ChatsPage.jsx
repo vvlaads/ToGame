@@ -10,7 +10,7 @@ import LayoutWithNav from '../components/LayoutWithNav';
 import { useEffect, useState } from 'react';
 import { useChats } from '../context/ChatsContext';
 import { useUser } from '../context/UserContext';
-import { getPathForChat, getPathForImage } from '../utils/pathFormat';
+import { getPathForChat } from '../utils/pathFormat';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVoiceRoom } from '../utils/useVoiceRoom';
 
