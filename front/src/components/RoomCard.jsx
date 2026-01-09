@@ -1,9 +1,20 @@
 import './styles/RoomCard.css';
 import TrashIcon from '../assets/icons/trash.svg';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useChats } from '../context/ChatsContext';
 
 function RoomCard({ room, chatName, onClick, onTrashClick, isActive = false, isOwner = false }) {
     const [userCount, setUserCount] = useState(0); //TODO: получение числа участников
+    const { getUsersInRoom } = useChats();
+
+    useEffect(() => {
+        async function fetchUsers() {
+            const responseBody = await getUsersInRoom(room);
+            setUserCount(responseBody.length);
+        }
+
+        fetchUsers();
+    }, [])
 
     return (
         <div onClick={onClick} className={`room-card__container ${isActive ? 'room-card__container--active' : ''}`}>
