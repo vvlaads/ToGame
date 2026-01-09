@@ -29,12 +29,14 @@ export function useVoiceRoom() {
         try {
             await startMicrophone();
             setConnected(true);
+            return true;
         } catch (e) {
             console.error(e);
             setError('Не удалось получить доступ к микрофону');
         } finally {
             setConnecting(false);
         }
+        return false;
     }
 
     // Покинуть комнату

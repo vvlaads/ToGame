@@ -34,10 +34,11 @@ function ChatCard({ chat, onClick, className }) {
             const messages = await getMessages(chat);
             const sorted = messages.sort((a, b) => dateTimeToDate(a.datetime).getTime() - dateTimeToDate(b.datetime).getTime());
             const lastMessage = sorted[sorted.length - 1];
-            const sender = await userInfoById({ id: lastMessage.senderId });
-
             setLastMessage(lastMessage);
-            setSender(sender);
+            if (lastMessage) {
+                const sender = await userInfoById({ id: lastMessage.senderId });
+                setSender(sender);
+            }
         }
 
         fetchMessages();

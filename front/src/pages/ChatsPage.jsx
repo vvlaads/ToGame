@@ -13,11 +13,12 @@ import { useUser } from '../context/UserContext';
 import { getPathForChat } from '../utils/pathFormat';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVoiceRoom } from '../utils/useVoiceRoom';
+import { Toaster, toast } from 'sonner';
 
 function ChatsPage() {
     const navigate = useNavigate();
     const { chatId } = useParams();
-    const { user, userInfo, userInfoById } = useUser();
+    const { user, userInfo, userInfoById, getFriends } = useUser();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -30,6 +31,7 @@ function ChatsPage() {
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [friends, setFriends] = useState([]);
     const {
         createChat,
         updateChat,
@@ -42,7 +44,8 @@ function ChatsPage() {
         leaveRoom,
         getChatUsers,
         getRooms,
-        getUsersInRoom
+        getUsersInRoom,
+        addUsersToChat
     } = useChats();
     const {
         join,
@@ -71,10 +74,14 @@ function ChatsPage() {
         descr: '',
         filepath: ''
     });
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
     // Присоединиться к комнате
     async function handleJoinRoom(room) {
-        await join();
+        const isConnected = await join();
+        if (!isConnected) {
+            toast.error("Ошибка подключения аудиоустройства");
+        }
         await joinRoom(room);
         setCurrentRoom(room);
         setCurrentRoomChatName(currentChat.name);
@@ -190,14 +197,19 @@ function ChatsPage() {
         e.preventDefault(); // Не перезагружать страницу
         if (isEditMode) {
             await updateChat({ ...currentChat, ...chatData });
+            await addUsers(currentChat, selectedUsers);
         } else {
-            await createChat(chatData);
+            const newChat = await createChat(chatData);
+            // TODO: с сервера должен возвращаться хотя бы id чата
+            // await addUsers(newChat, selectedUsers);
         }
         setChatData({
             name: '',
             descr: '',
             filepath: ''
         });
+        setSelectedUsers([]);
+        setFriends(await getFriends());
         closeChatForm();
         updateChats();
     }
@@ -273,6 +285,7 @@ function ChatsPage() {
         updateRooms();
     }
 
+    // Редактирование чата
     function handleEditChat() {
         setIsEditMode(true);
         closeCurrentChatInfo();
@@ -285,6 +298,29 @@ function ChatsPage() {
 
         setChatFormIsOpen(true);
     }
+
+    async function addUsers(chat, users) {
+        let usersIds = [];
+        users.map(u => usersIds.push(u.id));
+        return await addUsersToChat(chat.id, usersIds);
+    }
+
+    function selectFriend(e) {
+        const { value } = e.target;
+        if (!value) return;
+
+        const friend = JSON.parse(value);
+
+        setSelectedUsers(prev =>
+            prev.some(u => u.id === friend.id)
+                ? prev
+                : [...prev, friend]
+        );
+    }
+
+    const availableFriends = friends.filter(
+        friend => !selectedUsers.some(u => u.id === friend.id)
+    );
 
 
     // Загрузка информации о чатах
@@ -307,8 +343,15 @@ function ChatsPage() {
             setCurrentRoomUsers(roomInfo.users);
         }
 
+        async function fetchFriends() {
+            const friends = await getFriends();
+            setFriends(friends);
+        }
+
+        fetchFriends();
     }, []);
 
+    // Получение id чата из url
     useEffect(() => {
         if (!chatId || chats.length === 0) return;
 
@@ -344,6 +387,7 @@ function ChatsPage() {
             }
 
             const users = await getChatUsers(currentChat);
+            setCurrentChatUsers(users);
         }
 
         fetchUsers();
@@ -354,6 +398,8 @@ function ChatsPage() {
     return (
         <LayoutWithNav>
             <div className='chat-page__container'>
+                <Toaster position="top-right" />
+
                 {/*Вкладка чатов*/}
                 <div className='chat-page__chats'>
                     {chats.map(chat => (
@@ -533,7 +579,25 @@ function ChatsPage() {
 
                         <div className='chat-page__form-group'>
                             <label className='chat-page__label'>Участники</label>
-                            {/*TODO: Выбор из друзей*/}
+                            <select
+                                onChange={selectFriend}
+                                className='profile-page__form-input'>
+                                <option value={null}>Добавить друга</option>
+                                {availableFriends.map(friend =>
+                                    <option
+                                        key={friend.id}
+                                        value={JSON.stringify(friend)}>
+                                        {friend.name}
+                                    </option>
+                                )}
+                            </select>
+                            <div className='chat-page__form-selected-users'>
+                                {selectedUsers.map(selected =>
+                                    <UserCard
+                                        key={selected.id}
+                                        user={selected}
+                                    />)}
+                            </div>
                         </div>
                         <div className='chat-page__form-buttons'>
                             <button type='submit' className='chat-page__form-button' id='chat-page__form-submit'>
@@ -606,6 +670,7 @@ function ChatsPage() {
                             <div>
                                 {currentChatUsers.map(user =>
                                     <UserCard
+                                        key={user.name}
                                         user={user}
                                     />
                                 )}

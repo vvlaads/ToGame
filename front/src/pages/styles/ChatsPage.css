@@ -371,3 +371,11 @@
 #chat-page__leave-room:hover {
     background-color: var(--color-red-dark);
 }
+
+.chat-page__form-selected-users {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100px;
+    overflow-y: auto;
+}

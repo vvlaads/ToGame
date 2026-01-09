@@ -18,6 +18,7 @@ const GET_MESSAGES_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_MESSAGES}`;
 const GET_USERS_URL = `${API_BASE_URL}${API_ENDPOINTS.CHAT_GET_USERS}`;
 const GET_ROOMS_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_ROOMS}`;
 const GET_USERS_IN_ROOM_URL = `${API_BASE_URL}${API_ENDPOINTS.GET_USERS_IN_ROOM}`;
+const ADD_USERS_URL = `${API_BASE_URL}${API_ENDPOINTS.ADD_USERS_TO_CHAT}`;
 
 function ChatsProvider({ children }) {
 
@@ -91,6 +92,20 @@ function ChatsProvider({ children }) {
         return await postRequest(GET_USERS_IN_ROOM_URL, room);
     }
 
+    // Добавление списка пользователей в чат
+    async function addUsersToChat(chatId, usersIds) {
+        const users = [];
+        for (let i = 0; i < usersIds.length; i++) {
+            users.push({ id: usersIds[i] });
+        }
+        const requestBody = {
+            id: chatId,
+            users: users
+        }
+
+        return await postRequest(ADD_USERS_URL, requestBody);
+    }
+
     const value = {
         createChat,
         updateChat,
@@ -105,7 +120,8 @@ function ChatsProvider({ children }) {
         getMessages,
         getChatUsers,
         getRooms,
-        getUsersInRoom
+        getUsersInRoom,
+        addUsersToChat
     };
 
     return (
