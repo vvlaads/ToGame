@@ -5,27 +5,69 @@ import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 
-@ServerEndpoint("/ws/signaling")
-public class SignalingResource {
-    @OnOpen
-    public void onOpen(Session session){
-        // TODO: handle open
-    }
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-    @OnMessage
-    public void onMessage(Session session, String message){
-        // TODO: handle message
+@ServerEndpoint("/ws/signaling/{roomId}")
+public class SignalingResource {
+
+    private static final Map<String, Set<Session>> rooms =
+            new ConcurrentHashMap<>();
+
+    @OnOpen
+    public void onOpen(Session session, @PathParam("roomId") String roomId) {
+        rooms
+                .computeIfAbsent(roomId, r -> ConcurrentHashMap.newKeySet())
+                .add(session);
+
+        broadcast(roomId, """
+            {"type":"user-joined"}
+        """);
     }
 
     @OnClose
-    public void onClose(Session session){
-        // TODO: handle close
+    public void onClose(Session session, @PathParam("roomId") String roomId) {
+        Set<Session> room = rooms.get(roomId);
+        if (room != null) {
+            room.remove(session);
+
+            broadcast(roomId, """
+                {"type":"user-left"}
+            """);
+
+            if (room.isEmpty()) {
+                rooms.remove(roomId);
+            }
+        }
     }
 
-    @OnError
-    public void onError(Session session, Throwable t){
-        // TODO: handle error
+    @OnMessage
+    public void onMessage(Session session, String message, @PathParam("roomId") String roomId) {
+        broadcastExcept(roomId, session, message);
+    }
+
+    private void broadcast(String roomId, String msg) {
+        Set<Session> room = rooms.get(roomId);
+        if (room == null) return;
+
+        for (Session s : room) {
+            s.getAsyncRemote().sendText(msg);
+        }
+    }
+
+    private void broadcastExcept(String roomId, Session except, String msg) {
+        Set<Session> room = rooms.get(roomId);
+        if (room == null) return;
+
+        for (Session s : room) {
+            if (!s.equals(except)) {
+                s.getAsyncRemote().sendText(msg);
+            }
+        }
     }
 }
+
