@@ -7,7 +7,7 @@ import ChatCard from '../components/ChatCard';
 import UserCard from '../components/UserCard';
 import MessageCard from '../components/MessageCard';
 import LayoutWithNav from '../components/LayoutWithNav';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useChats } from '../context/ChatsContext';
 import { useUser } from '../context/UserContext';
 import { getPathForChat } from '../utils/pathFormat';
@@ -49,6 +49,14 @@ function ChatsPage() {
         getUsersInRoom,
         addUsersToChat
     } = useChats();
+
+    const currentRoomRef = useRef(null);
+
+    useEffect(() => {
+        currentRoomRef.current = currentRoom;
+    }, [currentRoom]);
+
+
     const {
         join,
         leave,
@@ -59,7 +67,14 @@ function ChatsPage() {
         selfTesting,
         muted,
         error
-    } = useVoiceRoom();
+    } = useVoiceRoom(async () => {
+        const room = currentRoomRef.current;
+        if (!room) return;
+
+        const users = await getUsersInRoom(room);
+        console.log('Обновление участников', users);
+        setCurrentRoomUsers(users);
+    });
 
     // Булевые переменные для модальных окон
     const [roomFormIsOpen, setRoomFormIsOpen] = useState(false);
@@ -81,7 +96,7 @@ function ChatsPage() {
 
     // Присоединиться к комнате
     async function handleJoinRoom(room) {
-        const isConnected = await join();
+        const isConnected = await join(room.id);
         if (!isConnected) {
             toast.error("Ошибка подключения аудиоустройства");
         }
@@ -242,7 +257,7 @@ function ChatsPage() {
 
     // Отправить запрос на создание новой комнаты
     async function sendRoomForm(e) {
-        e.preventDefault(); // Не перезагружать страницу
+        e.preventDefault();
         await createRoom({ ...roomData, chatId: currentChat.id });
         closeRoomForm();
         updateRooms();
@@ -494,7 +509,9 @@ function ChatsPage() {
                                     </div>
                                     <div className='chat-page__current-room-users'>
                                         {currentRoomUsers.map(user =>
-                                            <UserCard user={user} />
+                                            <UserCard
+                                                key={user.id}
+                                                user={user} />
                                         )}
                                     </div>
                                 </div>
@@ -677,9 +694,10 @@ function ChatsPage() {
 
                         <div>
                             <div className='chat-page__chat-info-window-label'>Владелец:</div>
-                            {ownerInfo && <UserCard
-                                user={ownerInfo}
-                            />}
+                            {ownerInfo &&
+                                <UserCard
+                                    user={ownerInfo}
+                                />}
                         </div>
 
                         <div>
