@@ -14,24 +14,26 @@ import { getPathForChat } from '../utils/pathFormat';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVoiceRoom } from '../utils/useVoiceRoom';
 import { Toaster, toast } from 'sonner';
+import { useChatWebSocket } from '../utils/useChatsWebSocket';
 
 function ChatsPage() {
-    const navigate = useNavigate();
-    const { chatId } = useParams();
-    const { user, userInfo, userInfoById, getFriends } = useUser();
     const [chats, setChats] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [messages, setMessages] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(null);
     const [currentRoomChatName, setCurrentRoomChatName] = useState('');
-    const [currentChatInfoIsOpen, setCurrentChatInfoIsOpen] = useState(false);
     const [currentRoomUsers, setCurrentRoomUsers] = useState([]);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [currentChatUsers, setCurrentChatUsers] = useState([]);
     const [isMyChat, setIsMyChat] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [friends, setFriends] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+
+    const navigate = useNavigate();
+    const { chatId } = useParams();
+    const { user, userInfo, userInfoById, getFriends } = useUser();
     const {
         createChat,
         updateChat,
@@ -59,22 +61,23 @@ function ChatsPage() {
         error
     } = useVoiceRoom();
 
+    // Булевые переменные для модальных окон
+    const [roomFormIsOpen, setRoomFormIsOpen] = useState(false);
+    const [chatFormIsOpen, setChatFormIsOpen] = useState(false);
+    const [currentChatInfoIsOpen, setCurrentChatInfoIsOpen] = useState(false);
+
+    // Данные форм
     const [messageData, setMessageData] = useState({
         content: ''
     });
-
-    const [roomFormIsOpen, setRoomFormIsOpen] = useState(false);
     const [roomData, setRoomData] = useState({
         name: ''
     });
-
-    const [chatFormIsOpen, setChatFormIsOpen] = useState(false);
     const [chatData, setChatData] = useState({
         name: '',
         descr: '',
         filepath: ''
     });
-    const [selectedUsers, setSelectedUsers] = useState([]);
 
     // Присоединиться к комнате
     async function handleJoinRoom(room) {
@@ -124,15 +127,15 @@ function ChatsPage() {
         const trimmed = messageData.content.trim();
         if (!trimmed) return;
 
-        await sendMessage({
+        const requestBody = {
             ...messageData,
             chatId: currentChat.id,
             senderId: user.id
-        });
+        }
+        sendWsMessage(messageData.content);
         setMessageData({
             content: ''
-        });
-        updateMessages();
+        })
     }
 
     // Отправка сообщения при нажатии Enter
@@ -174,25 +177,7 @@ function ChatsPage() {
         }));
     }
 
-    // Обновить список чатов
-    async function updateChats() {
-        const responseUser = await userInfo();
-        setChats(responseUser.chats);
-    }
-
-    // Обновить список комнат
-    async function updateRooms() {
-        const rooms = await getRooms(currentChat);
-        setRooms(rooms);
-    }
-
-    // Обновить список сообщений
-    async function updateMessages() {
-        const messages = await getMessages(currentChat);
-        setMessages(messages);
-    }
-
-    // отправить запрос на создания чата
+    // Отправить запрос на создание чата
     async function sendChatForm(e) {
         e.preventDefault(); // Не перезагружать страницу
         if (isEditMode) {
@@ -212,6 +197,24 @@ function ChatsPage() {
         setFriends(await getFriends());
         closeChatForm();
         updateChats();
+    }
+
+    // Обновить список чатов
+    async function updateChats() {
+        const responseUser = await userInfo();
+        setChats(responseUser.chats);
+    }
+
+    // Обновить список комнат
+    async function updateRooms() {
+        const rooms = await getRooms(currentChat);
+        setRooms(rooms);
+    }
+
+    // Обновить список сообщений
+    async function updateMessages() {
+        const messages = await getMessages(currentChat);
+        setMessages(messages);
     }
 
     // Открыть окно создания комнаты
@@ -299,12 +302,14 @@ function ChatsPage() {
         setChatFormIsOpen(true);
     }
 
+    // Отправка запроса на добавление пользователей в чат
     async function addUsers(chat, users) {
         let usersIds = [];
         users.map(u => usersIds.push(u.id));
         return await addUsersToChat(chat.id, usersIds);
     }
 
+    // Добавить друга в список
     function selectFriend(e) {
         const { value } = e.target;
         if (!value) return;
@@ -318,10 +323,22 @@ function ChatsPage() {
         );
     }
 
+    // Список друзей для добавления в чат
     const availableFriends = friends.filter(
         friend => !selectedUsers.some(u => u.id === friend.id)
     );
 
+    // WebSocket для отправки сообщений
+    const { sendMessage: sendWsMessage } = useChatWebSocket(
+        currentChat?.id,
+        (msg) => {
+            //TODO: Переделать на setMessages, но тогда сервер должен возвращать MessageDTO
+            // setMessages(prev => [...prev, msg]);
+            setTimeout(() => {
+                updateMessages();
+            }, 100);
+        }
+    );
 
     // Загрузка информации о чатах
     useEffect(() => {
