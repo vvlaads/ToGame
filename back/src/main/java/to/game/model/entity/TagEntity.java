@@ -23,7 +23,7 @@ public class TagEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Length(max = 20)
+    @Length(max = 50)
     private String name;
 
     @ManyToMany(mappedBy = "tags")

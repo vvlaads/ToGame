@@ -229,6 +229,8 @@ function ChatsPage() {
     // Обновить список сообщений
     async function updateMessages() {
         const messages = await getMessages(currentChat);
+        messages.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        console.log(messages)
         setMessages(messages);
     }
 
